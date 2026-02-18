@@ -1312,3 +1312,21 @@ function showMinimalStatus(code, text, x, y) {
     document.addEventListener('keydown', dismissEsc, true);
   }, 0);
 }
+
+// Export internal functions for testing
+if (process.env.NODE_ENV === 'test') {
+  exports.stripAnsi = stripAnsi;
+  exports.analyzeSecurityHeaders = analyzeSecurityHeaders;
+  exports.detectWAF = detectWAF;
+  exports.parseCookies = parseCookies;
+  exports.parseSingleCookie = parseSingleCookie;
+  exports.extractServerInfo = extractServerInfo;
+  exports.guessUrl = guessUrl;
+  exports.statusColor = statusColor;
+  exports.findHttpStatusInLine = findHttpStatusInLine;
+  exports.feedPtyData = feedPtyData;
+  exports.finalizeResponse = finalizeResponse;
+  exports.resetSessionBuffer = resetSessionBuffer;
+  exports.getSessionBuffer = getSessionBuffer;
+  exports.capturedResponses = capturedResponses;
+}
