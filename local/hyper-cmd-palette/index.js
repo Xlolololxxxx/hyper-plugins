@@ -91,9 +91,9 @@ const TOOLS = [
         case 'vuln': parts.push('--script', 'vuln'); break;
       }
       if (v.timing) parts.push(v.timing);
-      if (v.ports) parts.push('-p', v.ports);
-      if (v.scripts) parts.push('--script', v.scripts);
-      if (v.output && v.outfile) parts.push(v.output, v.outfile);
+      if (v.ports) parts.push('-p', esc(v.ports));
+      if (v.scripts) parts.push('--script', esc(v.scripts));
+      if (v.output && v.outfile) parts.push(v.output, esc(v.outfile));
       else if (v.output && !v.outfile) parts.push(v.output, 'nmap_out');
       if (v.extra) parts.push(v.extra);
       parts.push(esc(v.target));
@@ -150,12 +150,12 @@ const TOOLS = [
       const parts = ['sqlmap', '-u', esc(v.url)];
       if (v.data) parts.push('--data', esc(v.data));
       if (v.cookie) parts.push('--cookie', esc(v.cookie));
-      if (v.level !== '1') parts.push('--level', v.level);
-      if (v.risk !== '1') parts.push('--risk', v.risk);
-      if (v.technique) parts.push('--technique', v.technique);
+      if (v.level !== '1') parts.push('--level', esc(v.level));
+      if (v.risk !== '1') parts.push('--risk', esc(v.risk));
+      if (v.technique) parts.push('--technique', esc(v.technique));
       if (v.tamper) parts.push('--tamper', esc(v.tamper));
       if (v.action) parts.push(v.action);
-      if (v.dbms) parts.push('--dbms', v.dbms);
+      if (v.dbms) parts.push('--dbms', esc(v.dbms));
       if (v.batch) parts.push('--batch');
       if (v.extra) parts.push(v.extra);
       return parts.join(' ');
@@ -197,10 +197,10 @@ const TOOLS = [
     ],
     build: function(v) {
       const parts = ['nikto', '-h', esc(v.host)];
-      if (v.port) parts.push('-p', v.port);
+      if (v.port) parts.push('-p', esc(v.port));
       if (v.ssl) parts.push('-ssl');
-      if (v.tuning) parts.push('-Tuning', v.tuning);
-      if (v.evasion) parts.push('-evasion', v.evasion);
+      if (v.tuning) parts.push('-Tuning', esc(v.tuning));
+      if (v.evasion) parts.push('-evasion', esc(v.evasion));
       if (v.auth) parts.push('-id', esc(v.auth));
       if (v.output) parts.push(v.output);
       if (v.outfile) parts.push('-o', esc(v.outfile));
@@ -246,16 +246,16 @@ const TOOLS = [
       const wl = v.wordlist === 'custom' ? v.wordlist_custom : v.wordlist;
       parts.push('-w', esc(wl));
       parts.push('-u', esc(v.url));
-      if (v.extensions) parts.push('-e', v.extensions);
-      if (v.mc) parts.push('-mc', v.mc);
-      if (v.fc) parts.push('-fc', v.fc);
-      if (v.fs) parts.push('-fs', v.fs);
-      if (v.fw) parts.push('-fw', v.fw);
-      if (v.fl) parts.push('-fl', v.fl);
-      if (v.threads) parts.push('-t', v.threads);
+      if (v.extensions) parts.push('-e', esc(v.extensions));
+      if (v.mc) parts.push('-mc', esc(v.mc));
+      if (v.fc) parts.push('-fc', esc(v.fc));
+      if (v.fs) parts.push('-fs', esc(v.fs));
+      if (v.fw) parts.push('-fw', esc(v.fw));
+      if (v.fl) parts.push('-fl', esc(v.fl));
+      if (v.threads) parts.push('-t', esc(v.threads));
       if (v.recursion) {
         parts.push('-recursion');
-        if (v.recursion_depth) parts.push('-recursion-depth', v.recursion_depth);
+        if (v.recursion_depth) parts.push('-recursion-depth', esc(v.recursion_depth));
       }
       if (v.headers) parts.push('-H', esc(v.headers));
       if (v.extra) parts.push(v.extra);
@@ -303,9 +303,9 @@ const TOOLS = [
       }
       const wl = v.wordlist === 'custom' ? v.wordlist_custom : v.wordlist;
       parts.push('-w', esc(wl));
-      if (v.extensions && v.mode === 'dir') parts.push('-x', v.extensions);
-      if (v.status_codes && v.mode !== 'dns') parts.push('-s', v.status_codes);
-      if (v.threads) parts.push('-t', v.threads);
+      if (v.extensions && v.mode === 'dir') parts.push('-x', esc(v.extensions));
+      if (v.status_codes && v.mode !== 'dns') parts.push('-s', esc(v.status_codes));
+      if (v.threads) parts.push('-t', esc(v.threads));
       if (v.no_tls) parts.push('-k');
       if (v.expanded && v.mode === 'dir') parts.push('-e');
       if (v.extra) parts.push(v.extra);
@@ -332,8 +332,8 @@ const TOOLS = [
     ],
     build: function(v) {
       const parts = ['subfinder', '-d', esc(v.domain)];
-      if (v.sources) parts.push('-sources', v.sources);
-      if (v.exclude_sources) parts.push('-es', v.exclude_sources);
+      if (v.sources) parts.push('-sources', esc(v.sources));
+      if (v.exclude_sources) parts.push('-es', esc(v.exclude_sources));
       if (v.recursive) parts.push('-recursive');
       if (v.silent) parts.push('-silent');
       if (v.output) parts.push('-o', esc(v.output));
@@ -386,10 +386,10 @@ const TOOLS = [
       if (v.follow_redirects) parts.push('-follow-redirects');
       if (v.content_length) parts.push('-content-length');
       if (v.web_server) parts.push('-web-server');
-      if (v.method) parts.push('-method', v.method);
-      if (v.mc) parts.push('-mc', v.mc);
-      if (v.fc) parts.push('-fc', v.fc);
-      if (v.threads) parts.push('-threads', v.threads);
+      if (v.method) parts.push('-method', esc(v.method));
+      if (v.mc) parts.push('-mc', esc(v.mc));
+      if (v.fc) parts.push('-fc', esc(v.fc));
+      if (v.threads) parts.push('-threads', esc(v.threads));
       if (v.output) parts.push('-o', esc(v.output));
       if (v.silent) parts.push('-silent');
       if (v.extra) parts.push(v.extra);
@@ -444,8 +444,8 @@ const TOOLS = [
       else parts.push('-L', esc(v.username));
       if (v.pass_mode === 'single') parts.push('-p', esc(v.password));
       else parts.push('-P', esc(v.password));
-      if (v.port) parts.push('-s', v.port);
-      if (v.threads) parts.push('-t', v.threads);
+      if (v.port) parts.push('-s', esc(v.port));
+      if (v.threads) parts.push('-t', esc(v.threads));
       if (v.verbose) parts.push('-V');
       if (v.extra) parts.push(v.extra);
       parts.push(esc(v.target));
@@ -512,12 +512,12 @@ const TOOLS = [
     ],
     build: function(v) {
       const parts = ['wfuzz'];
-      if (v.hc) parts.push('--hc', v.hc);
-      if (v.hw) parts.push('--hw', v.hw);
-      if (v.hl) parts.push('--hl', v.hl);
-      if (v.hh) parts.push('--hh', v.hh);
-      if (v.sc) parts.push('--sc', v.sc);
-      if (v.threads) parts.push('-t', v.threads);
+      if (v.hc) parts.push('--hc', esc(v.hc));
+      if (v.hw) parts.push('--hw', esc(v.hw));
+      if (v.hl) parts.push('--hl', esc(v.hl));
+      if (v.hh) parts.push('--hh', esc(v.hh));
+      if (v.sc) parts.push('--sc', esc(v.sc));
+      if (v.threads) parts.push('-t', esc(v.threads));
       if (v.cookie) parts.push('-b', esc(v.cookie));
       if (v.header) parts.push('-H', esc(v.header));
       if (v.postdata) parts.push('-d', esc(v.postdata));
@@ -551,7 +551,7 @@ const TOOLS = [
     ],
     build: function(v) {
       const parts = ['dirb', esc(v.url), esc(v.wordlist)];
-      if (v.extensions) parts.push('-X', v.extensions);
+      if (v.extensions) parts.push('-X', esc(v.extensions));
       if (v.cookie) parts.push('-c', esc(v.cookie));
       if (v.auth) parts.push('-u', esc(v.auth));
       if (v.agent) parts.push('-a', esc(v.agent));
@@ -660,11 +660,11 @@ const TOOLS = [
     ],
     build: function(v) {
       const parts = ['dig'];
-      if (v.server) parts.push('@' + v.server);
+      if (v.server) parts.push(esc('@' + v.server));
       if (v.reverse) {
         parts.push('-x', esc(v.domain));
       } else {
-        parts.push(esc(v.domain), v.record);
+        parts.push(esc(v.domain), esc(v.record));
       }
       if (v.short) parts.push('+short');
       if (v.trace) parts.push('+trace');
