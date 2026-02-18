@@ -1,0 +1,108 @@
+(function (exports, require, module, __filename, __dirname, process, global, Buffer) { return function (exports, require, module, __filename, __dirname) { const path = require('path');
+const { exec } = require('child_process');
+const OutputProcessor = require('./OutputProcessor');
+
+const TEMP_DIR = '/home/xlo/.gemini/tmp';
+
+class ToolRunner {
+  constructor(rpc, store) {
+    this.rpc = rpc;
+    this.store = store;
+    this.processor = new OutputProcessor();
+    this.launching = false;
+    this.queue = [];
+  }
+
+  stop() {
+    if (this.processor) this.processor.stopAll();
+  }
+
+  sanitizeTarget(target) {
+    if (!target) return 'target';
+    return target.replace(/^https?:\/\//, '').replace(/[\/:]/g, '_');
+  }
+
+  launch(tool, target) {
+    if (this.launching) {
+        this.queue.push({ tool, target });
+        return;
+    }
+    this.launching = true;
+
+    const rpc = this.rpc || window.rpc;
+    const store = this.store || window.store;
+
+    if (!rpc || !store) {
+      console.error("Hyper Target Panel: RPC or Store not available!");
+      this.launching = false;
+      return;
+    }
+
+    const targetSafe = this.sanitizeTarget(target);
+    const logFile = path.join(TEMP_DIR, `${targetSafe}_${tool.id}.log`);
+    
+    // Construct command
+    let cmd = tool.command
+      .replace(/{target}/g, target || 'localhost')
+      .replace(/{target_safe}/g, targetSafe)
+      .replace(/{log_file}/g, logFile);
+
+    console.log(`Launching ${tool.name}: ${cmd}`);
+
+    // Start watching output
+    if (this.processor && this.processor.watch) {
+        this.processor.watch(logFile, tool.parser || 'generic');
+    }
+
+    // Execute in new tab
+    const oldActiveUid = store.getState().termgroups.activeUid;
+    rpc.emit('termgroups:new');
+    
+    // Wait for the new tab to be active
+    let attempts = 0;
+    const checkActive = setInterval(() => {
+        try {
+            const state = store.getState();
+            const activeUid = state.termgroups.activeUid;
+            
+            if (activeUid && activeUid !== oldActiveUid) {
+                clearInterval(checkActive);
+                // Send the command
+                rpc.emit('data', { uid: activeUid, data: cmd + String.fromCharCode(13) });
+                
+                // Done, move to next after a small delay to let tab settle
+                setTimeout(() => {
+                    this.launching = false;
+                    this.processQueue();
+                }, 500);
+            } else if (attempts > 30) { // 3 seconds timeout
+                clearInterval(checkActive);
+                console.error("Hyper Target Panel: No active terminal found after creating new tab (timeout).");
+                // Fallback: try the current active one if we really have to
+                if (activeUid) {
+                    rpc.emit('data', { uid: activeUid, data: cmd + String.fromCharCode(13) });
+                }
+                this.launching = false;
+                this.processQueue();
+            }
+            attempts++;
+        } catch (e) {
+            clearInterval(checkActive);
+            console.error("Hyper Target Panel: Error sending command to terminal", e);
+            this.launching = false;
+            this.processQueue();
+        }
+    }, 100);
+  }
+
+  processQueue() {
+      if (this.queue.length > 0) {
+          const { tool, target } = this.queue.shift();
+          this.launch(tool, target);
+      }
+  }
+}
+
+module.exports = ToolRunner;
+
+}.call(this, exports, require, module, __filename, __dirname); });
