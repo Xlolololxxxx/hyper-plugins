@@ -1,0 +1,7 @@
+{
+  "name": "hyper-sqli-assistant",
+  "version": "1.0.0",
+  "description": "SQLMap workflow companion — tracks SQL injection testing progress per parameter, suggests next commands, and shows injection status in HUD tab",
+  "main": "index.js",
+  "keywords": ["hyper", "hyper-plugin", "security", "sqlmap", "sqli", "sql-injection", "hud"]
+}

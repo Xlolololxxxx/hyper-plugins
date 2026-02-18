@@ -1,0 +1,6 @@
+{
+  "name": "hyper-recon-menu",
+  "version": "1.0.0",
+  "description": "Security-focused right-click context menu for bug bounty and pentesting",
+  "main": "index.js"
+}

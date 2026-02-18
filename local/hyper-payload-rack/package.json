@@ -1,0 +1,6 @@
+{
+  "name": "hyper-payload-rack",
+  "version": "1.0.0",
+  "description": "Searchable payload library for penetration testing with categorized payloads from common vulnerability classes",
+  "main": "index.js"
+}

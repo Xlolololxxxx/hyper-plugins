@@ -1,0 +1,6 @@
+{
+  "name": "hyper-vuln-checklist",
+  "version": "1.0.0",
+  "description": "Interactive vulnerability testing checklists based on WooYun methodology (88,636 real-world cases)",
+  "main": "index.js"
+}

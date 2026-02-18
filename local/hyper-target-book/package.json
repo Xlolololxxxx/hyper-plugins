@@ -1,0 +1,6 @@
+{
+  "name": "hyper-target-book",
+  "version": "1.0.0",
+  "description": "Combined target scope manager and discovered services notebook for pentesting engagements",
+  "main": "index.js"
+}

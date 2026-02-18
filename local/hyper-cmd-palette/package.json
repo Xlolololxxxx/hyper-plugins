@@ -1,0 +1,6 @@
+{
+  "name": "hyper-cmd-palette",
+  "version": "1.0.0",
+  "description": "Hotkey-triggered command palette for building security tool commands interactively",
+  "main": "index.js"
+}

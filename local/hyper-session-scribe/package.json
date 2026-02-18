@@ -1,0 +1,6 @@
+{
+  "name": "hyper-session-scribe",
+  "version": "1.0.0",
+  "description": "Records terminal sessions with timestamps, auto-annotations, bookmarks, search, and export for evidence/reports",
+  "main": "index.js"
+}

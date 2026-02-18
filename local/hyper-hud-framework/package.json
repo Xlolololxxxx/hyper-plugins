@@ -1,0 +1,7 @@
+{
+  "name": "hyper-hud-framework",
+  "version": "1.0.0",
+  "description": "Shared bottom bar HUD framework for Hyper security plugins",
+  "main": "index.js",
+  "keywords": ["hyper", "hyper-plugin", "security", "hud"]
+}

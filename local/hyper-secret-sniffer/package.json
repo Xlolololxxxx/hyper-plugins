@@ -1,0 +1,6 @@
+{
+  "name": "hyper-secret-sniffer",
+  "version": "1.0.0",
+  "description": "Detects secrets, credentials, API keys, and tokens in terminal output",
+  "main": "index.js"
+}

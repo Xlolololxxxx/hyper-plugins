@@ -1,0 +1,6 @@
+{
+  "name": "hyper-findings-log",
+  "version": "1.0.0",
+  "description": "Auto-captures security findings from terminal output, tags by severity and type, with scrollable HUD log and markdown/JSON export",
+  "main": "index.js"
+}

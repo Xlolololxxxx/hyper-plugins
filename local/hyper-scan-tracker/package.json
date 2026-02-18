@@ -1,0 +1,7 @@
+{
+  "name": "hyper-scan-tracker",
+  "version": "1.0.0",
+  "description": "Track long-running security scans in Hyper terminal with live HUD preview",
+  "main": "index.js",
+  "keywords": ["hyper", "hyper-plugin", "security", "scans", "nmap", "nikto", "hud"]
+}

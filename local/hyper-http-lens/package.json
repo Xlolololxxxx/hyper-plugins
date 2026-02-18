@@ -1,0 +1,7 @@
+{
+  "name": "hyper-http-lens",
+  "version": "1.0.0",
+  "description": "Auto-parse HTTP responses in terminal output with security header analysis, status code highlighting, WAF detection, cookie inspection, and sandboxed HTML preview",
+  "main": "index.js",
+  "keywords": ["hyper", "hyper-plugin", "security", "http", "headers", "waf", "cookies", "hud"]
+}

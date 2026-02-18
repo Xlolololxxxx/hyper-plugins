@@ -1,0 +1,6 @@
+{
+  "name": "hyper-shell-manager",
+  "version": "1.0.0",
+  "description": "Netcat reverse/bind shell listener manager with TTY upgrade and payload generation",
+  "main": "index.js"
+}

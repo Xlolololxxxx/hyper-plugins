@@ -1,0 +1,6 @@
+{
+  "name": "hyper-hash-workshop",
+  "version": "1.0.0",
+  "description": "Hash identification and cracking workflow manager for Hyper terminal",
+  "main": "index.js"
+}

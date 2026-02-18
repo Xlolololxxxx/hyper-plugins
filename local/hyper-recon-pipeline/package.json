@@ -1,0 +1,6 @@
+{
+  "name": "hyper-recon-pipeline",
+  "version": "1.0.0",
+  "description": "Automated multi-step reconnaissance pipeline orchestrator with visual HUD progress",
+  "main": "index.js"
+}

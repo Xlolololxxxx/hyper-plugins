@@ -1,0 +1,7 @@
+{
+  "name": "hyper-output-parser",
+  "version": "1.0.0",
+  "description": "Real-time parser for security tool output — extracts structured data from nmap, nikto, sqlmap, ffuf, gobuster, hydra and feeds it to other plugins via shared event bus",
+  "main": "index.js",
+  "keywords": ["hyper", "hyper-plugin", "security", "parser", "nmap", "nikto", "sqlmap", "ffuf", "gobuster", "hydra", "hud"]
+}

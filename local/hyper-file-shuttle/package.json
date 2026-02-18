@@ -1,0 +1,7 @@
+{
+  "name": "hyper-file-shuttle",
+  "version": "1.0.0",
+  "description": "Streamlined netcat-based file transfer interface with one-click setup for send/receive between machines",
+  "main": "index.js",
+  "keywords": ["hyper", "hyper-plugin", "netcat", "file-transfer", "nc", "ncat", "security"]
+}
