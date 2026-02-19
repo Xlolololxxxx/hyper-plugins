@@ -1,4 +1,4 @@
-(function (exports, require, module, __filename, __dirname, process, global, Buffer) { return function (exports, require, module, __filename, __dirname) { exports.parse = (content) => {
+exports.parse = (content) => {
   const vulns = [];
   const paths = [];
   const info = [];
@@ -41,4 +41,3 @@
   return { vulns, paths, info };
 };
 
-}.call(this, exports, require, module, __filename, __dirname); });

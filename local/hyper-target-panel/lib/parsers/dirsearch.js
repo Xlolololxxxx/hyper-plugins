@@ -1,4 +1,4 @@
-(function (exports, require, module, __filename, __dirname, process, global, Buffer) { return function (exports, require, module, __filename, __dirname) { exports.parse = (content) => {
+exports.parse = (content) => {
   const paths = [];
   
   // Dirsearch output examples:
@@ -24,4 +24,3 @@
   return { paths };
 };
 
-}.call(this, exports, require, module, __filename, __dirname); });

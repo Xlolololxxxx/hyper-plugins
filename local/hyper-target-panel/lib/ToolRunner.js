@@ -1,4 +1,4 @@
-(function (exports, require, module, __filename, __dirname, process, global, Buffer) { return function (exports, require, module, __filename, __dirname) { const path = require('path');
+const path = require('path');
 const { exec } = require('child_process');
 const OutputProcessor = require('./OutputProcessor');
 
@@ -134,4 +134,3 @@ class ToolRunner {
 
 module.exports = ToolRunner;
 
-}.call(this, exports, require, module, __filename, __dirname); });
