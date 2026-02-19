@@ -6,10 +6,26 @@
     "category": "Recon",
     "parser": "nmap",
     "presets": [
-      { "name": "Quick", "command": "nmap -T4 -F {target} -oN {log_file}", "description": "Top 100 ports" },
-      { "name": "Full", "command": "nmap -p- -T4 {target} -oN {log_file}", "description": "All 65535 ports" },
-      { "name": "Vuln", "command": "nmap -sV --script vuln {target} -oN {log_file}", "description": "Check for vulnerabilities" },
-      { "name": "UDP", "command": "sudo nmap -sU --top-ports 100 {target} -oN {log_file}", "description": "Top 100 UDP ports" }
+      {
+        "name": "Quick",
+        "command": "nmap -T4 -F {target} -oN {log_file}",
+        "description": "Top 100 ports"
+      },
+      {
+        "name": "Full",
+        "command": "nmap -p- -T4 {target} -oN {log_file}",
+        "description": "All 65535 ports"
+      },
+      {
+        "name": "Vuln",
+        "command": "nmap -sV --script vuln {target} -oN {log_file}",
+        "description": "Check for vulnerabilities"
+      },
+      {
+        "name": "UDP",
+        "command": "sudo nmap -sU --top-ports 100 {target} -oN {log_file}",
+        "description": "Top 100 UDP ports"
+      }
     ]
   },
   {
@@ -19,9 +35,21 @@
     "category": "Web",
     "parser": "gobuster",
     "presets": [
-        { "name": "Common Wordlist", "command": "gobuster dir -u http://{target} -w /usr/share/wordlists/dirb/common.txt -o {log_file}", "description": "Quick directory scan" },
-        { "name": "Medium Wordlist", "command": "gobuster dir -u http://{target} -w /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt -o {log_file}", "description": "More thorough scan" },
-        { "name": "Extensions", "command": "gobuster dir -u http://{target} -w /usr/share/wordlists/dirb/common.txt -x php,html,txt -o {log_file}", "description": "Scan with extensions" }
+      {
+        "name": "Common Wordlist",
+        "command": "gobuster dir -u http://{target} -w /usr/share/wordlists/dirb/common.txt -o {log_file}",
+        "description": "Quick directory scan"
+      },
+      {
+        "name": "Medium Wordlist",
+        "command": "gobuster dir -u http://{target} -w /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt -o {log_file}",
+        "description": "More thorough scan"
+      },
+      {
+        "name": "Extensions",
+        "command": "gobuster dir -u http://{target} -w /usr/share/wordlists/dirb/common.txt -x php,html,txt -o {log_file}",
+        "description": "Scan with extensions"
+      }
     ]
   },
   {
@@ -31,43 +59,83 @@
     "category": "Web",
     "parser": "nikto",
     "presets": [
-        { "name": "Standard", "command": "nikto -h http://{target} -o {log_file}", "description": "Default scan" },
-        { "name": "Tuning 1 (Interest)", "command": "nikto -h http://{target} -Tuning 1 -o {log_file}", "description": "Scan for interesting files" },
-        { "name": "Tuning x (Reverse)", "command": "nikto -h http://{target} -Tuning x -o {log_file}", "description": "Reverse proxy check" }
+      {
+        "name": "Standard",
+        "command": "nikto -h http://{target} -o {log_file}",
+        "description": "Default scan"
+      },
+      {
+        "name": "Tuning 1 (Interest)",
+        "command": "nikto -h http://{target} -Tuning 1 -o {log_file}",
+        "description": "Scan for interesting files"
+      },
+      {
+        "name": "Tuning x (Reverse)",
+        "command": "nikto -h http://{target} -Tuning x -o {log_file}",
+        "description": "Reverse proxy check"
+      }
+    ],
+    "types": [
+      "url",
+      "domain"
     ]
+  },
+  {
     "id": "nmap-quick",
     "name": "Nmap Quick Scan",
     "command": "nmap -sV -sC {target}",
     "category": "Recon",
-    "types": ["ip", "domain", "ip_port", "domain_port", "ipv4", "cidr"]
+    "types": [
+      "ip",
+      "domain",
+      "ip_port",
+      "domain_port",
+      "ipv4",
+      "cidr"
+    ]
   },
   {
     "id": "nmap-all",
     "name": "Nmap All Ports",
     "command": "nmap -p- --min-rate 1000 {target}",
     "category": "Recon",
-    "types": ["ip", "domain", "ipv4"]
+    "types": [
+      "ip",
+      "domain",
+      "ipv4"
+    ]
   },
   {
     "id": "nmap-udp",
     "name": "Nmap UDP Top 50",
     "command": "sudo nmap -sU --top-ports 50 {target}",
     "category": "Recon",
-    "types": ["ip", "ipv4"]
+    "types": [
+      "ip",
+      "ipv4"
+    ]
   },
   {
     "id": "curl-headers",
     "name": "cURL Headers",
     "command": "curl -sI {target}",
     "category": "Web",
-    "types": ["url", "domain", "ip_port", "domain_port"]
+    "types": [
+      "url",
+      "domain",
+      "ip_port",
+      "domain_port"
+    ]
   },
   {
     "id": "curl-full",
     "name": "cURL Full Response",
     "command": "curl -sk {target}",
     "category": "Web",
-    "types": ["url", "domain"]
+    "types": [
+      "url",
+      "domain"
+    ]
   },
   {
     "id": "whatweb",
@@ -76,8 +144,20 @@
     "category": "Web",
     "parser": "generic",
     "presets": [
-        { "name": "Standard", "command": "whatweb {target} | tee {log_file}", "description": "Standard scan" },
-        { "name": "Aggressive", "command": "whatweb -a 3 {target} | tee {log_file}", "description": "Aggressive plugin scan" }
+      {
+        "name": "Standard",
+        "command": "whatweb {target} | tee {log_file}",
+        "description": "Standard scan"
+      },
+      {
+        "name": "Aggressive",
+        "command": "whatweb -a 3 {target} | tee {log_file}",
+        "description": "Aggressive plugin scan"
+      }
+    ],
+    "types": [
+      "url",
+      "domain"
     ]
   },
   {
@@ -87,9 +167,21 @@
     "category": "Exploit",
     "parser": "sqlmap",
     "presets": [
-        { "name": "Auto", "command": "sqlmap -u \"http://{target}\" --batch --random-agent | tee {log_file}", "description": "Automatic scan" },
-        { "name": "Forms", "command": "sqlmap -u \"http://{target}\" --forms --batch --random-agent | tee {log_file}", "description": "Scan forms on page" },
-        { "name": "Crawl", "command": "sqlmap -u \"http://{target}\" --crawl=2 --batch --random-agent | tee {log_file}", "description": "Crawl and scan" }
+      {
+        "name": "Auto",
+        "command": "sqlmap -u \"http://{target}\" --batch --random-agent | tee {log_file}",
+        "description": "Automatic scan"
+      },
+      {
+        "name": "Forms",
+        "command": "sqlmap -u \"http://{target}\" --forms --batch --random-agent | tee {log_file}",
+        "description": "Scan forms on page"
+      },
+      {
+        "name": "Crawl",
+        "command": "sqlmap -u \"http://{target}\" --crawl=2 --batch --random-agent | tee {log_file}",
+        "description": "Crawl and scan"
+      }
     ]
   },
   {
@@ -106,174 +198,245 @@
     "category": "CMS",
     "parser": "wpscan",
     "presets": [
-        { "name": "Quick Enum", "command": "wpscan --url http://{target} --enumerate p,t,u | tee {log_file}", "description": "Plugins, Themes, Users" },
-        { "name": "Aggressive Users", "command": "wpscan --url http://{target} --enumerate u1-100 | tee {log_file}", "description": "Enumerate first 100 users" },
-        { "name": "Vulnerable Plugins", "command": "wpscan --url http://{target} --enumerate vp | tee {log_file}", "description": "Vulnerable plugins only" }
+      {
+        "name": "Quick Enum",
+        "command": "wpscan --url http://{target} --enumerate p,t,u | tee {log_file}",
+        "description": "Plugins, Themes, Users"
+      },
+      {
+        "name": "Aggressive Users",
+        "command": "wpscan --url http://{target} --enumerate u1-100 | tee {log_file}",
+        "description": "Enumerate first 100 users"
+      },
+      {
+        "name": "Vulnerable Plugins",
+        "command": "wpscan --url http://{target} --enumerate vp | tee {log_file}",
+        "description": "Vulnerable plugins only"
+      }
     ]
   },
   {
-      "id": "ffuf",
-      "name": "FFUF",
-      "command": "ffuf -u http://{target}/FUZZ -w /usr/share/wordlists/dirb/common.txt -o {log_file}",
-      "category": "Web",
-      "parser": "ffuf",
-      "presets": [
-          { "name": "Common Dir", "command": "ffuf -u http://{target}/FUZZ -w /usr/share/wordlists/dirb/common.txt -o {log_file}", "description": "Common directories" },
-          { "name": "Subdomains", "command": "ffuf -u http://FUZZ.{target} -w /usr/share/wordlists/SecLists/Discovery/DNS/subdomains-top1million-5000.txt -o {log_file}", "description": "Subdomain fuzzing" },
-          { "name": "Post Data", "command": "ffuf -u http://{target} -X POST -d \"id=FUZZ\" -w /usr/share/wordlists/rockyou.txt -o {log_file}", "description": "Fuzz POST parameter" }
-      ]
-  },
-  {
-      "id": "nuclei",
-      "name": "Nuclei",
-      "command": "nuclei -u http://{target} -o {log_file}",
-      "category": "Vuln",
-      "parser": "nuclei",
-      "presets": [
-          { "name": "Default", "command": "nuclei -u http://{target} -o {log_file}", "description": "Default templates" },
-          { "name": "Critical", "command": "nuclei -u http://{target} -s critical -o {log_file}", "description": "Critical severity only" },
-          { "name": "CVEs", "command": "nuclei -u http://{target} -t cves/ -o {log_file}", "description": "Check for known CVEs" }
-      ]
-  },
-  {
-      "id": "subfinder",
-      "name": "Subfinder",
-      "command": "subfinder -d {target} -o {log_file}",
-      "category": "Recon",
-      "parser": "generic"
-  },
-  {
-      "id": "amass",
-      "name": "Amass Enum",
-      "command": "amass enum -d {target} -o {log_file}",
-      "category": "Recon",
-      "parser": "generic",
-       "presets": [
-          { "name": "Passive", "command": "amass enum -passive -d {target} -o {log_file}", "description": "Passive enumeration only" },
-          { "name": "Active", "command": "amass enum -active -d {target} -o {log_file}", "description": "Active enumeration" }
-      ]
-  },
-  {
-      "id": "httpx_from_subfinder",
-      "name": "HTTPX (from Subfinder)",
-      "command": "httpx -l {log:subfinder} -o {log_file} -title -tech-detect -status-code",
-      "category": "Recon",
-      "parser": "generic"
-  },
-  {
-      "id": "nuclei_from_httpx",
-      "name": "Nuclei (from HTTPX)",
-      "command": "nuclei -l {log:httpx_from_subfinder} -o {log_file}",
-      "category": "Vuln",
-      "parser": "nuclei"
-    "command": "whatweb {target}",
+    "id": "ffuf",
+    "name": "FFUF",
+    "command": "ffuf -u http://{target}/FUZZ -w /usr/share/wordlists/dirb/common.txt -o {log_file}",
     "category": "Web",
-    "types": ["url", "domain"]
+    "parser": "ffuf",
+    "presets": [
+      {
+        "name": "Common Dir",
+        "command": "ffuf -u http://{target}/FUZZ -w /usr/share/wordlists/dirb/common.txt -o {log_file}",
+        "description": "Common directories"
+      },
+      {
+        "name": "Subdomains",
+        "command": "ffuf -u http://FUZZ.{target} -w /usr/share/wordlists/SecLists/Discovery/DNS/subdomains-top1million-5000.txt -o {log_file}",
+        "description": "Subdomain fuzzing"
+      },
+      {
+        "name": "Post Data",
+        "command": "ffuf -u http://{target} -X POST -d \"id=FUZZ\" -w /usr/share/wordlists/rockyou.txt -o {log_file}",
+        "description": "Fuzz POST parameter"
+      }
+    ]
   },
   {
-    "id": "nikto",
-    "name": "Nikto",
-    "command": "nikto -h {target}",
-    "category": "Web",
-    "types": ["url", "domain"]
+    "id": "nuclei",
+    "name": "Nuclei",
+    "command": "nuclei -u http://{target} -o {log_file}",
+    "category": "Vuln",
+    "parser": "nuclei",
+    "presets": [
+      {
+        "name": "Default",
+        "command": "nuclei -u http://{target} -o {log_file}",
+        "description": "Default templates"
+      },
+      {
+        "name": "Critical",
+        "command": "nuclei -u http://{target} -s critical -o {log_file}",
+        "description": "Critical severity only"
+      },
+      {
+        "name": "CVEs",
+        "command": "nuclei -u http://{target} -t cves/ -o {log_file}",
+        "description": "Check for known CVEs"
+      }
+    ]
+  },
+  {
+    "id": "subfinder",
+    "name": "Subfinder",
+    "command": "subfinder -d {target} -o {log_file}",
+    "category": "Recon",
+    "parser": "generic",
+    "types": [
+      "domain"
+    ]
+  },
+  {
+    "id": "amass",
+    "name": "Amass Enum",
+    "command": "amass enum -d {target} -o {log_file}",
+    "category": "Recon",
+    "parser": "generic",
+    "presets": [
+      {
+        "name": "Passive",
+        "command": "amass enum -passive -d {target} -o {log_file}",
+        "description": "Passive enumeration only"
+      },
+      {
+        "name": "Active",
+        "command": "amass enum -active -d {target} -o {log_file}",
+        "description": "Active enumeration"
+      }
+    ]
+  },
+  {
+    "id": "httpx_from_subfinder",
+    "name": "HTTPX (from Subfinder)",
+    "command": "httpx -l {log:subfinder} -o {log_file} -title -tech-detect -status-code",
+    "category": "Recon",
+    "parser": "generic"
+  },
+  {
+    "id": "nuclei_from_httpx",
+    "name": "Nuclei (from HTTPX)",
+    "command": "nuclei -l {log:httpx_from_subfinder} -o {log_file}",
+    "category": "Vuln",
+    "parser": "nuclei"
   },
   {
     "id": "gobuster",
     "name": "Gobuster Dir",
     "command": "gobuster dir -u {target} -w /usr/share/wordlists/dirb/common.txt",
     "category": "Web",
-    "types": ["url", "domain"]
+    "types": [
+      "url",
+      "domain"
+    ]
   },
   {
     "id": "whois",
     "name": "Whois",
     "command": "whois {target}",
     "category": "Recon",
-    "types": ["ip", "domain", "email", "ipv4", "cidr"]
+    "types": [
+      "ip",
+      "domain",
+      "email",
+      "ipv4",
+      "cidr"
+    ]
   },
   {
     "id": "dig-any",
     "name": "Dig ANY",
     "command": "dig {target} ANY",
     "category": "DNS",
-    "types": ["domain", "domain_port"]
+    "types": [
+      "domain",
+      "domain_port"
+    ]
   },
   {
     "id": "dig-short",
     "name": "Dig A (Short)",
     "command": "dig +short {target} A",
     "category": "DNS",
-    "types": ["domain"]
-  },
-  {
-    "id": "subfinder",
-    "name": "Subfinder",
-    "command": "subfinder -d {target}",
-    "category": "Recon",
-    "types": ["domain"]
+    "types": [
+      "domain"
+    ]
   },
   {
     "id": "httpx",
     "name": "HTTPX Probe",
     "command": "echo {target} | httpx -silent -status-code -title",
     "category": "Recon",
-    "types": ["domain"]
+    "types": [
+      "domain"
+    ]
   },
   {
     "id": "theharvester",
     "name": "theHarvester",
     "command": "theHarvester -d {target} -b all -l 100",
     "category": "Recon",
-    "types": ["email", "domain"]
+    "types": [
+      "email",
+      "domain"
+    ]
   },
   {
     "id": "searchsploit",
     "name": "SearchSploit",
     "command": "searchsploit {target}",
     "category": "Exploit",
-    "types": ["cve", "text"]
+    "types": [
+      "cve",
+      "text"
+    ]
   },
   {
     "id": "hashid",
     "name": "HashID",
     "command": "hashid {target}",
     "category": "Crypto",
-    "types": ["hash_format", "hash_hex"]
+    "types": [
+      "hash_format",
+      "hash_hex"
+    ]
   },
   {
     "id": "hash-identifier",
     "name": "Hash Identifier",
     "command": "echo {target} | hash-identifier",
     "category": "Crypto",
-    "types": ["hash_format", "hash_hex"]
+    "types": [
+      "hash_format",
+      "hash_hex"
+    ]
   },
   {
     "id": "base64-decode",
     "name": "Base64 Decode",
     "command": "echo {target} | base64 -d",
     "category": "Crypto",
-    "types": ["base64", "base64_double"]
+    "types": [
+      "base64",
+      "base64_double"
+    ]
   },
   {
     "id": "double-base64-decode",
     "name": "Double Base64 Decode",
     "command": "echo {target} | base64 -d | base64 -d",
     "category": "Crypto",
-    "types": ["base64_double"]
+    "types": [
+      "base64_double"
+    ]
   },
   {
     "id": "ping",
     "name": "Ping",
     "command": "ping -c 4 {target}",
     "category": "Network",
-    "types": ["ip", "ipv4", "domain"]
+    "types": [
+      "ip",
+      "ipv4",
+      "domain"
+    ]
   },
   {
     "id": "traceroute",
     "name": "Traceroute",
     "command": "traceroute {target}",
     "category": "Network",
-    "types": ["ip", "ipv4", "domain"]
+    "types": [
+      "ip",
+      "ipv4",
+      "domain"
+    ]
   },
   {
     "id": "browser-open-url",
@@ -282,7 +445,9 @@
     "runner": "internal",
     "action": "open-browser",
     "category": "General",
-    "types": ["url"]
+    "types": [
+      "url"
+    ]
   },
   {
     "id": "browser-open-domain",
@@ -291,7 +456,10 @@
     "runner": "internal",
     "action": "open-browser",
     "category": "General",
-    "types": ["domain", "domain_port"]
+    "types": [
+      "domain",
+      "domain_port"
+    ]
   },
   {
     "id": "browser-open-ip",
@@ -300,7 +468,11 @@
     "runner": "internal",
     "action": "open-browser",
     "category": "General",
-    "types": ["ip", "ipv4", "ip_port"]
+    "types": [
+      "ip",
+      "ipv4",
+      "ip_port"
+    ]
   },
   {
     "id": "copy-target",
@@ -309,7 +481,22 @@
     "runner": "internal",
     "action": "copy",
     "category": "General",
-    "types": ["url", "domain", "ip", "ipv4", "cidr", "email", "cve", "hash_format", "hash_hex", "base64", "base64_double", "text", "ip_port", "domain_port"]
+    "types": [
+      "url",
+      "domain",
+      "ip",
+      "ipv4",
+      "cidr",
+      "email",
+      "cve",
+      "hash_format",
+      "hash_hex",
+      "base64",
+      "base64_double",
+      "text",
+      "ip_port",
+      "domain_port"
+    ]
   },
   {
     "id": "shodan-host",
@@ -318,7 +505,10 @@
     "runner": "internal",
     "action": "open-browser",
     "category": "OSINT",
-    "types": ["ip", "ipv4"]
+    "types": [
+      "ip",
+      "ipv4"
+    ]
   },
   {
     "id": "shodan-search",
@@ -327,7 +517,9 @@
     "runner": "internal",
     "action": "open-browser",
     "category": "OSINT",
-    "types": ["domain"]
+    "types": [
+      "domain"
+    ]
   },
   {
     "id": "censys-host",
@@ -336,7 +528,10 @@
     "runner": "internal",
     "action": "open-browser",
     "category": "OSINT",
-    "types": ["ip", "ipv4"]
+    "types": [
+      "ip",
+      "ipv4"
+    ]
   },
   {
     "id": "virustotal-ip",
@@ -345,7 +540,10 @@
     "runner": "internal",
     "action": "open-browser",
     "category": "OSINT",
-    "types": ["ip", "ipv4"]
+    "types": [
+      "ip",
+      "ipv4"
+    ]
   },
   {
     "id": "virustotal-domain",
@@ -354,7 +552,9 @@
     "runner": "internal",
     "action": "open-browser",
     "category": "OSINT",
-    "types": ["domain"]
+    "types": [
+      "domain"
+    ]
   },
   {
     "id": "virustotal-hash",
@@ -363,7 +563,9 @@
     "runner": "internal",
     "action": "open-browser",
     "category": "OSINT",
-    "types": ["hash_hex"]
+    "types": [
+      "hash_hex"
+    ]
   },
   {
     "id": "wayback-machine",
@@ -372,7 +574,10 @@
     "runner": "internal",
     "action": "open-browser",
     "category": "OSINT",
-    "types": ["url", "domain"]
+    "types": [
+      "url",
+      "domain"
+    ]
   },
   {
     "id": "crt-sh",
@@ -381,7 +586,9 @@
     "runner": "internal",
     "action": "open-browser",
     "category": "OSINT",
-    "types": ["domain"]
+    "types": [
+      "domain"
+    ]
   },
   {
     "id": "exploit-db",
@@ -390,7 +597,9 @@
     "runner": "internal",
     "action": "open-browser",
     "category": "Exploit",
-    "types": ["cve"]
+    "types": [
+      "cve"
+    ]
   },
   {
     "id": "nvd",
@@ -399,7 +608,9 @@
     "runner": "internal",
     "action": "open-browser",
     "category": "Exploit",
-    "types": ["cve"]
+    "types": [
+      "cve"
+    ]
   },
   {
     "id": "hibp",
@@ -408,6 +619,8 @@
     "runner": "internal",
     "action": "open-browser",
     "category": "OSINT",
-    "types": ["email"]
+    "types": [
+      "email"
+    ]
   }
 ]

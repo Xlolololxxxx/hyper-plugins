@@ -1,4 +1,4 @@
-(function (exports, require, module, __filename, __dirname, process, global, Buffer) { return function (exports, require, module, __filename, __dirname) { const path = require('path');
+const path = require('path');
 const { exec } = require('child_process');
 const OutputProcessor = require('./OutputProcessor');
 
@@ -29,34 +29,50 @@ class ToolRunner {
     }
     this.launching = true;
 
-    const rpc = this.rpc || window.rpc;
-    const store = this.store || window.store;
+    // Refresh rpc/store references if needed
+    const activeRpc = this.rpc || window.rpc;
+    const activeStore = this.store || window.store;
 
-    if (!rpc || !store) {
+    if (!activeRpc || !activeStore) {
       console.error("Hyper Target Panel: RPC or Store not available!");
       // Retry acquiring from window
-      const rpcRetry = window.rpc;
-      const storeRetry = window.store;
+      this.rpc = window.rpc;
+      this.store = window.store;
 
-      if (!rpcRetry || !storeRetry) {
+      if (!this.rpc || !this.store) {
           console.error("Hyper Target Panel: RPC or Store still not available after retry.");
           this.launching = false;
           return;
       }
-      // Update instance properties
-      if (!this.rpc) this.rpc = rpcRetry;
-      if (!this.store) this.store = storeRetry;
     }
-
-    const activeRpc = this.rpc || window.rpc;
-    const activeStore = this.store || window.store;
 
     const targetSafe = this.sanitizeTarget(target);
     const logFile = path.join(TEMP_DIR, `${targetSafe}_${tool.id}.log`);
     
     // Construct command with advanced substitution
-    let cmd = tool.command
-      .replace(/{target}/g, target || 'localhost')
+    // Handle duplicated protocol if target already has it and command also adds it
+    let finalTarget = target || 'localhost';
+
+    // If tool command starts with protocol prefixing target, strip it from target if present
+    // e.g. "http://{target}" and target="https://example.com" -> "http://https://example.com" (BAD)
+    // Fix: if target has protocol, use it as is.
+    // Ideally, we should check if {target} is prefixed by http/https in command.
+
+    let cmd = tool.command;
+
+    // Check for double protocol pattern
+    if (cmd.includes('http://{target}')) {
+        if (finalTarget.startsWith('http://') || finalTarget.startsWith('https://')) {
+            cmd = cmd.replace('http://{target}', '{target}');
+        }
+    } else if (cmd.includes('https://{target}')) {
+        if (finalTarget.startsWith('http://') || finalTarget.startsWith('https://')) {
+            cmd = cmd.replace('https://{target}', '{target}');
+        }
+    }
+
+    cmd = cmd
+      .replace(/{target}/g, finalTarget)
       .replace(/{target_safe}/g, targetSafe)
       .replace(/{log_file}/g, logFile);
 
@@ -75,7 +91,10 @@ class ToolRunner {
     // Execute in new tab
     let oldActiveUid = null;
     try {
-        oldActiveUid = activeStore.getState().termgroups.activeUid;
+        const state = activeStore.getState();
+        if (state && state.termgroups) {
+            oldActiveUid = state.termgroups.activeUid;
+        }
     } catch (e) {
         console.warn("Hyper Target Panel: Could not get old activeUid", e);
     }
@@ -87,6 +106,17 @@ class ToolRunner {
     const checkActive = setInterval(() => {
         try {
             const state = activeStore.getState();
+            if (!state || !state.termgroups) {
+                 // State not ready?
+                 attempts++;
+                 if (attempts > 50) {
+                     clearInterval(checkActive);
+                     this.launching = false;
+                     this.processQueue();
+                 }
+                 return;
+            }
+
             const activeUid = state.termgroups.activeUid;
             
             // Check if activeUid changed AND is valid
@@ -133,5 +163,3 @@ class ToolRunner {
 }
 
 module.exports = ToolRunner;
-
-}.call(this, exports, require, module, __filename, __dirname); });

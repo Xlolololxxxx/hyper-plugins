@@ -22,6 +22,8 @@
     "name": "Subdomain Pipeline",
     "description": "Subfinder -> HTTPX -> Nuclei",
     "tools": ["subfinder", "httpx_from_subfinder", "nuclei_from_httpx"]
+  },
+  {
     "id": "recon-basic",
     "name": "Basic Recon",
     "description": "Ping and Quick Nmap",

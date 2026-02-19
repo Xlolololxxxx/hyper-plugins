@@ -1,4 +1,4 @@
-(function (exports, require, module, __filename, __dirname, process, global, Buffer) { return function (exports, require, module, __filename, __dirname) { const fs = require('fs');
+const fs = require('fs');
 const path = require('path');
 
 const FINDINGS_FILE = '/home/xlo/.gemini/tmp/target_findings.json';
@@ -178,4 +178,3 @@ class OutputProcessor {
 
 module.exports = OutputProcessor;
 
-}.call(this, exports, require, module, __filename, __dirname); });
