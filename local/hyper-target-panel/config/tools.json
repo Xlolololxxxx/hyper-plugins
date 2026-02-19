@@ -1,0 +1,137 @@
+[
+  {
+    "id": "nmap",
+    "name": "Nmap Basic",
+    "command": "nmap -sV -sC -T4 {target} -oN {log_file}",
+    "category": "Recon",
+    "parser": "nmap",
+    "presets": [
+      { "name": "Quick", "command": "nmap -T4 -F {target} -oN {log_file}", "description": "Top 100 ports" },
+      { "name": "Full", "command": "nmap -p- -T4 {target} -oN {log_file}", "description": "All 65535 ports" },
+      { "name": "Vuln", "command": "nmap -sV --script vuln {target} -oN {log_file}", "description": "Check for vulnerabilities" },
+      { "name": "UDP", "command": "sudo nmap -sU --top-ports 100 {target} -oN {log_file}", "description": "Top 100 UDP ports" }
+    ]
+  },
+  {
+    "id": "gobuster_dir",
+    "name": "Gobuster Dir",
+    "command": "gobuster dir -u http://{target} -w /usr/share/wordlists/dirb/common.txt -o {log_file}",
+    "category": "Web",
+    "parser": "gobuster",
+    "presets": [
+        { "name": "Common Wordlist", "command": "gobuster dir -u http://{target} -w /usr/share/wordlists/dirb/common.txt -o {log_file}", "description": "Quick directory scan" },
+        { "name": "Medium Wordlist", "command": "gobuster dir -u http://{target} -w /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt -o {log_file}", "description": "More thorough scan" },
+        { "name": "Extensions", "command": "gobuster dir -u http://{target} -w /usr/share/wordlists/dirb/common.txt -x php,html,txt -o {log_file}", "description": "Scan with extensions" }
+    ]
+  },
+  {
+    "id": "nikto",
+    "name": "Nikto",
+    "command": "nikto -h http://{target} -o {log_file}",
+    "category": "Web",
+    "parser": "nikto",
+    "presets": [
+        { "name": "Standard", "command": "nikto -h http://{target} -o {log_file}", "description": "Default scan" },
+        { "name": "Tuning 1 (Interest)", "command": "nikto -h http://{target} -Tuning 1 -o {log_file}", "description": "Scan for interesting files" },
+        { "name": "Tuning x (Reverse)", "command": "nikto -h http://{target} -Tuning x -o {log_file}", "description": "Reverse proxy check" }
+    ]
+  },
+  {
+    "id": "whatweb",
+    "name": "WhatWeb",
+    "command": "whatweb {target} | tee {log_file}",
+    "category": "Web",
+    "parser": "generic",
+    "presets": [
+        { "name": "Standard", "command": "whatweb {target} | tee {log_file}", "description": "Standard scan" },
+        { "name": "Aggressive", "command": "whatweb -a 3 {target} | tee {log_file}", "description": "Aggressive plugin scan" }
+    ]
+  },
+  {
+    "id": "sqlmap",
+    "name": "SQLMap",
+    "command": "sqlmap -u \"http://{target}\" --batch --random-agent | tee {log_file}",
+    "category": "Exploit",
+    "parser": "sqlmap",
+    "presets": [
+        { "name": "Auto", "command": "sqlmap -u \"http://{target}\" --batch --random-agent | tee {log_file}", "description": "Automatic scan" },
+        { "name": "Forms", "command": "sqlmap -u \"http://{target}\" --forms --batch --random-agent | tee {log_file}", "description": "Scan forms on page" },
+        { "name": "Crawl", "command": "sqlmap -u \"http://{target}\" --crawl=2 --batch --random-agent | tee {log_file}", "description": "Crawl and scan" }
+    ]
+  },
+  {
+    "id": "enum4linux",
+    "name": "Enum4Linux",
+    "command": "enum4linux -a {target} | tee {log_file}",
+    "category": "SMB",
+    "parser": "generic"
+  },
+  {
+    "id": "wpscan",
+    "name": "WPScan",
+    "command": "wpscan --url http://{target} --enumerate p,t,u | tee {log_file}",
+    "category": "CMS",
+    "parser": "wpscan",
+    "presets": [
+        { "name": "Quick Enum", "command": "wpscan --url http://{target} --enumerate p,t,u | tee {log_file}", "description": "Plugins, Themes, Users" },
+        { "name": "Aggressive Users", "command": "wpscan --url http://{target} --enumerate u1-100 | tee {log_file}", "description": "Enumerate first 100 users" },
+        { "name": "Vulnerable Plugins", "command": "wpscan --url http://{target} --enumerate vp | tee {log_file}", "description": "Vulnerable plugins only" }
+    ]
+  },
+  {
+      "id": "ffuf",
+      "name": "FFUF",
+      "command": "ffuf -u http://{target}/FUZZ -w /usr/share/wordlists/dirb/common.txt -o {log_file}",
+      "category": "Web",
+      "parser": "ffuf",
+      "presets": [
+          { "name": "Common Dir", "command": "ffuf -u http://{target}/FUZZ -w /usr/share/wordlists/dirb/common.txt -o {log_file}", "description": "Common directories" },
+          { "name": "Subdomains", "command": "ffuf -u http://FUZZ.{target} -w /usr/share/wordlists/SecLists/Discovery/DNS/subdomains-top1million-5000.txt -o {log_file}", "description": "Subdomain fuzzing" },
+          { "name": "Post Data", "command": "ffuf -u http://{target} -X POST -d \"id=FUZZ\" -w /usr/share/wordlists/rockyou.txt -o {log_file}", "description": "Fuzz POST parameter" }
+      ]
+  },
+  {
+      "id": "nuclei",
+      "name": "Nuclei",
+      "command": "nuclei -u http://{target} -o {log_file}",
+      "category": "Vuln",
+      "parser": "nuclei",
+      "presets": [
+          { "name": "Default", "command": "nuclei -u http://{target} -o {log_file}", "description": "Default templates" },
+          { "name": "Critical", "command": "nuclei -u http://{target} -s critical -o {log_file}", "description": "Critical severity only" },
+          { "name": "CVEs", "command": "nuclei -u http://{target} -t cves/ -o {log_file}", "description": "Check for known CVEs" }
+      ]
+  },
+  {
+      "id": "subfinder",
+      "name": "Subfinder",
+      "command": "subfinder -d {target} -o {log_file}",
+      "category": "Recon",
+      "parser": "generic"
+  },
+  {
+      "id": "amass",
+      "name": "Amass Enum",
+      "command": "amass enum -d {target} -o {log_file}",
+      "category": "Recon",
+      "parser": "generic",
+       "presets": [
+          { "name": "Passive", "command": "amass enum -passive -d {target} -o {log_file}", "description": "Passive enumeration only" },
+          { "name": "Active", "command": "amass enum -active -d {target} -o {log_file}", "description": "Active enumeration" }
+      ]
+  },
+  {
+      "id": "httpx_from_subfinder",
+      "name": "HTTPX (from Subfinder)",
+      "command": "httpx -l {log:subfinder} -o {log_file} -title -tech-detect -status-code",
+      "category": "Recon",
+      "parser": "generic"
+  },
+  {
+      "id": "nuclei_from_httpx",
+      "name": "Nuclei (from HTTPX)",
+      "command": "nuclei -l {log:httpx_from_subfinder} -o {log_file}",
+      "category": "Vuln",
+      "parser": "nuclei"
+  }
+]

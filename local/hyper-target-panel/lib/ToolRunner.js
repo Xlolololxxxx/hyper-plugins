@@ -54,11 +54,16 @@ class ToolRunner {
     const targetSafe = this.sanitizeTarget(target);
     const logFile = path.join(TEMP_DIR, `${targetSafe}_${tool.id}.log`);
     
-    // Construct command
+    // Construct command with advanced substitution
     let cmd = tool.command
       .replace(/{target}/g, target || 'localhost')
       .replace(/{target_safe}/g, targetSafe)
       .replace(/{log_file}/g, logFile);
+
+    // Support for {log:TOOL_ID} to reference another tool's output file
+    cmd = cmd.replace(/{log:([a-zA-Z0-9_-]+)}/g, (match, toolId) => {
+        return path.join(TEMP_DIR, `${targetSafe}_${toolId}.log`);
+    });
 
     console.log(`Launching ${tool.name}: ${cmd}`);
 

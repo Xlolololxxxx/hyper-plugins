@@ -238,6 +238,30 @@ exports.decorateTerms = (Terms, { React }) => {
         ]);
     }
 
+    getRecommendedTools(tools, data) {
+      if (!data || !data.ports) return [];
+      const recs = [];
+      const portsStr = data.ports.join(' ');
+
+      // Heuristic 1: If HTTP/HTTPS ports open (80, 443, 8080), recommend Web tools
+      if (/80|443|8080|3000|5000|8000/.test(portsStr)) {
+          recs.push(...tools.filter(t => ['gobuster_dir', 'nikto', 'whatweb', 'wpscan', 'ffuf', 'nuclei'].includes(t.id)));
+      }
+
+      // Heuristic 2: If SMB ports open (139, 445), recommend Enum4Linux
+      if (/139|445/.test(portsStr)) {
+          recs.push(...tools.filter(t => t.id === 'enum4linux'));
+      }
+
+      // Heuristic 3: If SQL mentioned or port 3306, recommend SQLMap
+      if (/3306|5432|1433/.test(portsStr) || /sql/i.test(portsStr)) {
+          recs.push(...tools.filter(t => t.id === 'sqlmap'));
+      }
+
+      // Remove duplicates
+      return [...new Set(recs)];
+    }
+
     render() {
       const { data, tools, workflows, activeTool, toolSelectorOpen } = this.state;
       const sidebarWidth = 280;
@@ -249,6 +273,8 @@ exports.decorateTerms = (Terms, { React }) => {
         acc[cat].push(tool);
         return acc;
       }, {});
+
+      const recommendedTools = this.getRecommendedTools(tools, data);
 
       const children = [
           React.createElement(
@@ -329,6 +355,42 @@ exports.decorateTerms = (Terms, { React }) => {
                       }, `⚡ ${wf.name}`)
                     )
                   ),
+
+                  // Recommended Tools Section
+                  recommendedTools.length > 0 && React.createElement('div', { key: 'recommended' }, [
+                      React.createElement('div', {
+                        style: {
+                          color: '#50fa7b', // Green for recommended
+                          fontSize: '10px',
+                          fontWeight: 'bold',
+                          marginBottom: '5px',
+                          marginTop: '15px',
+                          borderBottom: `1px solid #50fa7b`
+                        }
+                      }, 'RECOMMENDED'),
+
+                      React.createElement('div', { style: { display: 'flex', flexWrap: 'wrap', gap: '4px' } },
+                        recommendedTools.map((tool, i) =>
+                          React.createElement('div', {
+                            key: `rec-${tool.id}`,
+                            style: {
+                              color: C.tool,
+                              cursor: 'pointer',
+                              padding: '2px 4px',
+                              fontSize: '10px',
+                              border: `1px solid ${C.port}`, // Green border
+                              borderRadius: '3px',
+                              flex: '1 0 45%',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              whiteSpace: 'nowrap',
+                              backgroundColor: 'rgba(80, 250, 123, 0.1)'
+                            },
+                            onClick: () => this.launchTool(tool)
+                          }, tool.name)
+                        )
+                      )
+                  ]),
 
                   Object.keys(toolsByCategory).map(cat => 
                     React.createElement('div', { key: cat }, [
