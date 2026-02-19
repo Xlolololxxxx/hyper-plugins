@@ -44,17 +44,18 @@ function stripAnsi(str) {
     .replace(/[\x00-\x08\x0e-\x1f]/g, '');
 }
 
-// ------ Security Headers to Check -------------------------------------
+// ------ Interesting Headers to Check (Backend Focus) ------------------
 
-const SECURITY_HEADERS = [
-  { name: 'Content-Security-Policy', key: 'content-security-policy', severity: 'high', abbr: 'CSP' },
-  { name: 'X-Frame-Options', key: 'x-frame-options', severity: 'medium', abbr: 'XFO' },
-  { name: 'X-Content-Type-Options', key: 'x-content-type-options', severity: 'medium', abbr: 'XCTO' },
-  { name: 'Strict-Transport-Security', key: 'strict-transport-security', severity: 'high', abbr: 'HSTS' },
-  { name: 'X-XSS-Protection', key: 'x-xss-protection', severity: 'low', abbr: 'XSS' },
-  { name: 'Referrer-Policy', key: 'referrer-policy', severity: 'low', abbr: 'RP' },
-  { name: 'Permissions-Policy', key: 'permissions-policy', severity: 'medium', abbr: 'PP' },
-  { name: 'Access-Control-Allow-Origin', key: 'access-control-allow-origin', severity: 'info', abbr: 'CORS' },
+const INTERESTING_HEADERS = [
+  { name: 'Server', key: 'server', severity: 'info', abbr: 'SRV' },
+  { name: 'X-Powered-By', key: 'x-powered-by', severity: 'info', abbr: 'PWR' },
+  { name: 'Via', key: 'via', severity: 'info', abbr: 'VIA' },
+  { name: 'X-AspNet-Version', key: 'x-aspnet-version', severity: 'info', abbr: 'ASP' },
+  { name: 'X-Generator', key: 'x-generator', severity: 'info', abbr: 'GEN' },
+  { name: 'Set-Cookie', key: 'set-cookie', severity: 'medium', abbr: 'CK' },
+  { name: 'WWW-Authenticate', key: 'www-authenticate', severity: 'high', abbr: 'AUTH' },
+  { name: 'Access-Control-Allow-Origin', key: 'access-control-allow-origin', severity: 'medium', abbr: 'CORS' },
+  { name: 'Access-Control-Allow-Methods', key: 'access-control-allow-methods', severity: 'high', abbr: 'METH' },
 ];
 
 // ------ WAF Signatures ------------------------------------------------
@@ -209,7 +210,7 @@ function addResponse(resp) {
 
 function updateBadge() {
   if (!hudApi) return;
-  const issueCount = capturedResponses.filter(r => r.missingHeaders.length > 0).length;
+  const issueCount = capturedResponses.filter(r => r.statusCode >= 500 || r.statusCode === 401 || r.statusCode === 403).length;
   hudApi.updateBadge('http-lens', issueCount > 0 ? issueCount : null);
 }
 
@@ -219,18 +220,26 @@ function triggerRender() {
 
 // ------ Response Analysis Functions -----------------------------------
 
+const DANGEROUS_METHODS = ['PUT', 'DELETE', 'TRACE', 'CONNECT', 'PROPFIND'];
+
+function detectDangerousMethods(headers) {
+  const allow = headers['allow'] || headers['access-control-allow-methods'];
+  if (!allow) return [];
+
+  return allow.split(/[\s,]+/).filter(m => DANGEROUS_METHODS.includes(m.toUpperCase()));
+}
+
 function analyzeSecurityHeaders(headers) {
   const present = [];
   const missing = [];
 
-  for (const sh of SECURITY_HEADERS) {
+  for (const sh of INTERESTING_HEADERS) {
     if (headers[sh.key]) {
       present.push({ ...sh, value: headers[sh.key] });
     } else {
-      // CORS is informational, not a "missing" warning
-      if (sh.key !== 'access-control-allow-origin') {
-        missing.push(sh);
-      }
+      // We only care about missing headers if they are critical security controls
+      // But for backend recon, we mostly care about *present* headers
+      // So 'missing' list is less relevant now, but kept for compatibility
     }
   }
 
@@ -365,9 +374,26 @@ function guessUrl(headers) {
 function statusColor(code) {
   if (code >= 200 && code < 300) return '#3fb950'; // green
   if (code >= 300 && code < 400) return '#d29922'; // yellow
+  // Prioritize 401/403 and 5xx for backend issues
+  if (code === 401 || code === 403) return '#f85149'; // red (auth issues)
   if (code >= 400 && code < 500) return '#f97316'; // orange
-  if (code >= 500) return '#f85149';                // red
+  if (code >= 500) return '#da3633';                // dark red (server errors)
   return '#8b949e';
+}
+
+const ERROR_PATTERNS = [
+  /Internal Server Error/i,
+  /Stack trace/i,
+  /Exception in thread/i,
+  /Syntax error/i,
+  /fatal error/i,
+  /ORA-[0-9]{5}/,
+  /SQL syntax/i
+];
+
+function scanBodyForErrors(body) {
+  if (!body) return [];
+  return ERROR_PATTERNS.filter(p => p.test(body)).map(p => p.toString());
 }
 
 // ------ HTTP Response Parsing State Machine ---------------------------
@@ -520,7 +546,9 @@ function finalizeResponse(uid, buf) {
   const body = buf.bodyLines.join('\n').substring(0, BODY_CAPTURE_LIMIT);
   const cookies = parseCookies(buf.headers);
   const security = analyzeSecurityHeaders(buf.headers);
+  const dangerousMethods = detectDangerousMethods(buf.headers);
   const waf = detectWAF(buf.headers, cookies, body);
+  const bodyErrors = scanBodyForErrors(body);
   const serverInfo = extractServerInfo(buf.headers);
   const url = guessUrl(buf.headers);
 
@@ -537,6 +565,8 @@ function finalizeResponse(uid, buf) {
     hasBody: buf.bodyLines.length > 0,
     cookies,
     security,
+    dangerousMethods,
+    bodyErrors,
     missingHeaders: security.missing,
     presentHeaders: security.present,
     waf,
@@ -701,22 +731,40 @@ function showHeaderDetail(resp) {
     'overflow-y:auto;padding:10px 14px;font-size:11px;color:#c9d1d9;' +
     'flex:1;line-height:1.6;';
 
-  // Security headers scorecard
+  // Interesting headers scorecard
   let html = '<div style="margin-bottom:12px;">';
-  html += '<div style="font-weight:700;color:#58a6ff;margin-bottom:6px;font-size:12px;">Security Headers</div>';
+  html += '<div style="font-weight:700;color:#58a6ff;margin-bottom:6px;font-size:12px;">Interesting Headers</div>';
 
-  for (const sh of SECURITY_HEADERS) {
+  for (const sh of INTERESTING_HEADERS) {
     const found = resp.headers[sh.key];
-    const icon = found ? '\u2705' : '\u274C';
-    const color = found ? '#3fb950' : '#f85149';
-    const val = found ? (' = ' + escHtml(truncate(found, 60))) : ' (missing)';
-    html += '<div style="display:flex;gap:6px;align-items:flex-start;padding:2px 0;">';
-    html += '<span style="color:' + color + ';flex-shrink:0;">' + icon + '</span>';
-    html += '<span style="font-weight:600;flex-shrink:0;">' + escHtml(sh.name) + '</span>';
-    html += '<span style="color:#8b949e;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + val + '</span>';
-    html += '</div>';
+    if (found) {
+        const icon = '\uD83D\uDD0D';
+        const color = '#3fb950';
+        const val = ' = ' + escHtml(truncate(found, 60));
+        html += '<div style="display:flex;gap:6px;align-items:flex-start;padding:2px 0;">';
+        html += '<span style="color:' + color + ';flex-shrink:0;">' + icon + '</span>';
+        html += '<span style="font-weight:600;flex-shrink:0;">' + escHtml(sh.name) + '</span>';
+        html += '<span style="color:#8b949e;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + val + '</span>';
+        html += '</div>';
+    }
   }
   html += '</div>';
+
+  // Body Errors
+  if (resp.bodyErrors && resp.bodyErrors.length > 0) {
+    html += '<div style="margin-bottom:12px;">';
+    html += '<div style="font-weight:700;color:#f85149;margin-bottom:6px;font-size:12px;">Potential Errors in Body</div>';
+    html += '<div style="padding:2px 0;color:#f85149;">Detected suspicious patterns: ' + resp.bodyErrors.length + '</div>';
+    html += '</div>';
+  }
+
+  // Dangerous Methods
+  if (resp.dangerousMethods && resp.dangerousMethods.length > 0) {
+    html += '<div style="margin-bottom:12px;">';
+    html += '<div style="font-weight:700;color:#f85149;margin-bottom:6px;font-size:12px;">Dangerous Methods</div>';
+    html += '<div style="padding:2px 0;color:#f85149;font-weight:600;">' + escHtml(resp.dangerousMethods.join(', ')) + '</div>';
+    html += '</div>';
+  }
 
   // WAF detection
   if (resp.waf.length > 0) {
@@ -830,7 +878,7 @@ function renderHttpTab(React) {
       h('span', { style: { width: '52px', flexShrink: 0 } }, 'Status'),
       h('span', { style: { flex: 1, minWidth: 0 } }, 'URL / Host'),
       h('span', { style: { width: '100px', flexShrink: 0 } }, 'Server'),
-      h('span', { style: { width: '60px', flexShrink: 0, textAlign: 'center' } }, 'Missing'),
+      h('span', { style: { width: '60px', flexShrink: 0, textAlign: 'center' } }, 'Headers'),
       h('span', { style: { width: '80px', flexShrink: 0 } }, 'WAF'),
       h('span', { style: { width: '100px', flexShrink: 0, textAlign: 'right' } }, 'Actions'),
     ),
@@ -874,6 +922,7 @@ function renderResponseRow(React, resp) {
         border: '1px solid ' + sc + '44',
         fontFamily: 'monospace',
       },
+      title: resp.statusText,
     }, String(resp.statusCode)),
 
     // URL
@@ -896,14 +945,14 @@ function renderResponseRow(React, resp) {
       title: serverStr,
     }, truncate(serverStr, 16)),
 
-    // Missing headers count
+    // Detected headers count
     h('span', {
       style: {
         width: '60px', flexShrink: 0, textAlign: 'center',
         fontWeight: 600, fontSize: '10px',
-        color: missingCount > 4 ? '#f85149' : missingCount > 2 ? '#f97316' : missingCount > 0 ? '#d29922' : '#3fb950',
+        color: '#58a6ff',
       },
-    }, missingCount > 0 ? missingCount + ' / ' + (SECURITY_HEADERS.length - 1) : '\u2713'),
+    }, resp.presentHeaders.length > 0 ? resp.presentHeaders.length + ' found' : '-'),
 
     // WAF
     h('span', {

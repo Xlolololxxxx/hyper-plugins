@@ -53,8 +53,9 @@ describe('Hyper HTTP Lens - Utility Functions', () => {
   test('statusColor should return correct colors for status ranges', () => {
     expect(httpLens.statusColor(200)).toBe('#3fb950'); // green
     expect(httpLens.statusColor(301)).toBe('#d29922'); // yellow
+    expect(httpLens.statusColor(401)).toBe('#f85149'); // auth issue
     expect(httpLens.statusColor(404)).toBe('#f97316'); // orange
-    expect(httpLens.statusColor(500)).toBe('#f85149'); // red
+    expect(httpLens.statusColor(500)).toBe('#da3633'); // dark red
     expect(httpLens.statusColor(101)).toBe('#8b949e'); // gray
   });
 
@@ -98,16 +99,14 @@ describe('Hyper HTTP Lens - Utility Functions', () => {
 });
 
 describe('Hyper HTTP Lens - Advanced Utilities', () => {
-  test('analyzeSecurityHeaders should identify missing headers', () => {
+  test('analyzeSecurityHeaders should identify interesting headers', () => {
     const headers = {
-      'content-security-policy': 'default-src "self"',
-      'x-frame-options': 'DENY'
+      'server': 'nginx',
+      'x-powered-by': 'PHP'
     };
     const result = httpLens.analyzeSecurityHeaders(headers);
-    expect(result.present.map(h => h.key)).toContain('content-security-policy');
-    expect(result.present.map(h => h.key)).toContain('x-frame-options');
-    expect(result.missing.map(h => h.key)).toContain('strict-transport-security');
-    expect(result.missing.map(h => h.key)).toContain('x-content-type-options');
+    expect(result.present.map(h => h.key)).toContain('server');
+    expect(result.present.map(h => h.key)).toContain('x-powered-by');
   });
 
   test('detectWAF should detect Cloudflare', () => {
