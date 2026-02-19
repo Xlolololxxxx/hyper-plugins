@@ -34,6 +34,29 @@ const CONFIG_DIR = path.join(__dirname, 'config');
 const TOOLS_FILE = path.join(CONFIG_DIR, 'tools.json');
 const WORKFLOWS_FILE = path.join(CONFIG_DIR, 'workflows.json');
 
+// Command Queue for robust execution
+const pendingCommands = [];
+
+if (typeof window !== 'undefined') {
+    window.__hyperTargetPanel_queue = (cmd) => {
+        pendingCommands.push(cmd);
+    };
+}
+
+// Middleware to intercept SESSION_ADD and execute pending commands
+exports.middleware = (store) => (next) => (action) => {
+    if (action.type === 'SESSION_ADD') {
+        if (pendingCommands.length > 0) {
+            const cmd = pendingCommands.shift();
+            // Execute cmd in action.uid with a small delay to ensure shell readiness
+            setTimeout(() => {
+                window.rpc.emit('data', { uid: action.uid, data: cmd + '\n' });
+            }, 500);
+        }
+    }
+    return next(action);
+};
+
 // Hacker Colors
 const C = {
   bg: '#1e1e24',
