@@ -1,0 +1,13 @@
+{
+  "name": "hyper-target-panel",
+  "version": "1.0.0",
+  "description": "A target reconnaissance panel for Hyper",
+  "main": "index.js",
+  "keywords": [
+    "hyper",
+    "recon",
+    "panel"
+  ],
+  "author": "xlo",
+  "license": "MIT"
+}
