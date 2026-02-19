@@ -1,11 +1,35 @@
 'use strict';
 const fs = require('fs');
 const path = require('path');
+const os = require('os');
 const { exec } = require('child_process');
 const { shell, clipboard } = require('electron');
 const ToolRunner = require('./lib/ToolRunner');
 
-const FINDINGS_FILE = '/home/xlo/.gemini/tmp/target_findings.json';
+const FINDINGS_DIR = path.join(os.homedir(), '.gemini/tmp');
+const TARGET_CONFIG_FILE = path.join(FINDINGS_DIR, 'target_config.json');
+
+// Ensure directory exists
+try {
+    fs.mkdirSync(FINDINGS_DIR, { recursive: true });
+} catch (e) {}
+
+function sanitizeTarget(target) {
+    if (!target) return 'None';
+    // Remove protocol
+    let clean = target.replace(/^https?:\/\//, '');
+    // Remove path and query
+    clean = clean.split('/')[0].split('?')[0];
+    // Remove port if present
+    clean = clean.split(':')[0];
+    return clean || 'None';
+}
+
+function getFindingsPath(target) {
+    const safeTarget = sanitizeTarget(target).replace(/[^a-zA-Z0-9.-]/g, '_');
+    return path.join(FINDINGS_DIR, `findings_${safeTarget}.json`);
+}
+
 const CONFIG_DIR = path.join(__dirname, 'config');
 const TOOLS_FILE = path.join(CONFIG_DIR, 'tools.json');
 const WORKFLOWS_FILE = path.join(CONFIG_DIR, 'workflows.json');
@@ -126,27 +150,10 @@ exports.decorateTerms = (Terms, { React }) => {
     }
 
     componentDidMount() {
-      this.fetchData();
       this.loadConfig();
+      this.loadTargetConfig();
       
       window.addEventListener('hyper-target-panel:open-tool-selector', this.handleOpenToolSelector);
-
-      try {
-        let timeout;
-        this.watcher = fs.watch(FINDINGS_FILE, (eventType, filename) => {
-          if (timeout) clearTimeout(timeout);
-          timeout = setTimeout(() => this.fetchData(), 100);
-        });
-      } catch (e) {
-        if (!fs.existsSync(FINDINGS_FILE)) {
-            // Initialize with correct structure including domains map
-            fs.writeFileSync(FINDINGS_FILE, JSON.stringify({
-                currentTarget: 'None',
-                domains: {}
-            }));
-            this.watcher = fs.watch(FINDINGS_FILE, () => this.fetchData());
-        }
-      }
     }
 
     componentWillUnmount() {
@@ -179,96 +186,69 @@ exports.decorateTerms = (Terms, { React }) => {
       });
     }
 
-    sanitizeDomain(input) {
-        if (!input) return 'None';
-        // Remove protocol
-        let domain = input.replace(/^https?:\/\//, '');
-        // Remove path and port for storage key, but strictly speaking user wants just domain
-        // input: https://example.com/foo -> example.com
-        domain = domain.split('/')[0];
-        // Remove auth if present (user:pass@domain)
-        if (domain.includes('@')) {
-            domain = domain.split('@')[1];
-        }
-        return domain;
+    loadTargetConfig() {
+        fs.readFile(TARGET_CONFIG_FILE, 'utf8', (err, content) => {
+            if (!err) {
+                try {
+                    const config = JSON.parse(content);
+                    if (config.lastTarget) {
+                        this.fetchData(config.lastTarget);
+                        return;
+                    }
+                } catch (e) {}
+            }
+            // Default if no config
+            this.fetchData('None');
+        });
     }
 
-    fetchData() {
-      fs.readFile(FINDINGS_FILE, 'utf8', (err, content) => {
-        if (!err && content) {
-          try {
-            const json = JSON.parse(content);
-            const currentTarget = json.currentTarget || json.target || 'None';
-            let domains = json.domains || {};
+    fetchData(target) {
+      // If target provided, use it. Otherwise use state.data.target
+      const currentTarget = target || this.state.data.target || 'None';
+      const findingsFile = getFindingsPath(currentTarget);
 
-            // Legacy migration: if flat structure, move to domains map
-            if (!json.domains && json.target) {
-                 domains[json.target] = {
-                     target: json.target,
-                     ports: json.ports || [],
-                     vulns: json.vulns || [],
-                     paths: json.paths || [],
-                     domains: []
-                 };
+      // Update watcher
+      if (this.watcher) this.watcher.close();
+      try {
+        this.watcher = fs.watch(findingsFile, (eventType, filename) => {
+             // Debounce logic
+             if (this.fetchTimeout) clearTimeout(this.fetchTimeout);
+             this.fetchTimeout = setTimeout(() => this.reloadFindings(findingsFile), 100);
+        });
+      } catch (e) {
+         // Create if missing
+         if (!fs.existsSync(findingsFile)) {
+             const initData = { target: currentTarget, ports: [], domains: [], vulns: [], paths: [], history: [] };
+             fs.writeFileSync(findingsFile, JSON.stringify(initData));
+             this.watcher = fs.watch(findingsFile, () => this.reloadFindings(findingsFile));
+         }
+      }
+      
+      this.reloadFindings(findingsFile);
+    }
+
+    reloadFindings(filepath) {
+        fs.readFile(filepath, 'utf8', (err, content) => {
+            if (!err) {
+                try {
+                    const data = JSON.parse(content);
+                    if (!data.history) data.history = [];
+                    if (!data.domains) data.domains = [];
+                    this.setState({ data });
+                } catch (e) {}
             }
-
-            // Get active data or init
-            const activeData = domains[currentTarget] || {
-                target: currentTarget,
-                ports: [],
-                vulns: [],
-                paths: [],
-                domains: []
-            };
-
-            // Ensure history is from global
-            activeData.history = json.history || [];
-
-            this.setState({ data: activeData });
-          } catch (e) { console.error("Error reading findings", e); }
-        }
-      });
+        });
     }
 
     setTarget(rawTarget) {
-      if (!rawTarget) return;
+      const newTarget = sanitizeTarget(rawTarget);
+      if (newTarget === this.state.data.target) return;
 
-      const domain = this.sanitizeDomain(rawTarget);
-      
-      fs.readFile(FINDINGS_FILE, 'utf8', (err, content) => {
-          let json = { currentTarget: 'None', domains: {}, history: [] };
-          try {
-              if (!err && content) json = JSON.parse(content);
-          } catch (e) {}
+      // Save current target to config
+      fs.writeFile(TARGET_CONFIG_FILE, JSON.stringify({ lastTarget: newTarget }), () => {});
 
-          // Ensure structure
-          if (!json.domains) json.domains = {};
-          if (!json.history) json.history = [];
-
-          // Initialize domain entry if new
-          if (!json.domains[domain]) {
-              json.domains[domain] = {
-                  target: domain,
-                  ports: [],
-                  vulns: [],
-                  paths: [],
-                  domains: [] // Subdomains
-              };
-          }
-
-          json.currentTarget = domain;
-
-          // Update global history
-          if (!json.history.includes(domain)) {
-              json.history = [domain, ...json.history].slice(0, 200);
-          }
-
-          // Write back to persist immediately
-          fs.writeFile(FINDINGS_FILE, JSON.stringify(json, null, 2), () => {
-              // The file watcher in componentDidMount will trigger fetchData()
-              // which updates the state with the new domain's data
-          });
-      });
+      // Switch to new target findings
+      this.fetchData(newTarget);
     }
 
     launchTool(tool) {
@@ -301,7 +281,7 @@ exports.decorateTerms = (Terms, { React }) => {
           return;
       }
 
-      this.toolRunner.launch(toolToRun, data.target || 'localhost');
+      this.toolRunner.launch(toolToRun, data);
       this.setState({ activeTool: null, toolSelectorOpen: false });
     }
     
@@ -311,10 +291,9 @@ exports.decorateTerms = (Terms, { React }) => {
 
     launchWorkflow(workflow) {
       const { tools, data } = this.state;
-      const target = data.target || 'localhost';
       const sequence = workflow.tools.map(id => tools.find(t => t.id === id)).filter(Boolean);
       sequence.forEach(tool => {
-        this.toolRunner.launch(tool, target);
+        this.toolRunner.launch(tool, data);
       });
       this.setState({ toolSelectorOpen: false });
     }
