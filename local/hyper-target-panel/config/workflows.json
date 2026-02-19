@@ -22,5 +22,21 @@
     "name": "Subdomain Pipeline",
     "description": "Subfinder -> HTTPX -> Nuclei",
     "tools": ["subfinder", "httpx_from_subfinder", "nuclei_from_httpx"]
+    "id": "recon-basic",
+    "name": "Basic Recon",
+    "description": "Ping and Quick Nmap",
+    "tools": ["ping", "nmap-quick"]
+  },
+  {
+    "id": "web-recon",
+    "name": "Web Recon",
+    "description": "WhatWeb, Nikto, and Gobuster",
+    "tools": ["whatweb", "nikto", "gobuster"]
+  },
+  {
+    "id": "domain-intel",
+    "name": "Domain Intel",
+    "description": "Whois, Dig, and Subfinder",
+    "tools": ["whois", "dig-any", "subfinder"]
   }
 ]

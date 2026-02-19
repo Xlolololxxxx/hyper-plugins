@@ -35,6 +35,39 @@
         { "name": "Tuning 1 (Interest)", "command": "nikto -h http://{target} -Tuning 1 -o {log_file}", "description": "Scan for interesting files" },
         { "name": "Tuning x (Reverse)", "command": "nikto -h http://{target} -Tuning x -o {log_file}", "description": "Reverse proxy check" }
     ]
+    "id": "nmap-quick",
+    "name": "Nmap Quick Scan",
+    "command": "nmap -sV -sC {target}",
+    "category": "Recon",
+    "types": ["ip", "domain", "ip_port", "domain_port", "ipv4", "cidr"]
+  },
+  {
+    "id": "nmap-all",
+    "name": "Nmap All Ports",
+    "command": "nmap -p- --min-rate 1000 {target}",
+    "category": "Recon",
+    "types": ["ip", "domain", "ipv4"]
+  },
+  {
+    "id": "nmap-udp",
+    "name": "Nmap UDP Top 50",
+    "command": "sudo nmap -sU --top-ports 50 {target}",
+    "category": "Recon",
+    "types": ["ip", "ipv4"]
+  },
+  {
+    "id": "curl-headers",
+    "name": "cURL Headers",
+    "command": "curl -sI {target}",
+    "category": "Web",
+    "types": ["url", "domain", "ip_port", "domain_port"]
+  },
+  {
+    "id": "curl-full",
+    "name": "cURL Full Response",
+    "command": "curl -sk {target}",
+    "category": "Web",
+    "types": ["url", "domain"]
   },
   {
     "id": "whatweb",
@@ -133,5 +166,248 @@
       "command": "nuclei -l {log:httpx_from_subfinder} -o {log_file}",
       "category": "Vuln",
       "parser": "nuclei"
+    "command": "whatweb {target}",
+    "category": "Web",
+    "types": ["url", "domain"]
+  },
+  {
+    "id": "nikto",
+    "name": "Nikto",
+    "command": "nikto -h {target}",
+    "category": "Web",
+    "types": ["url", "domain"]
+  },
+  {
+    "id": "gobuster",
+    "name": "Gobuster Dir",
+    "command": "gobuster dir -u {target} -w /usr/share/wordlists/dirb/common.txt",
+    "category": "Web",
+    "types": ["url", "domain"]
+  },
+  {
+    "id": "whois",
+    "name": "Whois",
+    "command": "whois {target}",
+    "category": "Recon",
+    "types": ["ip", "domain", "email", "ipv4", "cidr"]
+  },
+  {
+    "id": "dig-any",
+    "name": "Dig ANY",
+    "command": "dig {target} ANY",
+    "category": "DNS",
+    "types": ["domain", "domain_port"]
+  },
+  {
+    "id": "dig-short",
+    "name": "Dig A (Short)",
+    "command": "dig +short {target} A",
+    "category": "DNS",
+    "types": ["domain"]
+  },
+  {
+    "id": "subfinder",
+    "name": "Subfinder",
+    "command": "subfinder -d {target}",
+    "category": "Recon",
+    "types": ["domain"]
+  },
+  {
+    "id": "httpx",
+    "name": "HTTPX Probe",
+    "command": "echo {target} | httpx -silent -status-code -title",
+    "category": "Recon",
+    "types": ["domain"]
+  },
+  {
+    "id": "theharvester",
+    "name": "theHarvester",
+    "command": "theHarvester -d {target} -b all -l 100",
+    "category": "Recon",
+    "types": ["email", "domain"]
+  },
+  {
+    "id": "searchsploit",
+    "name": "SearchSploit",
+    "command": "searchsploit {target}",
+    "category": "Exploit",
+    "types": ["cve", "text"]
+  },
+  {
+    "id": "hashid",
+    "name": "HashID",
+    "command": "hashid {target}",
+    "category": "Crypto",
+    "types": ["hash_format", "hash_hex"]
+  },
+  {
+    "id": "hash-identifier",
+    "name": "Hash Identifier",
+    "command": "echo {target} | hash-identifier",
+    "category": "Crypto",
+    "types": ["hash_format", "hash_hex"]
+  },
+  {
+    "id": "base64-decode",
+    "name": "Base64 Decode",
+    "command": "echo {target} | base64 -d",
+    "category": "Crypto",
+    "types": ["base64", "base64_double"]
+  },
+  {
+    "id": "double-base64-decode",
+    "name": "Double Base64 Decode",
+    "command": "echo {target} | base64 -d | base64 -d",
+    "category": "Crypto",
+    "types": ["base64_double"]
+  },
+  {
+    "id": "ping",
+    "name": "Ping",
+    "command": "ping -c 4 {target}",
+    "category": "Network",
+    "types": ["ip", "ipv4", "domain"]
+  },
+  {
+    "id": "traceroute",
+    "name": "Traceroute",
+    "command": "traceroute {target}",
+    "category": "Network",
+    "types": ["ip", "ipv4", "domain"]
+  },
+  {
+    "id": "browser-open-url",
+    "name": "Open URL",
+    "command": "{target}",
+    "runner": "internal",
+    "action": "open-browser",
+    "category": "General",
+    "types": ["url"]
+  },
+  {
+    "id": "browser-open-domain",
+    "name": "Open Domain (HTTPS)",
+    "command": "https://{target}",
+    "runner": "internal",
+    "action": "open-browser",
+    "category": "General",
+    "types": ["domain", "domain_port"]
+  },
+  {
+    "id": "browser-open-ip",
+    "name": "Open IP (HTTP)",
+    "command": "http://{target}",
+    "runner": "internal",
+    "action": "open-browser",
+    "category": "General",
+    "types": ["ip", "ipv4", "ip_port"]
+  },
+  {
+    "id": "copy-target",
+    "name": "Copy to Clipboard",
+    "command": "{target}",
+    "runner": "internal",
+    "action": "copy",
+    "category": "General",
+    "types": ["url", "domain", "ip", "ipv4", "cidr", "email", "cve", "hash_format", "hash_hex", "base64", "base64_double", "text", "ip_port", "domain_port"]
+  },
+  {
+    "id": "shodan-host",
+    "name": "Shodan Host",
+    "command": "https://www.shodan.io/host/{target}",
+    "runner": "internal",
+    "action": "open-browser",
+    "category": "OSINT",
+    "types": ["ip", "ipv4"]
+  },
+  {
+    "id": "shodan-search",
+    "name": "Shodan Search",
+    "command": "https://www.shodan.io/search?query=hostname%3A{target}",
+    "runner": "internal",
+    "action": "open-browser",
+    "category": "OSINT",
+    "types": ["domain"]
+  },
+  {
+    "id": "censys-host",
+    "name": "Censys Host",
+    "command": "https://search.censys.io/hosts/{target}",
+    "runner": "internal",
+    "action": "open-browser",
+    "category": "OSINT",
+    "types": ["ip", "ipv4"]
+  },
+  {
+    "id": "virustotal-ip",
+    "name": "VirusTotal IP",
+    "command": "https://www.virustotal.com/gui/ip-address/{target}",
+    "runner": "internal",
+    "action": "open-browser",
+    "category": "OSINT",
+    "types": ["ip", "ipv4"]
+  },
+  {
+    "id": "virustotal-domain",
+    "name": "VirusTotal Domain",
+    "command": "https://www.virustotal.com/gui/domain/{target}",
+    "runner": "internal",
+    "action": "open-browser",
+    "category": "OSINT",
+    "types": ["domain"]
+  },
+  {
+    "id": "virustotal-hash",
+    "name": "VirusTotal Hash",
+    "command": "https://www.virustotal.com/gui/file/{target}",
+    "runner": "internal",
+    "action": "open-browser",
+    "category": "OSINT",
+    "types": ["hash_hex"]
+  },
+  {
+    "id": "wayback-machine",
+    "name": "Wayback Machine",
+    "command": "https://web.archive.org/web/*/{target}",
+    "runner": "internal",
+    "action": "open-browser",
+    "category": "OSINT",
+    "types": ["url", "domain"]
+  },
+  {
+    "id": "crt-sh",
+    "name": "crt.sh Certificates",
+    "command": "https://crt.sh/?q=%25.{target}",
+    "runner": "internal",
+    "action": "open-browser",
+    "category": "OSINT",
+    "types": ["domain"]
+  },
+  {
+    "id": "exploit-db",
+    "name": "Exploit-DB",
+    "command": "https://www.exploit-db.com/search?cve={target}",
+    "runner": "internal",
+    "action": "open-browser",
+    "category": "Exploit",
+    "types": ["cve"]
+  },
+  {
+    "id": "nvd",
+    "name": "NVD Details",
+    "command": "https://nvd.nist.gov/vuln/detail/{target}",
+    "runner": "internal",
+    "action": "open-browser",
+    "category": "Exploit",
+    "types": ["cve"]
+  },
+  {
+    "id": "hibp",
+    "name": "Have I Been Pwned",
+    "command": "https://haveibeenpwned.com/account/{target}",
+    "runner": "internal",
+    "action": "open-browser",
+    "category": "OSINT",
+    "types": ["email"]
   }
 ]
