@@ -2,6 +2,7 @@
 const fs = require('fs');
 const path = require('path');
 const { exec } = require('child_process');
+const { shell, clipboard } = require('electron');
 const ToolRunner = require('./lib/ToolRunner');
 
 const FINDINGS_FILE = '/home/xlo/.gemini/tmp/target_findings.json';
@@ -94,7 +95,8 @@ exports.decorateTerms = (Terms, { React }) => {
         tools: [],
         workflows: [],
         activeTool: null,
-        toolSelectorOpen: false
+        toolSelectorOpen: false,
+        selectorType: null
       };
       this.toolRunner = new ToolRunner(window.rpc, window.store);
       this.handleOpenToolSelector = this.handleOpenToolSelector.bind(this);
@@ -127,9 +129,9 @@ exports.decorateTerms = (Terms, { React }) => {
     }
 
     handleOpenToolSelector(e) {
-        const { target } = e.detail;
+        const { target, type } = e.detail;
         this.setTarget(target);
-        this.setState({ toolSelectorOpen: true });
+        this.setState({ toolSelectorOpen: true, selectorType: type });
     }
 
     loadConfig() {
@@ -190,6 +192,20 @@ exports.decorateTerms = (Terms, { React }) => {
       const commandToRun = preset ? preset.command : tool.command;
       const toolToRun = { ...tool, command: commandToRun };
       
+      if (tool.runner === 'internal') {
+          const target = data.target || '';
+          // Simple substitution for internal commands
+          const command = commandToRun.replace(/{target}/g, target);
+
+          if (tool.action === 'open-browser') {
+             shell.openExternal(command);
+          } else if (tool.action === 'copy') {
+             clipboard.writeText(command);
+          }
+          this.setState({ activeTool: null, toolSelectorOpen: false });
+          return;
+      }
+
       this.toolRunner.launch(toolToRun, data.target || 'localhost');
       this.setState({ activeTool: null, toolSelectorOpen: false });
     }
@@ -239,7 +255,7 @@ exports.decorateTerms = (Terms, { React }) => {
     }
 
     render() {
-      const { data, tools, workflows, activeTool, toolSelectorOpen } = this.state;
+      const { data, tools, workflows, activeTool, toolSelectorOpen, selectorType } = this.state;
       const sidebarWidth = 280;
       const bottomHeight = 150;
 
@@ -420,6 +436,14 @@ exports.decorateTerms = (Terms, { React }) => {
 
       // Tool Selector Modal
       if (toolSelectorOpen) {
+          const filteredTools = tools.filter(t => !selectorType || !t.types || t.types.includes(selectorType));
+          const modalToolsByCategory = filteredTools.reduce((acc, tool) => {
+            const cat = tool.category || 'Other';
+            if (!acc[cat]) acc[cat] = [];
+            acc[cat].push(tool);
+            return acc;
+          }, {});
+
           children.push(React.createElement('div', {
               key: 'tool-selector-overlay',
               style: {
@@ -454,7 +478,7 @@ exports.decorateTerms = (Terms, { React }) => {
           }, [
               React.createElement('div', {
                   style: { fontSize: '20px', fontWeight: 'bold', color: C.target, textAlign: 'center', borderBottom: `1px solid ${C.border}`, paddingBottom: '10px' }
-              }, `Select Tool for ${data.target}`),
+              }, `Select Tool for ${data.target}` + (selectorType ? ` (${selectorType})` : '')),
 
               // Workflows
               React.createElement('div', { style: { color: C.header, fontWeight: 'bold' } }, "WORKFLOWS"),
@@ -479,13 +503,13 @@ exports.decorateTerms = (Terms, { React }) => {
               ),
 
               // Tools
-              ...Object.keys(toolsByCategory).map(cat => 
+              ...Object.keys(modalToolsByCategory).map(cat =>
                   React.createElement('div', { key: cat }, [
                       React.createElement('div', {
                           style: { color: C.header, fontWeight: 'bold', marginTop: '10px', borderBottom: `1px solid ${C.border}` }
                       }, cat.toUpperCase()),
                       React.createElement('div', { style: { display: 'flex', flexWrap: 'wrap', gap: '10px', marginTop: '5px' } }, 
-                          toolsByCategory[cat].map(tool => 
+                          modalToolsByCategory[cat].map(tool =>
                               React.createElement('div', {
                                   key: tool.id,
                                   style: {
