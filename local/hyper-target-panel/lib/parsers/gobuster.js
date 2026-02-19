@@ -1,4 +1,4 @@
-(function (exports, require, module, __filename, __dirname, process, global, Buffer) { return function (exports, require, module, __filename, __dirname) { exports.parse = (content) => {
+exports.parse = (content) => {
   const paths = [];
   const domains = [];
   
@@ -35,4 +35,3 @@
   return { paths, domains };
 };
 
-}.call(this, exports, require, module, __filename, __dirname); });

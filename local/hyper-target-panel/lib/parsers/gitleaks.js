@@ -1,4 +1,4 @@
-(function (exports, require, module, __filename, __dirname, process, global, Buffer) { return function (exports, require, module, __filename, __dirname) { exports.parse = (content) => {
+exports.parse = (content) => {
   const vulns = [];
   
   // Gitleaks output format (text):
@@ -65,4 +65,3 @@
   return { vulns };
 };
 
-}.call(this, exports, require, module, __filename, __dirname); });

@@ -1,4 +1,4 @@
-(function (exports, require, module, __filename, __dirname, process, global, Buffer) { return function (exports, require, module, __filename, __dirname) { 'use strict';
+'use strict';
 const fs = require('fs');
 const path = require('path');
 const { exec } = require('child_process');
@@ -720,4 +720,3 @@ exports.decorateTerms = (Terms, { React }) => {
   };
 };
 
-}.call(this, exports, require, module, __filename, __dirname); });
