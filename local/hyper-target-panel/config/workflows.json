@@ -1,5 +1,27 @@
 [
   {
+    "id": "workflow_web_enum",
+    "name": "Full Web Enum",
+    "description": "Nmap + Gobuster + Nikto",
+    "tools": ["nmap", "gobuster_dir", "nikto"]
+  },
+  {
+    "id": "workflow_vuln_check",
+    "name": "Vuln Check",
+    "description": "Nmap (Vuln) + Nuclei",
+    "tools": ["nmap", "nuclei"]
+  },
+  {
+    "id": "workflow_wordpress",
+    "name": "WP Attack",
+    "description": "Gobuster + WPScan",
+    "tools": ["gobuster_dir", "wpscan"]
+  },
+  {
+    "id": "workflow_subdomain_pipeline",
+    "name": "Subdomain Pipeline",
+    "description": "Subfinder -> HTTPX -> Nuclei",
+    "tools": ["subfinder", "httpx_from_subfinder", "nuclei_from_httpx"]
     "id": "recon-basic",
     "name": "Basic Recon",
     "description": "Ping and Quick Nmap",
