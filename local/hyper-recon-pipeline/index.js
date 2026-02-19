@@ -299,6 +299,73 @@ const PIPELINE_TEMPLATES = {
     ],
   },
 
+  api: {
+    name: 'API Recon',
+    description: 'Endpoint Enum -> Param Discovery -> Vuln Scan',
+    targetLabel: 'API Base URL (e.g. https://api.example.com)',
+    steps: [
+      {
+        name: 'Nmap API Enum',
+        cmdTemplate: 'nmap -p 80,443 --script=http-api* {target}',
+        parser: 'nmap',
+        fanout: false,
+        description: 'Enumerate API endpoints via Nmap scripts',
+      },
+      {
+        name: 'Gobuster API',
+        cmdTemplate: 'gobuster dir -u {target} -w /usr/share/wordlists/dirb/common.txt',
+        parser: 'gobuster',
+        fanout: false,
+        description: 'Brute-force API endpoints',
+      },
+      {
+        name: 'Arjun Param Discovery',
+        cmdTemplate: 'arjun -u {target} --get',
+        parser: 'line',
+        fanout: false,
+        description: 'Discover hidden parameters',
+      },
+    ],
+  },
+
+  full: {
+    name: 'Full Recon',
+    description: 'Subdomains -> IPs -> Ports -> Vulns (Intensive)',
+    targetLabel: 'Root Domain',
+    steps: [
+      {
+        name: 'Subfinder',
+        cmdTemplate: 'subfinder -d {target} -silent',
+        parser: 'subfinder',
+        fanout: false,
+        description: 'Enumerate subdomains',
+      },
+      {
+        name: 'HTTPX',
+        cmdTemplate: 'echo {targets_newline} | httpx -silent -status-code -title -tech-detect',
+        parser: 'httpx',
+        fanout: false,
+        inputMode: 'pipe_all',
+        description: 'Probe live HTTP hosts',
+      },
+      {
+        name: 'Nmap Scan',
+        cmdTemplate: 'nmap -sV -sC -p- --min-rate 1000 {target}',
+        parser: 'nmap_http',
+        fanout: true,
+        inputField: 'host_from_url',
+        description: 'Port scan & Service enum',
+      },
+      {
+        name: 'Nikto',
+        cmdTemplate: 'nikto -h {target}',
+        parser: 'line',
+        fanout: true,
+        description: 'Vulnerability scan on HTTP services',
+      },
+    ],
+  },
+
   custom: {
     name: 'Custom Pipeline',
     description: 'Define your own steps',
@@ -876,6 +943,8 @@ function renderCreatorForm(h) {
     { key: 'domain', label: 'Domain Recon', icon: '\u{1F310}' },
     { key: 'ip', label: 'IP Recon', icon: '\u{1F5A5}' },
     { key: 'webapp', label: 'Web App', icon: '\u{1F578}' },
+    { key: 'api', label: 'API Recon', icon: '\u{1F50D}' },
+    { key: 'full', label: 'Full Recon', icon: '\u{1F4A5}' },
     { key: 'custom', label: 'Custom', icon: '\u{2699}' },
   ];
 

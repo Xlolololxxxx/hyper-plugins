@@ -704,6 +704,87 @@ function exportMarkdown() {
   return md;
 }
 
+function exportHTML() {
+  const now = new Date().toISOString().replace('T', ' ').replace(/\.\d+Z/, ' UTC');
+  const sections = ['critical', 'high', 'medium', 'low', 'info'];
+  const sectionColors = {
+    critical: '#f85149',
+    high: '#f97316',
+    medium: '#fbbf24',
+    low: '#58a6ff',
+    info: '#8b949e',
+  };
+
+  function escapeHtml(str) {
+    if (typeof str !== 'string') return String(str);
+    return str.replace(/&/g, '&amp;')
+              .replace(/</g, '&lt;')
+              .replace(/>/g, '&gt;')
+              .replace(/"/g, '&quot;')
+              .replace(/'/g, '&#039;');
+  }
+
+  let html = `<!DOCTYPE html>
+<html>
+<head>
+<title>Security Findings Report</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; background: #0d1117; color: #c9d1d9; margin: 0; padding: 20px; }
+h1 { color: #58a6ff; border-bottom: 1px solid #30363d; padding-bottom: 10px; }
+h2 { color: #c9d1d9; margin-top: 30px; border-bottom: 1px solid #21262d; padding-bottom: 5px; }
+.summary-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+.summary-table th, .summary-table td { text-align: left; padding: 8px; border-bottom: 1px solid #30363d; }
+.finding { background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 15px; margin-bottom: 15px; border-left-width: 5px; }
+.title { font-size: 16px; font-weight: bold; color: #e6edf3; display: flex; align-items: center; justify-content: space-between; }
+.meta { font-size: 12px; color: #8b949e; margin-top: 5px; font-family: monospace; }
+.detail { background: #0d1117; padding: 10px; border-radius: 4px; margin-top: 10px; font-family: monospace; font-size: 12px; white-space: pre-wrap; word-break: break-all; color: #8b949e; border: 1px solid #21262d; }
+.badge { display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; text-transform: uppercase; color: #fff; }
+</style>
+</head>
+<body>
+<h1>Security Findings Report</h1>
+<p>Generated: ${now}</p>
+<h2>Summary</h2>
+<table class="summary-table">
+<tr><th>Severity</th><th>Count</th></tr>
+`;
+
+  const counts = {};
+  for (const sev of sections) counts[sev] = 0;
+  for (const f of findings) {
+    if (counts[f.severity] !== undefined) counts[f.severity]++;
+  }
+
+  for (const sev of sections) {
+    html += `<tr><td><span class="badge" style="background:${sectionColors[sev]}">${sev}</span></td><td>${counts[sev]}</td></tr>`;
+  }
+  html += `</table>`;
+
+  for (const sev of sections) {
+    const items = findings.filter(f => f.severity === sev);
+    if (items.length === 0) continue;
+
+    html += `<h2>${sev.toUpperCase()} Findings (${items.length})</h2>`;
+    for (const f of items) {
+      const color = sectionColors[sev];
+      html += `
+<div class="finding" style="border-left-color: ${color}">
+  <div class="title">
+    <span>${escapeHtml(f.title)}</span>
+    <span class="badge" style="background:${color}">${sev}</span>
+  </div>
+  <div class="meta">
+    Type: ${escapeHtml(f.type)} | Target: <span style="color:#58a6ff">${escapeHtml(f.target)}</span> | Source: ${escapeHtml(f.source)} | Time: ${new Date(f.timestamp).toISOString()}
+  </div>
+  ${f.detail ? `<div class="detail">${escapeHtml(f.detail)}</div>` : ''}
+</div>`;
+    }
+  }
+
+  html += `</body></html>`;
+  return html;
+}
+
 function exportJSON() {
   return JSON.stringify({
     generated: new Date().toISOString(),
@@ -848,6 +929,21 @@ function renderFindingsTab(React) {
       },
       title: 'Export findings as JSON',
     }, 'Export JSON'),
+
+    // Export HTML
+    h('span', {
+      className: 'findings-action-btn findings-export-btn',
+      style: {
+        padding: '2px 8px', borderRadius: '4px', fontSize: '10px',
+        cursor: 'pointer', userSelect: 'none', color: '#3fb950',
+        border: '1px solid #238636', background: 'transparent',
+      },
+      onClick: () => {
+        const html = exportHTML();
+        saveExport(html, 'html');
+      },
+      title: 'Export findings as HTML',
+    }, 'Export HTML'),
 
     // Clear
     h('span', {
