@@ -34,9 +34,22 @@ class ToolRunner {
 
     if (!rpc || !store) {
       console.error("Hyper Target Panel: RPC or Store not available!");
-      this.launching = false;
-      return;
+      // Retry acquiring from window
+      const rpcRetry = window.rpc;
+      const storeRetry = window.store;
+
+      if (!rpcRetry || !storeRetry) {
+          console.error("Hyper Target Panel: RPC or Store still not available after retry.");
+          this.launching = false;
+          return;
+      }
+      // Update instance properties
+      if (!this.rpc) this.rpc = rpcRetry;
+      if (!this.store) this.store = storeRetry;
     }
+
+    const activeRpc = this.rpc || window.rpc;
+    const activeStore = this.store || window.store;
 
     const targetSafe = this.sanitizeTarget(target);
     const logFile = path.join(TEMP_DIR, `${targetSafe}_${tool.id}.log`);
@@ -55,32 +68,43 @@ class ToolRunner {
     }
 
     // Execute in new tab
-    const oldActiveUid = store.getState().termgroups.activeUid;
-    rpc.emit('termgroups:new');
+    let oldActiveUid = null;
+    try {
+        oldActiveUid = activeStore.getState().termgroups.activeUid;
+    } catch (e) {
+        console.warn("Hyper Target Panel: Could not get old activeUid", e);
+    }
+
+    activeRpc.emit('termgroups:new');
     
     // Wait for the new tab to be active
     let attempts = 0;
     const checkActive = setInterval(() => {
         try {
-            const state = store.getState();
+            const state = activeStore.getState();
             const activeUid = state.termgroups.activeUid;
             
+            // Check if activeUid changed AND is valid
             if (activeUid && activeUid !== oldActiveUid) {
                 clearInterval(checkActive);
-                // Send the command
-                rpc.emit('data', { uid: activeUid, data: cmd + String.fromCharCode(13) });
                 
-                // Done, move to next after a small delay to let tab settle
+                // Send the command with a slight delay to ensure shell is ready
                 setTimeout(() => {
-                    this.launching = false;
-                    this.processQueue();
-                }, 500);
-            } else if (attempts > 30) { // 3 seconds timeout
+                    activeRpc.emit('data', { uid: activeUid, data: cmd + '\n' });
+
+                    // Done, move to next after a small delay to let tab settle
+                    setTimeout(() => {
+                        this.launching = false;
+                        this.processQueue();
+                    }, 500);
+                }, 300);
+
+            } else if (attempts > 50) { // 5 seconds timeout
                 clearInterval(checkActive);
                 console.error("Hyper Target Panel: No active terminal found after creating new tab (timeout).");
                 // Fallback: try the current active one if we really have to
                 if (activeUid) {
-                    rpc.emit('data', { uid: activeUid, data: cmd + String.fromCharCode(13) });
+                    activeRpc.emit('data', { uid: activeUid, data: cmd + '\n' });
                 }
                 this.launching = false;
                 this.processQueue();

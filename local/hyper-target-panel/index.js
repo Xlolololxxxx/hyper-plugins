@@ -285,10 +285,10 @@ exports.decorateTerms = (Terms, { React }) => {
                 [
                   React.createElement('div', {
                     style: {
-                      fontSize: '14px',
+                      fontSize: '12px',
                       fontWeight: 'bold',
                       color: C.target,
-                      marginBottom: '15px',
+                      marginBottom: '10px',
                       borderBottom: `2px solid ${C.accent}`,
                       paddingBottom: '5px',
                       cursor: 'pointer'
@@ -302,7 +302,7 @@ exports.decorateTerms = (Terms, { React }) => {
                    React.createElement('div', {
                     style: {
                       color: C.header,
-                      fontSize: '11px',
+                      fontSize: '10px',
                       fontWeight: 'bold',
                       marginBottom: '5px',
                       marginTop: '10px',
@@ -310,19 +310,24 @@ exports.decorateTerms = (Terms, { React }) => {
                     }
                   }, 'WORKFLOWS'),
                   
-                  workflows.map((wf, i) => 
-                    React.createElement('div', {
-                      key: `wf-${i}`,
-                      style: {
-                        color: C.workflow,
-                        marginBottom: '4px',
-                        cursor: 'pointer',
-                        padding: '2px 4px',
-                        fontWeight: 'bold'
-                      },
-                      onClick: () => this.launchWorkflow(wf),
-                      title: wf.description
-                    }, `⚡ ${wf.name}`)
+                  React.createElement('div', { style: { display: 'flex', flexWrap: 'wrap', gap: '4px' } },
+                    workflows.map((wf, i) =>
+                      React.createElement('div', {
+                        key: `wf-${i}`,
+                        style: {
+                          color: C.workflow,
+                          cursor: 'pointer',
+                          padding: '2px 4px',
+                          fontWeight: 'bold',
+                          fontSize: '10px',
+                          border: `1px solid ${C.border}`,
+                          borderRadius: '3px',
+                          flex: '1 0 45%'
+                        },
+                        onClick: () => this.launchWorkflow(wf),
+                        title: wf.description
+                      }, `⚡ ${wf.name}`)
+                    )
                   ),
 
                   Object.keys(toolsByCategory).map(cat => 
@@ -330,25 +335,33 @@ exports.decorateTerms = (Terms, { React }) => {
                       React.createElement('div', {
                         style: {
                           color: C.header,
-                          fontSize: '11px',
+                          fontSize: '10px',
                           fontWeight: 'bold',
                           marginBottom: '5px',
-                          marginTop: '20px',
+                          marginTop: '15px',
                           borderBottom: `1px solid ${C.border}`
                         }
                       }, cat.toUpperCase()),
                       
-                      toolsByCategory[cat].map((tool, i) => 
-                        React.createElement('div', {
-                          key: tool.id,
-                          style: {
-                            color: C.tool,
-                            marginBottom: '4px',
-                            cursor: 'pointer',
-                            padding: '2px 4px'
-                          },
-                          onClick: () => this.launchTool(tool)
-                        }, `> ${tool.name}`)
+                      React.createElement('div', { style: { display: 'flex', flexWrap: 'wrap', gap: '4px' } },
+                        toolsByCategory[cat].map((tool, i) =>
+                          React.createElement('div', {
+                            key: tool.id,
+                            style: {
+                              color: C.tool,
+                              cursor: 'pointer',
+                              padding: '2px 4px',
+                              fontSize: '10px',
+                              border: `1px solid ${C.border}`,
+                              borderRadius: '3px',
+                              flex: '1 0 45%',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              whiteSpace: 'nowrap'
+                            },
+                            onClick: () => this.launchTool(tool)
+                          }, tool.name)
+                        )
                       )
                     ])
                   ),

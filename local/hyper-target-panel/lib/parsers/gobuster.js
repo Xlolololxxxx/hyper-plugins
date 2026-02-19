@@ -20,7 +20,8 @@
     
     // Status 200-299, 301, 302, 401, 403, 500 are interesting
     if (['200', '204', '301', '302', '307', '401', '403', '405', '500'].includes(status)) {
-        paths.push(`/${path} [${status}] (Size: ${size})${redirect}`);
+        // Nicer formatting
+        paths.push(`[${status}] /${path} (Sz: ${size})${redirect}`);
     }
   }
 
@@ -28,7 +29,7 @@
       const domain = match[1];
       const status = match[2];
       const size = match[3];
-      domains.push(`${domain} [${status}] (Size: ${size})`);
+      domains.push(`[${status}] ${domain} (Sz: ${size})`);
   }
 
   return { paths, domains };

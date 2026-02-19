@@ -33,7 +33,7 @@
   // 4. Extract Potential Subdomains/Domains
   // Exclude common file extensions to reduce noise
   const domainRegex = /\b([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,}\b/gi;
-  const ignoredExtensions = ['.png', '.jpg', '.jpeg', '.gif', '.css', '.js', '.html', '.php', '.json', '.xml', '.txt', '.log'];
+  const ignoredExtensions = ['.png', '.jpg', '.jpeg', '.gif', '.css', '.js', '.html', '.php', '.json', '.xml', '.txt', '.log', '.zip', '.tar', '.gz'];
   
   let dMatch;
   while ((dMatch = domainRegex.exec(content)) !== null) {
@@ -42,8 +42,10 @@
     
     // Simple heuristic: valid domains usually don't look like versions (1.0.2) or simple numbers
     const isVersion = /^\d+(\.\d+)+$/.test(d);
+    // Ignore purely numeric or small alphanumeric noise
+    const isNoise = d.length < 4 || /^\d+$/.test(d.replace(/\./g,''));
 
-    if (!hasIgnoredExt && !isVersion && !ips.includes(d)) {
+    if (!hasIgnoredExt && !isVersion && !isNoise && !ips.includes(d)) {
         if (!domains.includes(d)) domains.push(d);
     }
   }
@@ -64,12 +66,16 @@
 
   // 6. Extract Potential Vulnerabilities/Findings
   // Looks for common keywords indicating severity or findings
-  const vulnRegex = /\b(VULNERABLE|EXPLOITABLE|CRITICAL|HIGH|MEDIUM|LOW|CVE-\d{4}-\d+)\b[:\s]?(.*)/gi;
+  // Enhanced to capture bracket styles like [+] or [!]
+  const vulnRegex = /(?:^|\s)(?:\[\+\]|\[!\]|VULNERABLE|EXPLOITABLE|CRITICAL|HIGH|MEDIUM|LOW|CVE-\d{4}-\d+)[ \t]+(.*)/gim;
   let vMatch;
   while ((vMatch = vulnRegex.exec(content)) !== null) {
-    const finding = vMatch[0].trim();
-    // Filter out some common false positives if necessary
-    if (!vulns.includes(finding) && finding.length > 4) vulns.push(finding);
+    const matchFull = vMatch[0].trim();
+    // Clean up
+    if (!vulns.includes(matchFull) && matchFull.length > 5) {
+        // Truncate very long lines
+        vulns.push(matchFull.length > 100 ? matchFull.substring(0, 97) + '...' : matchFull);
+    }
   }
   
   return { paths, ports, domains, vulns, emails, ips };
