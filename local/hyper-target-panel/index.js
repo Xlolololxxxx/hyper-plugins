@@ -10,6 +10,29 @@ const CONFIG_DIR = path.join(__dirname, 'config');
 const TOOLS_FILE = path.join(CONFIG_DIR, 'tools.json');
 const WORKFLOWS_FILE = path.join(CONFIG_DIR, 'workflows.json');
 
+// Command Queue for robust execution
+const pendingCommands = [];
+
+if (typeof window !== 'undefined') {
+    window.__hyperTargetPanel_queue = (cmd) => {
+        pendingCommands.push(cmd);
+    };
+}
+
+// Middleware to intercept SESSION_ADD and execute pending commands
+exports.middleware = (store) => (next) => (action) => {
+    if (action.type === 'SESSION_ADD') {
+        if (pendingCommands.length > 0) {
+            const cmd = pendingCommands.shift();
+            // Execute cmd in action.uid with a small delay to ensure shell readiness
+            setTimeout(() => {
+                window.rpc.emit('data', { uid: action.uid, data: cmd + '\n' });
+            }, 500);
+        }
+    }
+    return next(action);
+};
+
 // Hacker Colors
 const C = {
   bg: '#1e1e24',
@@ -116,7 +139,11 @@ exports.decorateTerms = (Terms, { React }) => {
         });
       } catch (e) {
         if (!fs.existsSync(FINDINGS_FILE)) {
-            fs.writeFileSync(FINDINGS_FILE, JSON.stringify({ target: 'None', ports: [], domains: [], vulns: [], paths: [], history: [] }));
+            // Initialize with correct structure including domains map
+            fs.writeFileSync(FINDINGS_FILE, JSON.stringify({
+                currentTarget: 'None',
+                domains: {}
+            }));
             this.watcher = fs.watch(FINDINGS_FILE, () => this.fetchData());
         }
       }
@@ -152,28 +179,96 @@ exports.decorateTerms = (Terms, { React }) => {
       });
     }
 
+    sanitizeDomain(input) {
+        if (!input) return 'None';
+        // Remove protocol
+        let domain = input.replace(/^https?:\/\//, '');
+        // Remove path and port for storage key, but strictly speaking user wants just domain
+        // input: https://example.com/foo -> example.com
+        domain = domain.split('/')[0];
+        // Remove auth if present (user:pass@domain)
+        if (domain.includes('@')) {
+            domain = domain.split('@')[1];
+        }
+        return domain;
+    }
+
     fetchData() {
       fs.readFile(FINDINGS_FILE, 'utf8', (err, content) => {
-        if (!err) {
+        if (!err && content) {
           try {
-            const data = JSON.parse(content);
-            if (!data.history) data.history = [];
-            if (!data.domains) data.domains = [];
-            this.setState({ data });
-          } catch (e) {}
+            const json = JSON.parse(content);
+            const currentTarget = json.currentTarget || json.target || 'None';
+            let domains = json.domains || {};
+
+            // Legacy migration: if flat structure, move to domains map
+            if (!json.domains && json.target) {
+                 domains[json.target] = {
+                     target: json.target,
+                     ports: json.ports || [],
+                     vulns: json.vulns || [],
+                     paths: json.paths || [],
+                     domains: []
+                 };
+            }
+
+            // Get active data or init
+            const activeData = domains[currentTarget] || {
+                target: currentTarget,
+                ports: [],
+                vulns: [],
+                paths: [],
+                domains: []
+            };
+
+            // Ensure history is from global
+            activeData.history = json.history || [];
+
+            this.setState({ data: activeData });
+          } catch (e) { console.error("Error reading findings", e); }
         }
       });
     }
 
-    setTarget(newTarget) {
-      const { data } = this.state;
-      const newData = { ...data, target: newTarget };
-      if (!newData.history.includes(newTarget)) {
-        newData.history = [newTarget, ...newData.history].slice(0, 200);
-      }
+    setTarget(rawTarget) {
+      if (!rawTarget) return;
+
+      const domain = this.sanitizeDomain(rawTarget);
       
-      this.setState({ data: newData });
-      fs.writeFile(FINDINGS_FILE, JSON.stringify(newData, null, 2), () => {});
+      fs.readFile(FINDINGS_FILE, 'utf8', (err, content) => {
+          let json = { currentTarget: 'None', domains: {}, history: [] };
+          try {
+              if (!err && content) json = JSON.parse(content);
+          } catch (e) {}
+
+          // Ensure structure
+          if (!json.domains) json.domains = {};
+          if (!json.history) json.history = [];
+
+          // Initialize domain entry if new
+          if (!json.domains[domain]) {
+              json.domains[domain] = {
+                  target: domain,
+                  ports: [],
+                  vulns: [],
+                  paths: [],
+                  domains: [] // Subdomains
+              };
+          }
+
+          json.currentTarget = domain;
+
+          // Update global history
+          if (!json.history.includes(domain)) {
+              json.history = [domain, ...json.history].slice(0, 200);
+          }
+
+          // Write back to persist immediately
+          fs.writeFile(FINDINGS_FILE, JSON.stringify(json, null, 2), () => {
+              // The file watcher in componentDidMount will trigger fetchData()
+              // which updates the state with the new domain's data
+          });
+      });
     }
 
     launchTool(tool) {
