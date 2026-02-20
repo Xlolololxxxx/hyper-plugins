@@ -1,0 +1,8 @@
+{
+  "target": "example.com",
+  "toolId": "curl-headers",
+  "parser": "curl_head",
+  "runId": "manual_1771558354",
+  "sourceLogFile": "/tmp/manual-curl.log",
+  "capturedAt": "2026-02-20T03:32:34.326Z"
+}

@@ -1,0 +1,35 @@
+{
+  "target": "luckyone.us",
+  "toolId": "httpx_probe",
+  "toolName": "HTTPX PROBE",
+  "parser": "httpx_probe",
+  "parserEngine": "adapter",
+  "runId": "1771574263270_8j992e",
+  "sourceLogFile": null,
+  "capturedAt": "2026-02-20T07:57:45.065Z",
+  "data": {
+    "parser": "url_list",
+    "engine": "jc-adapter",
+    "summary": {
+      "line_count": 1,
+      "record_count": 0,
+      "domain_count": 1,
+      "url_count": 1,
+      "vuln_count": 0
+    },
+    "findings": {
+      "ports": [],
+      "vulns": [],
+      "paths": [],
+      "domains": []
+    },
+    "records": [],
+    "derived": {
+      "urls": [],
+      "domains": [
+        "luckyone.us"
+      ],
+      "cves": []
+    }
+  }
+}

@@ -1,10 +1,9 @@
 const fs = require('fs');
-const path = require('path');
-
-const FINDINGS_FILE = '/home/xlo/.gemini/tmp/target_findings.json';
+const JcRunner = require('./jc/JcRunner');
+const AdapterRunner = require('./jc/AdapterRunner');
 
 class OutputProcessor {
-  constructor() {
+  constructor(callbacks) {
     this.parsers = {
       nmap: require('./parsers/nmap').parse,
       generic: require('./parsers/generic').parse,
@@ -19,12 +18,22 @@ class OutputProcessor {
       sqlmap: require('./parsers/sqlmap').parse
     };
     this.watchers = {};
+    this.onFindings = null;
+    this.onJcOutput = null;
+    if (typeof callbacks === 'function') {
+      this.onFindings = callbacks;
+    } else if (callbacks && typeof callbacks === 'object') {
+      this.onFindings = typeof callbacks.onFindings === 'function' ? callbacks.onFindings : null;
+      this.onJcOutput = typeof callbacks.onJcOutput === 'function' ? callbacks.onJcOutput : null;
+    }
+    this.jcRunner = new JcRunner();
+    this.adapterRunner = new AdapterRunner();
     this.pendingFindings = { ports: new Set(), vulns: new Set(), paths: new Set(), domains: new Set() };
     this.writeTimeout = null;
   }
 
   // Register a file to watch and parse
-  watch(filePath, parserType = 'generic') {
+  watch(filePath, parserType = 'generic', context = {}) {
     if (this.watchers[filePath]) return;
 
     try {
@@ -43,6 +52,8 @@ class OutputProcessor {
 
       this.watchers[filePath] = {
         watcher,
+        parserType,
+        context,
         lastPos: 0,
         remainder: '',
         expiry: setTimeout(() => this.stop(filePath), 600000) // 10m auto-stop
@@ -91,6 +102,8 @@ class OutputProcessor {
       }
       
       if (stats.size > lastPos) {
+        this.processJcSnapshot(filePath, watcher.context || {});
+
         const bytesToRead = stats.size - lastPos;
         const buffer = Buffer.alloc(bytesToRead);
         
@@ -110,7 +123,7 @@ class OutputProcessor {
                 watcher.remainder = content.substring(lastNewline + 1);
                 
                 const parser = this.parsers[parserType] || this.parsers.generic;
-                this.updateFindings(parser(completeLines));
+                this.updateFindings(parser(completeLines), watcher.context || {});
             } else {
                 // No newline yet, buffer the whole content
                 watcher.remainder = content;
@@ -121,8 +134,28 @@ class OutputProcessor {
     });
   }
 
-  updateFindings(newFindings) {
+  processJcSnapshot(filePath, context) {
+    const jcParser = context && context.jcParser;
+    const jcEngine = context && context.jcEngine;
+    if (!jcParser || !this.onJcOutput) return;
+
+    fs.readFile(filePath, 'utf8', (err, content) => {
+      if (err || !content) return;
+      const result = jcEngine === 'adapter'
+        ? this.adapterRunner.parse(jcParser, content, context || {})
+        : this.jcRunner.parse(jcParser, content);
+      if (!result || !result.ok) return;
+      this.onJcOutput(context.target, result.data, Object.assign({}, context, { jcParser, jcEngine: jcEngine || 'jc' }));
+    });
+  }
+
+  updateFindings(newFindings, context) {
     if (!newFindings) return;
+
+    if (this.onFindings && context && context.target) {
+      this.onFindings(context.target, newFindings, context);
+      return;
+    }
     
     // Add to pending batch
     if (newFindings.ports) newFindings.ports.forEach(p => this.pendingFindings.ports.add(p));
@@ -136,45 +169,9 @@ class OutputProcessor {
   }
 
   commitFindings() {
-    const batch = {
-      ports: Array.from(this.pendingFindings.ports),
-      vulns: Array.from(this.pendingFindings.vulns),
-      paths: Array.from(this.pendingFindings.paths),
-      domains: Array.from(this.pendingFindings.domains)
-    };
-    
-    // Clear buffer for next cycle
+    // Keep backward compatibility when no live callback is supplied.
     this.pendingFindings = { ports: new Set(), vulns: new Set(), paths: new Set(), domains: new Set() };
-
-    fs.readFile(FINDINGS_FILE, 'utf8', (err, content) => {
-      let data = { target: 'None', ports: [], vulns: [], paths: [], history: [], domains: [] };
-      if (!err && content) {
-        try {
-          data = JSON.parse(content);
-        } catch (e) {}
-      }
-
-      let changed = false;
-
-      // Merge from batch
-      ['ports', 'vulns', 'paths', 'domains'].forEach(key => {
-        if (batch[key]) {
-          if (!data[key]) data[key] = [];
-          batch[key].forEach(item => {
-            if (!data[key].includes(item)) {
-              data[key].push(item);
-              changed = true;
-            }
-          });
-        }
-      });
-
-      if (changed) {
-        fs.writeFile(FINDINGS_FILE, JSON.stringify(data, null, 2), () => {});
-      }
-    });
   }
 }
 
 module.exports = OutputProcessor;
-

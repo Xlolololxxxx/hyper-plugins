@@ -1,0 +1,1085 @@
+{
+  "all": [
+    {
+      "id": "nmap_service",
+      "name": "NMAP SERVICE SCAN",
+      "command": "nmap -sV -sC -T4 {target} -oN {log_file}",
+      "parser_hint": "nmap",
+      "base_cmd": "nmap",
+      "jc_covered": false,
+      "jc_modules": [],
+      "input_mode": "domain",
+      "types": [
+        "domain",
+        "ipv4",
+        "cidr"
+      ]
+    },
+    {
+      "id": "nmap_full_tcp",
+      "name": "NMAP FULL TCP",
+      "command": "nmap -p- -T4 --min-rate 1000 {target} -oN {log_file}",
+      "parser_hint": "nmap",
+      "base_cmd": "nmap",
+      "jc_covered": false,
+      "jc_modules": [],
+      "input_mode": "domain",
+      "types": [
+        "domain",
+        "ipv4"
+      ]
+    },
+    {
+      "id": "nmap_vuln",
+      "name": "NMAP VULN SCRIPTS",
+      "command": "nmap -sV --script vuln {target} -oN {log_file}",
+      "parser_hint": "nmap",
+      "base_cmd": "nmap",
+      "jc_covered": false,
+      "jc_modules": [],
+      "input_mode": "domain",
+      "types": [
+        "domain",
+        "ipv4"
+      ]
+    },
+    {
+      "id": "nmap_udp_top",
+      "name": "NMAP UDP TOP 100",
+      "command": "nmap -sU --top-ports 100 {target} -oN {log_file}",
+      "parser_hint": "nmap",
+      "base_cmd": "nmap",
+      "jc_covered": false,
+      "jc_modules": [],
+      "input_mode": "domain",
+      "types": [
+        "domain",
+        "ipv4"
+      ]
+    },
+    {
+      "id": "whois",
+      "name": "WHOIS",
+      "command": "whois {target} | tee {log_file}",
+      "parser_hint": "generic",
+      "base_cmd": "whois",
+      "jc_covered": false,
+      "jc_modules": [],
+      "input_mode": "domain",
+      "types": [
+        "domain",
+        "email",
+        "ipv4"
+      ]
+    },
+    {
+      "id": "dig_any",
+      "name": "DIG ANY",
+      "command": "dig {target} ANY | tee {log_file}",
+      "parser_hint": "generic",
+      "base_cmd": "dig",
+      "jc_covered": true,
+      "jc_modules": [
+        "dig"
+      ],
+      "input_mode": "domain",
+      "types": [
+        "domain"
+      ]
+    },
+    {
+      "id": "subfinder",
+      "name": "SUBFINDER",
+      "command": "subfinder -d {target} -o {log_file}",
+      "parser_hint": "generic",
+      "base_cmd": "subfinder",
+      "jc_covered": false,
+      "jc_modules": [],
+      "input_mode": "domain",
+      "types": [
+        "domain"
+      ]
+    },
+    {
+      "id": "amass_passive",
+      "name": "AMASS PASSIVE",
+      "command": "amass enum -passive -d {target} -o {log_file}",
+      "parser_hint": "generic",
+      "base_cmd": "amass",
+      "jc_covered": false,
+      "jc_modules": [],
+      "input_mode": "domain",
+      "types": [
+        "domain"
+      ]
+    },
+    {
+      "id": "gau_passive",
+      "name": "GAU PASSIVE URLS",
+      "command": "gau --subs {target} | tee {log_file}",
+      "parser_hint": "generic",
+      "base_cmd": "gau",
+      "jc_covered": false,
+      "jc_modules": [],
+      "input_mode": "domain",
+      "types": [
+        "domain"
+      ]
+    },
+    {
+      "id": "waybackurls",
+      "name": "WAYBACKURLS",
+      "command": "echo {target} | waybackurls | tee {log_file}",
+      "parser_hint": "generic",
+      "base_cmd": "echo",
+      "jc_covered": false,
+      "jc_modules": [],
+      "input_mode": "domain",
+      "types": [
+        "domain"
+      ]
+    },
+    {
+      "id": "nuclei_from_httpx",
+      "name": "NUCLEI FROM HTTPX",
+      "command": "nuclei -l {log:httpx_from_subfinder} -o {log_file}",
+      "parser_hint": "nuclei",
+      "base_cmd": "nuclei",
+      "jc_covered": false,
+      "jc_modules": [],
+      "input_mode": "domain",
+      "types": [
+        "domain"
+      ]
+    },
+    {
+      "id": "curl_headers",
+      "name": "CURL HEADERS",
+      "command": "curl -skI {target} | tee {log_file}",
+      "parser_hint": "generic",
+      "base_cmd": "curl",
+      "jc_covered": true,
+      "jc_modules": [
+        "curl_head"
+      ],
+      "input_mode": "url",
+      "types": [
+        "url",
+        "domain",
+        "domain_port",
+        "ip_port",
+        "ipv4"
+      ]
+    },
+    {
+      "id": "curl_dump_full",
+      "name": "CURL RESPONSE DUMP",
+      "command": "curl -skL -D - {target} -o - | tee {log_file}",
+      "parser_hint": "generic",
+      "base_cmd": "curl",
+      "jc_covered": true,
+      "jc_modules": [
+        "curl_head"
+      ],
+      "input_mode": "url",
+      "types": [
+        "url",
+        "domain",
+        "domain_port",
+        "ip_port",
+        "ipv4"
+      ]
+    },
+    {
+      "id": "whatweb",
+      "name": "WHATWEB",
+      "command": "whatweb {target} | tee {log_file}",
+      "parser_hint": "generic",
+      "base_cmd": "whatweb",
+      "jc_covered": false,
+      "jc_modules": [],
+      "input_mode": "url",
+      "types": [
+        "url",
+        "domain",
+        "domain_port",
+        "ip_port",
+        "ipv4"
+      ]
+    },
+    {
+      "id": "katana_standard",
+      "name": "KATANA STANDARD",
+      "command": "katana -u {target} -d 3 -jc -silent -o {log_file}",
+      "parser_hint": "katana",
+      "base_cmd": "katana",
+      "jc_covered": false,
+      "jc_modules": [],
+      "input_mode": "url",
+      "types": [
+        "url",
+        "domain",
+        "domain_port",
+        "ip_port",
+        "ipv4"
+      ]
+    },
+    {
+      "id": "katana_deep",
+      "name": "KATANA DEEP + JS",
+      "command": "katana -u {target} -d 5 -jc -js-crawl -known-files all -silent -o {log_file}",
+      "parser_hint": "katana",
+      "base_cmd": "katana",
+      "jc_covered": false,
+      "jc_modules": [],
+      "input_mode": "url",
+      "types": [
+        "url",
+        "domain",
+        "domain_port",
+        "ip_port",
+        "ipv4"
+      ]
+    },
+    {
+      "id": "nikto",
+      "name": "NIKTO",
+      "command": "nikto -h {target} -output {log_file}",
+      "parser_hint": "nikto",
+      "base_cmd": "nikto",
+      "jc_covered": false,
+      "jc_modules": [],
+      "input_mode": "url",
+      "types": [
+        "url",
+        "domain",
+        "domain_port",
+        "ip_port",
+        "ipv4"
+      ]
+    },
+    {
+      "id": "gobuster_dir",
+      "name": "GOBUSTER DIRECTORIES",
+      "command": "gobuster dir -u {target} -w {wordlist_file} -o {log_file}",
+      "parser_hint": "gobuster",
+      "base_cmd": "gobuster",
+      "jc_covered": false,
+      "jc_modules": [],
+      "input_mode": "url",
+      "types": [
+        "url",
+        "domain",
+        "domain_port",
+        "ip_port",
+        "ipv4"
+      ]
+    },
+    {
+      "id": "dirsearch",
+      "name": "DIRSEARCH",
+      "command": "dirsearch -u {target} -w {wordlist_file} --format plain -o {log_file}",
+      "parser_hint": "dirsearch",
+      "base_cmd": "dirsearch",
+      "jc_covered": false,
+      "jc_modules": [],
+      "input_mode": "url",
+      "types": [
+        "url",
+        "domain",
+        "domain_port",
+        "ip_port",
+        "ipv4"
+      ]
+    },
+    {
+      "id": "feroxbuster",
+      "name": "FEROXBUSTER",
+      "command": "feroxbuster -u {target} -w {wordlist_file} -k -o {log_file}",
+      "parser_hint": "generic",
+      "base_cmd": "feroxbuster",
+      "jc_covered": false,
+      "jc_modules": [],
+      "input_mode": "url",
+      "types": [
+        "url",
+        "domain",
+        "domain_port",
+        "ip_port",
+        "ipv4"
+      ]
+    },
+    {
+      "id": "ffuf_dir",
+      "name": "FFUF DIRECTORIES",
+      "command": "ffuf -u {target}/FUZZ -w {wordlist_file} -o {log_file} -of json",
+      "parser_hint": "ffuf",
+      "base_cmd": "ffuf",
+      "jc_covered": false,
+      "jc_modules": [],
+      "input_mode": "url",
+      "types": [
+        "url",
+        "domain",
+        "domain_port",
+        "ip_port",
+        "ipv4"
+      ]
+    },
+    {
+      "id": "arjun_get",
+      "name": "ARJUN GET PARAMS",
+      "command": "arjun -u {target} -m GET -oT {log_file}",
+      "parser_hint": "generic",
+      "base_cmd": "arjun",
+      "jc_covered": false,
+      "jc_modules": [],
+      "input_mode": "url",
+      "types": [
+        "url",
+        "domain",
+        "domain_port",
+        "ip_port",
+        "ipv4"
+      ]
+    },
+    {
+      "id": "arjun_post",
+      "name": "ARJUN POST PARAMS",
+      "command": "arjun -u {target} -m POST -oT {log_file}",
+      "parser_hint": "generic",
+      "base_cmd": "arjun",
+      "jc_covered": false,
+      "jc_modules": [],
+      "input_mode": "url",
+      "types": [
+        "url",
+        "domain",
+        "domain_port",
+        "ip_port",
+        "ipv4"
+      ]
+    },
+    {
+      "id": "ffuf_param",
+      "name": "FFUF PARAM FUZZ",
+      "command": "ffuf -u {target}/?FUZZ=test -w {wordlist_file} -o {log_file} -of json",
+      "parser_hint": "ffuf",
+      "base_cmd": "ffuf",
+      "jc_covered": false,
+      "jc_modules": [],
+      "input_mode": "url",
+      "types": [
+        "url",
+        "domain",
+        "domain_port",
+        "ip_port",
+        "ipv4"
+      ]
+    },
+    {
+      "id": "nuclei_url",
+      "name": "NUCLEI URL",
+      "command": "nuclei -u {target} -severity low,medium,high,critical -o {log_file}",
+      "parser_hint": "nuclei",
+      "base_cmd": "nuclei",
+      "jc_covered": false,
+      "jc_modules": [],
+      "input_mode": "url",
+      "types": [
+        "url",
+        "domain",
+        "domain_port",
+        "ip_port",
+        "ipv4"
+      ]
+    },
+    {
+      "id": "nuclei_exposure",
+      "name": "NUCLEI EXPOSURES",
+      "command": "nuclei -u {target} -tags exposure,token,secret,misconfig -o {log_file}",
+      "parser_hint": "nuclei",
+      "base_cmd": "nuclei",
+      "jc_covered": false,
+      "jc_modules": [],
+      "input_mode": "url",
+      "types": [
+        "url",
+        "domain",
+        "domain_port",
+        "ip_port",
+        "ipv4"
+      ]
+    },
+    {
+      "id": "sqlmap",
+      "name": "SQLMAP",
+      "command": "sqlmap -u \"{target}\" --batch --random-agent --level=2 --risk=2 | tee {log_file}",
+      "parser_hint": "sqlmap",
+      "base_cmd": "sqlmap",
+      "jc_covered": false,
+      "jc_modules": [],
+      "input_mode": "url",
+      "types": [
+        "url",
+        "domain",
+        "domain_port",
+        "ip_port",
+        "ipv4"
+      ]
+    },
+    {
+      "id": "dalfox",
+      "name": "DALFOX URL",
+      "command": "dalfox url {target} --skip-bav --no-color --output {log_file}",
+      "parser_hint": "generic",
+      "base_cmd": "dalfox",
+      "jc_covered": false,
+      "jc_modules": [],
+      "input_mode": "url",
+      "types": [
+        "url",
+        "domain",
+        "domain_port",
+        "ip_port",
+        "ipv4"
+      ]
+    },
+    {
+      "id": "ffuf_sqli",
+      "name": "FFUF SQLI PROBE",
+      "command": "ffuf -u {target}/?id=FUZZ -w {wordlist_file} -o {log_file} -of json",
+      "parser_hint": "ffuf",
+      "base_cmd": "ffuf",
+      "jc_covered": false,
+      "jc_modules": [],
+      "input_mode": "url",
+      "types": [
+        "url",
+        "domain",
+        "domain_port",
+        "ip_port",
+        "ipv4"
+      ]
+    },
+    {
+      "id": "ffuf_xss",
+      "name": "FFUF XSS PROBE",
+      "command": "ffuf -u {target}/?q=FUZZ -w {wordlist_file} -o {log_file} -of json",
+      "parser_hint": "ffuf",
+      "base_cmd": "ffuf",
+      "jc_covered": false,
+      "jc_modules": [],
+      "input_mode": "url",
+      "types": [
+        "url",
+        "domain",
+        "domain_port",
+        "ip_port",
+        "ipv4"
+      ]
+    },
+    {
+      "id": "ffuf_lfi",
+      "name": "FFUF LFI PROBE",
+      "command": "ffuf -u {target}/?file=FUZZ -w {wordlist_file} -o {log_file} -of json",
+      "parser_hint": "ffuf",
+      "base_cmd": "ffuf",
+      "jc_covered": false,
+      "jc_modules": [],
+      "input_mode": "url",
+      "types": [
+        "url",
+        "domain",
+        "domain_port",
+        "ip_port",
+        "ipv4"
+      ]
+    },
+    {
+      "id": "hydra_ssh_combo",
+      "name": "HYDRA SSH (COMBO)",
+      "command": "hydra -C {wordlist_file} -s 22 {target} ssh -I -f -o {log_file}",
+      "parser_hint": "generic",
+      "base_cmd": "hydra",
+      "jc_covered": false,
+      "jc_modules": [],
+      "input_mode": "domain",
+      "types": [
+        "domain",
+        "ipv4"
+      ]
+    },
+    {
+      "id": "hydra_ftp_combo",
+      "name": "HYDRA FTP (COMBO)",
+      "command": "hydra -C {wordlist_file} -s 21 {target} ftp -I -f -o {log_file}",
+      "parser_hint": "generic",
+      "base_cmd": "hydra",
+      "jc_covered": false,
+      "jc_modules": [],
+      "input_mode": "domain",
+      "types": [
+        "domain",
+        "ipv4"
+      ]
+    },
+    {
+      "id": "hydra_http_get_combo",
+      "name": "HYDRA HTTP GET BASIC",
+      "command": "hydra -C {wordlist_file} -s 80 {target} http-get / -I -f -o {log_file}",
+      "parser_hint": "generic",
+      "base_cmd": "hydra",
+      "jc_covered": false,
+      "jc_modules": [],
+      "input_mode": "domain",
+      "types": [
+        "domain",
+        "ipv4"
+      ]
+    },
+    {
+      "id": "hydra_https_get_combo",
+      "name": "HYDRA HTTPS GET BASIC",
+      "command": "hydra -C {wordlist_file} -s 443 {target} https-get / -I -f -o {log_file}",
+      "parser_hint": "generic",
+      "base_cmd": "hydra",
+      "jc_covered": false,
+      "jc_modules": [],
+      "input_mode": "domain",
+      "types": [
+        "domain",
+        "ipv4"
+      ]
+    },
+    {
+      "id": "searchsploit",
+      "name": "SEARCHSPLOIT",
+      "command": "searchsploit {target} | tee {log_file}",
+      "parser_hint": "generic",
+      "base_cmd": "searchsploit",
+      "jc_covered": false,
+      "jc_modules": [],
+      "input_mode": "domain",
+      "types": [
+        "cve",
+        "text"
+      ]
+    }
+  ],
+  "missing": [
+    {
+      "id": "nmap_service",
+      "name": "NMAP SERVICE SCAN",
+      "command": "nmap -sV -sC -T4 {target} -oN {log_file}",
+      "parser_hint": "nmap",
+      "base_cmd": "nmap",
+      "jc_covered": false,
+      "jc_modules": [],
+      "input_mode": "domain",
+      "types": [
+        "domain",
+        "ipv4",
+        "cidr"
+      ]
+    },
+    {
+      "id": "nmap_full_tcp",
+      "name": "NMAP FULL TCP",
+      "command": "nmap -p- -T4 --min-rate 1000 {target} -oN {log_file}",
+      "parser_hint": "nmap",
+      "base_cmd": "nmap",
+      "jc_covered": false,
+      "jc_modules": [],
+      "input_mode": "domain",
+      "types": [
+        "domain",
+        "ipv4"
+      ]
+    },
+    {
+      "id": "nmap_vuln",
+      "name": "NMAP VULN SCRIPTS",
+      "command": "nmap -sV --script vuln {target} -oN {log_file}",
+      "parser_hint": "nmap",
+      "base_cmd": "nmap",
+      "jc_covered": false,
+      "jc_modules": [],
+      "input_mode": "domain",
+      "types": [
+        "domain",
+        "ipv4"
+      ]
+    },
+    {
+      "id": "nmap_udp_top",
+      "name": "NMAP UDP TOP 100",
+      "command": "nmap -sU --top-ports 100 {target} -oN {log_file}",
+      "parser_hint": "nmap",
+      "base_cmd": "nmap",
+      "jc_covered": false,
+      "jc_modules": [],
+      "input_mode": "domain",
+      "types": [
+        "domain",
+        "ipv4"
+      ]
+    },
+    {
+      "id": "whois",
+      "name": "WHOIS",
+      "command": "whois {target} | tee {log_file}",
+      "parser_hint": "generic",
+      "base_cmd": "whois",
+      "jc_covered": false,
+      "jc_modules": [],
+      "input_mode": "domain",
+      "types": [
+        "domain",
+        "email",
+        "ipv4"
+      ]
+    },
+    {
+      "id": "subfinder",
+      "name": "SUBFINDER",
+      "command": "subfinder -d {target} -o {log_file}",
+      "parser_hint": "generic",
+      "base_cmd": "subfinder",
+      "jc_covered": false,
+      "jc_modules": [],
+      "input_mode": "domain",
+      "types": [
+        "domain"
+      ]
+    },
+    {
+      "id": "amass_passive",
+      "name": "AMASS PASSIVE",
+      "command": "amass enum -passive -d {target} -o {log_file}",
+      "parser_hint": "generic",
+      "base_cmd": "amass",
+      "jc_covered": false,
+      "jc_modules": [],
+      "input_mode": "domain",
+      "types": [
+        "domain"
+      ]
+    },
+    {
+      "id": "gau_passive",
+      "name": "GAU PASSIVE URLS",
+      "command": "gau --subs {target} | tee {log_file}",
+      "parser_hint": "generic",
+      "base_cmd": "gau",
+      "jc_covered": false,
+      "jc_modules": [],
+      "input_mode": "domain",
+      "types": [
+        "domain"
+      ]
+    },
+    {
+      "id": "waybackurls",
+      "name": "WAYBACKURLS",
+      "command": "echo {target} | waybackurls | tee {log_file}",
+      "parser_hint": "generic",
+      "base_cmd": "echo",
+      "jc_covered": false,
+      "jc_modules": [],
+      "input_mode": "domain",
+      "types": [
+        "domain"
+      ]
+    },
+    {
+      "id": "nuclei_from_httpx",
+      "name": "NUCLEI FROM HTTPX",
+      "command": "nuclei -l {log:httpx_from_subfinder} -o {log_file}",
+      "parser_hint": "nuclei",
+      "base_cmd": "nuclei",
+      "jc_covered": false,
+      "jc_modules": [],
+      "input_mode": "domain",
+      "types": [
+        "domain"
+      ]
+    },
+    {
+      "id": "whatweb",
+      "name": "WHATWEB",
+      "command": "whatweb {target} | tee {log_file}",
+      "parser_hint": "generic",
+      "base_cmd": "whatweb",
+      "jc_covered": false,
+      "jc_modules": [],
+      "input_mode": "url",
+      "types": [
+        "url",
+        "domain",
+        "domain_port",
+        "ip_port",
+        "ipv4"
+      ]
+    },
+    {
+      "id": "katana_standard",
+      "name": "KATANA STANDARD",
+      "command": "katana -u {target} -d 3 -jc -silent -o {log_file}",
+      "parser_hint": "katana",
+      "base_cmd": "katana",
+      "jc_covered": false,
+      "jc_modules": [],
+      "input_mode": "url",
+      "types": [
+        "url",
+        "domain",
+        "domain_port",
+        "ip_port",
+        "ipv4"
+      ]
+    },
+    {
+      "id": "katana_deep",
+      "name": "KATANA DEEP + JS",
+      "command": "katana -u {target} -d 5 -jc -js-crawl -known-files all -silent -o {log_file}",
+      "parser_hint": "katana",
+      "base_cmd": "katana",
+      "jc_covered": false,
+      "jc_modules": [],
+      "input_mode": "url",
+      "types": [
+        "url",
+        "domain",
+        "domain_port",
+        "ip_port",
+        "ipv4"
+      ]
+    },
+    {
+      "id": "nikto",
+      "name": "NIKTO",
+      "command": "nikto -h {target} -output {log_file}",
+      "parser_hint": "nikto",
+      "base_cmd": "nikto",
+      "jc_covered": false,
+      "jc_modules": [],
+      "input_mode": "url",
+      "types": [
+        "url",
+        "domain",
+        "domain_port",
+        "ip_port",
+        "ipv4"
+      ]
+    },
+    {
+      "id": "gobuster_dir",
+      "name": "GOBUSTER DIRECTORIES",
+      "command": "gobuster dir -u {target} -w {wordlist_file} -o {log_file}",
+      "parser_hint": "gobuster",
+      "base_cmd": "gobuster",
+      "jc_covered": false,
+      "jc_modules": [],
+      "input_mode": "url",
+      "types": [
+        "url",
+        "domain",
+        "domain_port",
+        "ip_port",
+        "ipv4"
+      ]
+    },
+    {
+      "id": "dirsearch",
+      "name": "DIRSEARCH",
+      "command": "dirsearch -u {target} -w {wordlist_file} --format plain -o {log_file}",
+      "parser_hint": "dirsearch",
+      "base_cmd": "dirsearch",
+      "jc_covered": false,
+      "jc_modules": [],
+      "input_mode": "url",
+      "types": [
+        "url",
+        "domain",
+        "domain_port",
+        "ip_port",
+        "ipv4"
+      ]
+    },
+    {
+      "id": "feroxbuster",
+      "name": "FEROXBUSTER",
+      "command": "feroxbuster -u {target} -w {wordlist_file} -k -o {log_file}",
+      "parser_hint": "generic",
+      "base_cmd": "feroxbuster",
+      "jc_covered": false,
+      "jc_modules": [],
+      "input_mode": "url",
+      "types": [
+        "url",
+        "domain",
+        "domain_port",
+        "ip_port",
+        "ipv4"
+      ]
+    },
+    {
+      "id": "ffuf_dir",
+      "name": "FFUF DIRECTORIES",
+      "command": "ffuf -u {target}/FUZZ -w {wordlist_file} -o {log_file} -of json",
+      "parser_hint": "ffuf",
+      "base_cmd": "ffuf",
+      "jc_covered": false,
+      "jc_modules": [],
+      "input_mode": "url",
+      "types": [
+        "url",
+        "domain",
+        "domain_port",
+        "ip_port",
+        "ipv4"
+      ]
+    },
+    {
+      "id": "arjun_get",
+      "name": "ARJUN GET PARAMS",
+      "command": "arjun -u {target} -m GET -oT {log_file}",
+      "parser_hint": "generic",
+      "base_cmd": "arjun",
+      "jc_covered": false,
+      "jc_modules": [],
+      "input_mode": "url",
+      "types": [
+        "url",
+        "domain",
+        "domain_port",
+        "ip_port",
+        "ipv4"
+      ]
+    },
+    {
+      "id": "arjun_post",
+      "name": "ARJUN POST PARAMS",
+      "command": "arjun -u {target} -m POST -oT {log_file}",
+      "parser_hint": "generic",
+      "base_cmd": "arjun",
+      "jc_covered": false,
+      "jc_modules": [],
+      "input_mode": "url",
+      "types": [
+        "url",
+        "domain",
+        "domain_port",
+        "ip_port",
+        "ipv4"
+      ]
+    },
+    {
+      "id": "ffuf_param",
+      "name": "FFUF PARAM FUZZ",
+      "command": "ffuf -u {target}/?FUZZ=test -w {wordlist_file} -o {log_file} -of json",
+      "parser_hint": "ffuf",
+      "base_cmd": "ffuf",
+      "jc_covered": false,
+      "jc_modules": [],
+      "input_mode": "url",
+      "types": [
+        "url",
+        "domain",
+        "domain_port",
+        "ip_port",
+        "ipv4"
+      ]
+    },
+    {
+      "id": "nuclei_url",
+      "name": "NUCLEI URL",
+      "command": "nuclei -u {target} -severity low,medium,high,critical -o {log_file}",
+      "parser_hint": "nuclei",
+      "base_cmd": "nuclei",
+      "jc_covered": false,
+      "jc_modules": [],
+      "input_mode": "url",
+      "types": [
+        "url",
+        "domain",
+        "domain_port",
+        "ip_port",
+        "ipv4"
+      ]
+    },
+    {
+      "id": "nuclei_exposure",
+      "name": "NUCLEI EXPOSURES",
+      "command": "nuclei -u {target} -tags exposure,token,secret,misconfig -o {log_file}",
+      "parser_hint": "nuclei",
+      "base_cmd": "nuclei",
+      "jc_covered": false,
+      "jc_modules": [],
+      "input_mode": "url",
+      "types": [
+        "url",
+        "domain",
+        "domain_port",
+        "ip_port",
+        "ipv4"
+      ]
+    },
+    {
+      "id": "sqlmap",
+      "name": "SQLMAP",
+      "command": "sqlmap -u \"{target}\" --batch --random-agent --level=2 --risk=2 | tee {log_file}",
+      "parser_hint": "sqlmap",
+      "base_cmd": "sqlmap",
+      "jc_covered": false,
+      "jc_modules": [],
+      "input_mode": "url",
+      "types": [
+        "url",
+        "domain",
+        "domain_port",
+        "ip_port",
+        "ipv4"
+      ]
+    },
+    {
+      "id": "dalfox",
+      "name": "DALFOX URL",
+      "command": "dalfox url {target} --skip-bav --no-color --output {log_file}",
+      "parser_hint": "generic",
+      "base_cmd": "dalfox",
+      "jc_covered": false,
+      "jc_modules": [],
+      "input_mode": "url",
+      "types": [
+        "url",
+        "domain",
+        "domain_port",
+        "ip_port",
+        "ipv4"
+      ]
+    },
+    {
+      "id": "ffuf_sqli",
+      "name": "FFUF SQLI PROBE",
+      "command": "ffuf -u {target}/?id=FUZZ -w {wordlist_file} -o {log_file} -of json",
+      "parser_hint": "ffuf",
+      "base_cmd": "ffuf",
+      "jc_covered": false,
+      "jc_modules": [],
+      "input_mode": "url",
+      "types": [
+        "url",
+        "domain",
+        "domain_port",
+        "ip_port",
+        "ipv4"
+      ]
+    },
+    {
+      "id": "ffuf_xss",
+      "name": "FFUF XSS PROBE",
+      "command": "ffuf -u {target}/?q=FUZZ -w {wordlist_file} -o {log_file} -of json",
+      "parser_hint": "ffuf",
+      "base_cmd": "ffuf",
+      "jc_covered": false,
+      "jc_modules": [],
+      "input_mode": "url",
+      "types": [
+        "url",
+        "domain",
+        "domain_port",
+        "ip_port",
+        "ipv4"
+      ]
+    },
+    {
+      "id": "ffuf_lfi",
+      "name": "FFUF LFI PROBE",
+      "command": "ffuf -u {target}/?file=FUZZ -w {wordlist_file} -o {log_file} -of json",
+      "parser_hint": "ffuf",
+      "base_cmd": "ffuf",
+      "jc_covered": false,
+      "jc_modules": [],
+      "input_mode": "url",
+      "types": [
+        "url",
+        "domain",
+        "domain_port",
+        "ip_port",
+        "ipv4"
+      ]
+    },
+    {
+      "id": "hydra_ssh_combo",
+      "name": "HYDRA SSH (COMBO)",
+      "command": "hydra -C {wordlist_file} -s 22 {target} ssh -I -f -o {log_file}",
+      "parser_hint": "generic",
+      "base_cmd": "hydra",
+      "jc_covered": false,
+      "jc_modules": [],
+      "input_mode": "domain",
+      "types": [
+        "domain",
+        "ipv4"
+      ]
+    },
+    {
+      "id": "hydra_ftp_combo",
+      "name": "HYDRA FTP (COMBO)",
+      "command": "hydra -C {wordlist_file} -s 21 {target} ftp -I -f -o {log_file}",
+      "parser_hint": "generic",
+      "base_cmd": "hydra",
+      "jc_covered": false,
+      "jc_modules": [],
+      "input_mode": "domain",
+      "types": [
+        "domain",
+        "ipv4"
+      ]
+    },
+    {
+      "id": "hydra_http_get_combo",
+      "name": "HYDRA HTTP GET BASIC",
+      "command": "hydra -C {wordlist_file} -s 80 {target} http-get / -I -f -o {log_file}",
+      "parser_hint": "generic",
+      "base_cmd": "hydra",
+      "jc_covered": false,
+      "jc_modules": [],
+      "input_mode": "domain",
+      "types": [
+        "domain",
+        "ipv4"
+      ]
+    },
+    {
+      "id": "hydra_https_get_combo",
+      "name": "HYDRA HTTPS GET BASIC",
+      "command": "hydra -C {wordlist_file} -s 443 {target} https-get / -I -f -o {log_file}",
+      "parser_hint": "generic",
+      "base_cmd": "hydra",
+      "jc_covered": false,
+      "jc_modules": [],
+      "input_mode": "domain",
+      "types": [
+        "domain",
+        "ipv4"
+      ]
+    },
+    {
+      "id": "searchsploit",
+      "name": "SEARCHSPLOIT",
+      "command": "searchsploit {target} | tee {log_file}",
+      "parser_hint": "generic",
+      "base_cmd": "searchsploit",
+      "jc_covered": false,
+      "jc_modules": [],
+      "input_mode": "domain",
+      "types": [
+        "cve",
+        "text"
+      ]
+    }
+  ]
+}

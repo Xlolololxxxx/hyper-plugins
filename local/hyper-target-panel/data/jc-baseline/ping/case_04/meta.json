@@ -1,0 +1,8 @@
+{
+  "tool": "ping",
+  "jc_parser": "ping",
+  "source_fixture": "ParsingGlobal/jc/tests/fixtures/alpine-linux-3.13/ping-ip.out",
+  "case": 4,
+  "parsed_type": "dict",
+  "parsed_count": 13
+}

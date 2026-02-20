@@ -1,0 +1,38 @@
+{
+  "target": "luckyone.us",
+  "toolId": "nmap_vuln",
+  "toolName": "NMAP VULN SCRIPTS",
+  "parser": "nmap",
+  "parserEngine": "adapter",
+  "runId": "1771573366853_w3kmli",
+  "sourceLogFile": null,
+  "capturedAt": "2026-02-20T07:42:49.027Z",
+  "data": {
+    "parser": "nmap",
+    "engine": "jc-adapter",
+    "summary": {
+      "line_count": 1,
+      "record_count": 0,
+      "domain_count": 1,
+      "url_count": 0,
+      "vuln_count": 0,
+      "open_port_count": 0
+    },
+    "findings": {
+      "ports": [],
+      "vulns": [],
+      "paths": [],
+      "domains": [
+        "luckyone.us"
+      ]
+    },
+    "records": [],
+    "derived": {
+      "urls": [],
+      "domains": [
+        "luckyone.us"
+      ],
+      "cves": []
+    }
+  }
+}

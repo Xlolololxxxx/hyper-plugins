@@ -1,0 +1,442 @@
+[
+  {
+    "tool_id": "dalfox",
+    "tool_name": "DALFOX URL",
+    "command": "dalfox url https://luckyone.us --mining-dict --skip-bav --no-color --output /home/xlo/.hyper_plugins/local/hyper-target-panel/data/runtime/luckyone.us_dalfox.log",
+    "transport": "external_terminal",
+    "status": "started",
+    "error": null,
+    "log_file": "/home/xlo/.hyper_plugins/local/hyper-target-panel/data/runtime/luckyone.us_dalfox.log",
+    "created_at": "2026-02-20T08:00:51.872Z"
+  },
+  {
+    "tool_id": "dalfox",
+    "tool_name": "DALFOX URL",
+    "command": "dalfox url https://luckyone.us --mining-dict --skip-bav --no-color --output /home/xlo/.hyper_plugins/local/hyper-target-panel/data/runtime/luckyone.us_dalfox.log",
+    "transport": "pending",
+    "status": "running",
+    "error": null,
+    "log_file": "/home/xlo/.hyper_plugins/local/hyper-target-panel/data/runtime/luckyone.us_dalfox.log",
+    "created_at": "2026-02-20T08:00:51.827Z"
+  },
+  {
+    "tool_id": "feroxbuster",
+    "tool_name": "FEROXBUSTER",
+    "command": "feroxbuster -u https://luckyone.us -w  -k -o /home/xlo/.hyper_plugins/local/hyper-target-panel/data/runtime/luckyone.us_feroxbuster.log",
+    "transport": "external_terminal",
+    "status": "started",
+    "error": null,
+    "log_file": "/home/xlo/.hyper_plugins/local/hyper-target-panel/data/runtime/luckyone.us_feroxbuster.log",
+    "created_at": "2026-02-20T07:57:44.470Z"
+  },
+  {
+    "tool_id": "feroxbuster",
+    "tool_name": "FEROXBUSTER",
+    "command": "feroxbuster -u https://luckyone.us -w  -k -o /home/xlo/.hyper_plugins/local/hyper-target-panel/data/runtime/luckyone.us_feroxbuster.log",
+    "transport": "pending",
+    "status": "running",
+    "error": null,
+    "log_file": "/home/xlo/.hyper_plugins/local/hyper-target-panel/data/runtime/luckyone.us_feroxbuster.log",
+    "created_at": "2026-02-20T07:57:44.422Z"
+  },
+  {
+    "tool_id": "dirsearch",
+    "tool_name": "DIRSEARCH",
+    "command": "dirsearch -u https://luckyone.us -w  --format plain -o /home/xlo/.hyper_plugins/local/hyper-target-panel/data/runtime/luckyone.us_dirsearch.log",
+    "transport": "external_terminal",
+    "status": "started",
+    "error": null,
+    "log_file": "/home/xlo/.hyper_plugins/local/hyper-target-panel/data/runtime/luckyone.us_dirsearch.log",
+    "created_at": "2026-02-20T07:57:44.240Z"
+  },
+  {
+    "tool_id": "dirsearch",
+    "tool_name": "DIRSEARCH",
+    "command": "dirsearch -u https://luckyone.us -w  --format plain -o /home/xlo/.hyper_plugins/local/hyper-target-panel/data/runtime/luckyone.us_dirsearch.log",
+    "transport": "pending",
+    "status": "running",
+    "error": null,
+    "log_file": "/home/xlo/.hyper_plugins/local/hyper-target-panel/data/runtime/luckyone.us_dirsearch.log",
+    "created_at": "2026-02-20T07:57:44.191Z"
+  },
+  {
+    "tool_id": "gobuster_dir",
+    "tool_name": "GOBUSTER DIRECTORIES",
+    "command": "gobuster dir -u https://luckyone.us -w  -o /home/xlo/.hyper_plugins/local/hyper-target-panel/data/runtime/luckyone.us_gobuster_dir.txt",
+    "transport": "external_terminal",
+    "status": "started",
+    "error": null,
+    "log_file": "/home/xlo/.hyper_plugins/local/hyper-target-panel/data/runtime/luckyone.us_gobuster_dir.txt",
+    "created_at": "2026-02-20T07:57:44.009Z"
+  },
+  {
+    "tool_id": "gobuster_dir",
+    "tool_name": "GOBUSTER DIRECTORIES",
+    "command": "gobuster dir -u https://luckyone.us -w  -o /home/xlo/.hyper_plugins/local/hyper-target-panel/data/runtime/luckyone.us_gobuster_dir.txt",
+    "transport": "pending",
+    "status": "running",
+    "error": null,
+    "log_file": "/home/xlo/.hyper_plugins/local/hyper-target-panel/data/runtime/luckyone.us_gobuster_dir.txt",
+    "created_at": "2026-02-20T07:57:43.959Z"
+  },
+  {
+    "tool_id": "katana_standard",
+    "tool_name": "KATANA STANDARD",
+    "command": "katana -u https://luckyone.us -d 3 -jc -silent -o /home/xlo/.hyper_plugins/local/hyper-target-panel/data/runtime/luckyone.us_katana_standard.log",
+    "transport": "external_terminal",
+    "status": "started",
+    "error": null,
+    "log_file": "/home/xlo/.hyper_plugins/local/hyper-target-panel/data/runtime/luckyone.us_katana_standard.log",
+    "created_at": "2026-02-20T07:57:43.776Z"
+  },
+  {
+    "tool_id": "katana_standard",
+    "tool_name": "KATANA STANDARD",
+    "command": "katana -u https://luckyone.us -d 3 -jc -silent -o /home/xlo/.hyper_plugins/local/hyper-target-panel/data/runtime/luckyone.us_katana_standard.log",
+    "transport": "pending",
+    "status": "running",
+    "error": null,
+    "log_file": "/home/xlo/.hyper_plugins/local/hyper-target-panel/data/runtime/luckyone.us_katana_standard.log",
+    "created_at": "2026-02-20T07:57:43.730Z"
+  },
+  {
+    "tool_id": "whatweb",
+    "tool_name": "WHATWEB",
+    "command": "whatweb https://luckyone.us | tee /home/xlo/.hyper_plugins/local/hyper-target-panel/data/runtime/luckyone.us_whatweb.log",
+    "transport": "external_terminal",
+    "status": "started",
+    "error": null,
+    "log_file": "/home/xlo/.hyper_plugins/local/hyper-target-panel/data/runtime/luckyone.us_whatweb.log",
+    "created_at": "2026-02-20T07:57:43.549Z"
+  },
+  {
+    "tool_id": "whatweb",
+    "tool_name": "WHATWEB",
+    "command": "whatweb https://luckyone.us | tee /home/xlo/.hyper_plugins/local/hyper-target-panel/data/runtime/luckyone.us_whatweb.log",
+    "transport": "pending",
+    "status": "running",
+    "error": null,
+    "log_file": "/home/xlo/.hyper_plugins/local/hyper-target-panel/data/runtime/luckyone.us_whatweb.log",
+    "created_at": "2026-02-20T07:57:43.503Z"
+  },
+  {
+    "tool_id": "httpx_probe",
+    "tool_name": "HTTPX PROBE",
+    "command": "httpx -u https://luckyone.us -status-code -title -tech-detect -server -content-type -location -method -json -silent -o /home/xlo/.hyper_plugins/local/hyper-target-panel/data/runtime/luckyone.us_httpx_probe.log",
+    "transport": "external_terminal",
+    "status": "started",
+    "error": null,
+    "log_file": "/home/xlo/.hyper_plugins/local/hyper-target-panel/data/runtime/luckyone.us_httpx_probe.log",
+    "created_at": "2026-02-20T07:57:43.321Z"
+  },
+  {
+    "tool_id": "httpx_probe",
+    "tool_name": "HTTPX PROBE",
+    "command": "httpx -u https://luckyone.us -status-code -title -tech-detect -server -content-type -location -method -json -silent -o /home/xlo/.hyper_plugins/local/hyper-target-panel/data/runtime/luckyone.us_httpx_probe.log",
+    "transport": "pending",
+    "status": "running",
+    "error": null,
+    "log_file": "/home/xlo/.hyper_plugins/local/hyper-target-panel/data/runtime/luckyone.us_httpx_probe.log",
+    "created_at": "2026-02-20T07:57:43.271Z"
+  },
+  {
+    "tool_id": "curl_headers",
+    "tool_name": "CURL HEADERS",
+    "command": "curl -skI https://luckyone.us | tee /home/xlo/.hyper_plugins/local/hyper-target-panel/data/runtime/luckyone.us_curl_headers.log",
+    "transport": "external_terminal",
+    "status": "started",
+    "error": null,
+    "log_file": "/home/xlo/.hyper_plugins/local/hyper-target-panel/data/runtime/luckyone.us_curl_headers.log",
+    "created_at": "2026-02-20T07:57:43.008Z"
+  },
+  {
+    "tool_id": "curl_headers",
+    "tool_name": "CURL HEADERS",
+    "command": "curl -skI https://luckyone.us | tee /home/xlo/.hyper_plugins/local/hyper-target-panel/data/runtime/luckyone.us_curl_headers.log",
+    "transport": "pending",
+    "status": "running",
+    "error": null,
+    "log_file": "/home/xlo/.hyper_plugins/local/hyper-target-panel/data/runtime/luckyone.us_curl_headers.log",
+    "created_at": "2026-02-20T07:57:42.962Z"
+  },
+  {
+    "tool_id": "ffuf_dir",
+    "tool_name": "FFUF DIRECTORIES",
+    "command": "ffuf -u https://luckyone.us/FUZZ -w /home/xlo/Wordlists/web_discovery_mixed_dictionary.txt -o /home/xlo/.hyper_plugins/local/hyper-target-panel/data/runtime/luckyone.us_ffuf_dir.log -of json",
+    "transport": "external_terminal",
+    "status": "started",
+    "error": null,
+    "log_file": "/home/xlo/.hyper_plugins/local/hyper-target-panel/data/runtime/luckyone.us_ffuf_dir.log",
+    "created_at": "2026-02-20T07:50:05.152Z"
+  },
+  {
+    "tool_id": "ffuf_dir",
+    "tool_name": "FFUF DIRECTORIES",
+    "command": "ffuf -u https://luckyone.us/FUZZ -w /home/xlo/Wordlists/web_discovery_mixed_dictionary.txt -o /home/xlo/.hyper_plugins/local/hyper-target-panel/data/runtime/luckyone.us_ffuf_dir.log -of json",
+    "transport": "pending",
+    "status": "running",
+    "error": null,
+    "log_file": "/home/xlo/.hyper_plugins/local/hyper-target-panel/data/runtime/luckyone.us_ffuf_dir.log",
+    "created_at": "2026-02-20T07:50:05.108Z"
+  },
+  {
+    "tool_id": "ffuf_dir",
+    "tool_name": "FFUF DIRECTORIES",
+    "command": "ffuf -u https://luckyone.us/FUZZ -w /home/xlo/Wordlists/web_sensitive_files_exposure.txt -o /home/xlo/.hyper_plugins/local/hyper-target-panel/data/runtime/luckyone.us_ffuf_dir.log -of json",
+    "transport": "external_terminal",
+    "status": "started",
+    "error": null,
+    "log_file": "/home/xlo/.hyper_plugins/local/hyper-target-panel/data/runtime/luckyone.us_ffuf_dir.log",
+    "created_at": "2026-02-20T07:49:46.480Z"
+  },
+  {
+    "tool_id": "ffuf_dir",
+    "tool_name": "FFUF DIRECTORIES",
+    "command": "ffuf -u https://luckyone.us/FUZZ -w /home/xlo/Wordlists/web_sensitive_files_exposure.txt -o /home/xlo/.hyper_plugins/local/hyper-target-panel/data/runtime/luckyone.us_ffuf_dir.log -of json",
+    "transport": "pending",
+    "status": "running",
+    "error": null,
+    "log_file": "/home/xlo/.hyper_plugins/local/hyper-target-panel/data/runtime/luckyone.us_ffuf_dir.log",
+    "created_at": "2026-02-20T07:49:46.434Z"
+  },
+  {
+    "tool_id": "nmap_vuln",
+    "tool_name": "NMAP VULN SCRIPTS",
+    "command": "nmap -sV --script vuln luckyone.us -oN /home/xlo/.hyper_plugins/local/hyper-target-panel/data/runtime/luckyone.us_nmap_vuln.log",
+    "transport": "external_terminal",
+    "status": "started",
+    "error": null,
+    "log_file": "/home/xlo/.hyper_plugins/local/hyper-target-panel/data/runtime/luckyone.us_nmap_vuln.log",
+    "created_at": "2026-02-20T07:42:47.021Z"
+  },
+  {
+    "tool_id": "nmap_vuln",
+    "tool_name": "NMAP VULN SCRIPTS",
+    "command": "nmap -sV --script vuln luckyone.us -oN /home/xlo/.hyper_plugins/local/hyper-target-panel/data/runtime/luckyone.us_nmap_vuln.log",
+    "transport": "pending",
+    "status": "running",
+    "error": null,
+    "log_file": "/home/xlo/.hyper_plugins/local/hyper-target-panel/data/runtime/luckyone.us_nmap_vuln.log",
+    "created_at": "2026-02-20T07:42:46.857Z"
+  },
+  {
+    "tool_id": "dalfox",
+    "tool_name": "DALFOX URL",
+    "command": "dalfox url https://luckyone.us --skip-bav --no-color --output /home/xlo/.hyper_plugins/local/hyper-target-panel/data/runtime/luckyone.us_dalfox.log",
+    "transport": "external_terminal",
+    "status": "started",
+    "error": null,
+    "log_file": "/home/xlo/.hyper_plugins/local/hyper-target-panel/data/runtime/luckyone.us_dalfox.log",
+    "created_at": "2026-02-20T07:42:13.819Z"
+  },
+  {
+    "tool_id": "dalfox",
+    "tool_name": "DALFOX URL",
+    "command": "dalfox url https://luckyone.us --skip-bav --no-color --output /home/xlo/.hyper_plugins/local/hyper-target-panel/data/runtime/luckyone.us_dalfox.log",
+    "transport": "pending",
+    "status": "running",
+    "error": null,
+    "log_file": "/home/xlo/.hyper_plugins/local/hyper-target-panel/data/runtime/luckyone.us_dalfox.log",
+    "created_at": "2026-02-20T07:42:13.772Z"
+  },
+  {
+    "tool_id": "katana_standard",
+    "tool_name": "KATANA STANDARD",
+    "command": "katana -u https://luckyone.us -d 3 -jc -silent -o /home/xlo/.hyper_plugins/local/hyper-target-panel/data/runtime/luckyone.us_katana_standard.log",
+    "transport": "external_terminal",
+    "status": "started",
+    "error": null,
+    "log_file": "/home/xlo/.hyper_plugins/local/hyper-target-panel/data/runtime/luckyone.us_katana_standard.log",
+    "created_at": "2026-02-20T07:40:56.179Z"
+  },
+  {
+    "tool_id": "katana_standard",
+    "tool_name": "KATANA STANDARD",
+    "command": "katana -u https://luckyone.us -d 3 -jc -silent -o /home/xlo/.hyper_plugins/local/hyper-target-panel/data/runtime/luckyone.us_katana_standard.log",
+    "transport": "pending",
+    "status": "running",
+    "error": null,
+    "log_file": "/home/xlo/.hyper_plugins/local/hyper-target-panel/data/runtime/luckyone.us_katana_standard.log",
+    "created_at": "2026-02-20T07:40:56.133Z"
+  },
+  {
+    "tool_id": "nuclei_exposure",
+    "tool_name": "NUCLEI EXPOSURES",
+    "command": "nuclei -u https://luckyone.us -tags exposure,token,secret,misconfig -o /home/xlo/.hyper_plugins/local/hyper-target-panel/data/runtime/luckyone.us_nuclei_exposure.log",
+    "transport": "external_terminal",
+    "status": "started",
+    "error": null,
+    "log_file": "/home/xlo/.hyper_plugins/local/hyper-target-panel/data/runtime/luckyone.us_nuclei_exposure.log",
+    "created_at": "2026-02-20T07:40:25.582Z"
+  },
+  {
+    "tool_id": "nuclei_exposure",
+    "tool_name": "NUCLEI EXPOSURES",
+    "command": "nuclei -u https://luckyone.us -tags exposure,token,secret,misconfig -o /home/xlo/.hyper_plugins/local/hyper-target-panel/data/runtime/luckyone.us_nuclei_exposure.log",
+    "transport": "pending",
+    "status": "running",
+    "error": null,
+    "log_file": "/home/xlo/.hyper_plugins/local/hyper-target-panel/data/runtime/luckyone.us_nuclei_exposure.log",
+    "created_at": "2026-02-20T07:40:25.533Z"
+  },
+  {
+    "tool_id": "dirsearch",
+    "tool_name": "DIRSEARCH",
+    "command": "dirsearch -u https://luckyone.us -w /home/xlo/Wordlists/web_discovery_mixed_dictionary.txt --format plain -o /home/xlo/.hyper_plugins/local/hyper-target-panel/data/runtime/luckyone.us_dirsearch.log",
+    "transport": "external_terminal",
+    "status": "started",
+    "error": null,
+    "log_file": "/home/xlo/.hyper_plugins/local/hyper-target-panel/data/runtime/luckyone.us_dirsearch.log",
+    "created_at": "2026-02-20T07:39:51.870Z"
+  },
+  {
+    "tool_id": "dirsearch",
+    "tool_name": "DIRSEARCH",
+    "command": "dirsearch -u https://luckyone.us -w /home/xlo/Wordlists/web_discovery_mixed_dictionary.txt --format plain -o /home/xlo/.hyper_plugins/local/hyper-target-panel/data/runtime/luckyone.us_dirsearch.log",
+    "transport": "pending",
+    "status": "running",
+    "error": null,
+    "log_file": "/home/xlo/.hyper_plugins/local/hyper-target-panel/data/runtime/luckyone.us_dirsearch.log",
+    "created_at": "2026-02-20T07:39:51.819Z"
+  },
+  {
+    "tool_id": "nuclei_url",
+    "tool_name": "NUCLEI URL",
+    "command": "nuclei -u https://luckyone.us -severity low,medium,high,critical -o /home/xlo/.hyper_plugins/local/hyper-target-panel/data/runtime/luckyone.us_nuclei_url.log",
+    "transport": "external_terminal",
+    "status": "started",
+    "error": null,
+    "log_file": "/home/xlo/.hyper_plugins/local/hyper-target-panel/data/runtime/luckyone.us_nuclei_url.log",
+    "created_at": "2026-02-20T07:11:31.504Z"
+  },
+  {
+    "tool_id": "nuclei_url",
+    "tool_name": "NUCLEI URL",
+    "command": "nuclei -u https://luckyone.us -severity low,medium,high,critical -o /home/xlo/.hyper_plugins/local/hyper-target-panel/data/runtime/luckyone.us_nuclei_url.log",
+    "transport": "pending",
+    "status": "running",
+    "error": null,
+    "log_file": "/home/xlo/.hyper_plugins/local/hyper-target-panel/data/runtime/luckyone.us_nuclei_url.log",
+    "created_at": "2026-02-20T07:11:31.458Z"
+  },
+  {
+    "tool_id": "nikto",
+    "tool_name": "NIKTO",
+    "command": "nikto -h https://luckyone.us -output /home/xlo/.hyper_plugins/local/hyper-target-panel/data/runtime/luckyone.us_nikto.log",
+    "transport": "external_terminal",
+    "status": "started",
+    "error": null,
+    "log_file": "/home/xlo/.hyper_plugins/local/hyper-target-panel/data/runtime/luckyone.us_nikto.log",
+    "created_at": "2026-02-20T07:11:22.384Z"
+  },
+  {
+    "tool_id": "nikto",
+    "tool_name": "NIKTO",
+    "command": "nikto -h https://luckyone.us -output /home/xlo/.hyper_plugins/local/hyper-target-panel/data/runtime/luckyone.us_nikto.log",
+    "transport": "pending",
+    "status": "running",
+    "error": null,
+    "log_file": "/home/xlo/.hyper_plugins/local/hyper-target-panel/data/runtime/luckyone.us_nikto.log",
+    "created_at": "2026-02-20T07:11:22.335Z"
+  },
+  {
+    "tool_id": "nuclei",
+    "tool_name": "Nuclei",
+    "command": "nuclei -u http://luckyone.us -o /home/xlo/.hyper_plugins/local/hyper-target-panel/data/runtime/luckyone.us_nuclei.log",
+    "transport": "external_terminal",
+    "status": "started",
+    "error": null,
+    "log_file": "/home/xlo/.hyper_plugins/local/hyper-target-panel/data/runtime/luckyone.us_nuclei.log",
+    "created_at": "2026-02-20T03:47:54.484Z"
+  },
+  {
+    "tool_id": "nuclei",
+    "tool_name": "Nuclei",
+    "command": "nuclei -u http://luckyone.us -o /home/xlo/.hyper_plugins/local/hyper-target-panel/data/runtime/luckyone.us_nuclei.log",
+    "transport": "pending",
+    "status": "running",
+    "error": null,
+    "log_file": "/home/xlo/.hyper_plugins/local/hyper-target-panel/data/runtime/luckyone.us_nuclei.log",
+    "created_at": "2026-02-20T03:47:54.440Z"
+  },
+  {
+    "tool_id": "whatweb",
+    "tool_name": "WhatWeb",
+    "command": "whatweb -a 3 luckyone.us | tee /home/xlo/.hyper_plugins/local/hyper-target-panel/data/runtime/luckyone.us_whatweb.log",
+    "transport": "external_terminal",
+    "status": "started",
+    "error": null,
+    "log_file": "/home/xlo/.hyper_plugins/local/hyper-target-panel/data/runtime/luckyone.us_whatweb.log",
+    "created_at": "2026-02-20T03:47:17.332Z"
+  },
+  {
+    "tool_id": "whatweb",
+    "tool_name": "WhatWeb",
+    "command": "whatweb -a 3 luckyone.us | tee /home/xlo/.hyper_plugins/local/hyper-target-panel/data/runtime/luckyone.us_whatweb.log",
+    "transport": "pending",
+    "status": "running",
+    "error": null,
+    "log_file": "/home/xlo/.hyper_plugins/local/hyper-target-panel/data/runtime/luckyone.us_whatweb.log",
+    "created_at": "2026-02-20T03:47:17.288Z"
+  },
+  {
+    "tool_id": "gobuster",
+    "tool_name": "Gobuster Dir",
+    "command": "gobuster dir -u http://luckyone.us -w /usr/share/wordlists/dirb/common.txt",
+    "transport": "external_terminal",
+    "status": "started",
+    "error": null,
+    "log_file": "/home/xlo/.hyper_plugins/local/hyper-target-panel/data/runtime/luckyone.us_gobuster.txt",
+    "created_at": "2026-02-20T03:46:41.968Z"
+  },
+  {
+    "tool_id": "gobuster",
+    "tool_name": "Gobuster Dir",
+    "command": "gobuster dir -u http://luckyone.us -w /usr/share/wordlists/dirb/common.txt",
+    "transport": "pending",
+    "status": "running",
+    "error": null,
+    "log_file": "/home/xlo/.hyper_plugins/local/hyper-target-panel/data/runtime/luckyone.us_gobuster.txt",
+    "created_at": "2026-02-20T03:46:41.924Z"
+  },
+  {
+    "tool_id": "ffuf",
+    "tool_name": "FFUF",
+    "command": "ffuf -u http://FUZZ.http://luckyone.us -w /usr/share/wordlists/SecLists/Discovery/DNS/subdomains-top1million-5000.txt -o /home/xlo/.hyper_plugins/local/hyper-target-panel/data/runtime/luckyone.us_ffuf.log",
+    "transport": "external_terminal",
+    "status": "started",
+    "error": null,
+    "log_file": "/home/xlo/.hyper_plugins/local/hyper-target-panel/data/runtime/luckyone.us_ffuf.log",
+    "created_at": "2026-02-20T03:45:59.889Z"
+  },
+  {
+    "tool_id": "ffuf",
+    "tool_name": "FFUF",
+    "command": "ffuf -u http://FUZZ.http://luckyone.us -w /usr/share/wordlists/SecLists/Discovery/DNS/subdomains-top1million-5000.txt -o /home/xlo/.hyper_plugins/local/hyper-target-panel/data/runtime/luckyone.us_ffuf.log",
+    "transport": "pending",
+    "status": "running",
+    "error": null,
+    "log_file": "/home/xlo/.hyper_plugins/local/hyper-target-panel/data/runtime/luckyone.us_ffuf.log",
+    "created_at": "2026-02-20T03:45:59.844Z"
+  },
+  {
+    "tool_id": "nmap",
+    "tool_name": "Nmap Basic",
+    "command": "nmap -p- -T4 luckyone.us -oN /home/xlo/.hyper_plugins/local/hyper-target-panel/data/runtime/luckyone.us_nmap.log",
+    "transport": "external_terminal",
+    "status": "started",
+    "error": null,
+    "log_file": "/home/xlo/.hyper_plugins/local/hyper-target-panel/data/runtime/luckyone.us_nmap.log",
+    "created_at": "2026-02-20T03:45:19.794Z"
+  },
+  {
+    "tool_id": "nmap",
+    "tool_name": "Nmap Basic",
+    "command": "nmap -p- -T4 luckyone.us -oN /home/xlo/.hyper_plugins/local/hyper-target-panel/data/runtime/luckyone.us_nmap.log",
+    "transport": "pending",
+    "status": "running",
+    "error": null,
+    "log_file": "/home/xlo/.hyper_plugins/local/hyper-target-panel/data/runtime/luckyone.us_nmap.log",
+    "created_at": "2026-02-20T03:45:19.746Z"
+  }
+]

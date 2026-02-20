@@ -1,0 +1,70 @@
+{
+  "target": "luckyone.us",
+  "toolId": "nuclei_exposure",
+  "toolName": "NUCLEI EXPOSURES",
+  "parser": "nuclei",
+  "parserEngine": "adapter",
+  "runId": "1771573225533_xv50u8",
+  "sourceLogFile": null,
+  "capturedAt": "2026-02-20T07:41:29.336Z",
+  "data": {
+    "parser": "nuclei",
+    "engine": "jc-adapter",
+    "summary": {
+      "line_count": 4,
+      "record_count": 4,
+      "domain_count": 1,
+      "url_count": 0,
+      "vuln_count": 0,
+      "nuclei_findings": 4
+    },
+    "findings": {
+      "ports": [],
+      "vulns": [
+        "cookies-without-secure",
+        "cookies-without-httponly",
+        "weak-cipher-suites:tls-1.0",
+        "weak-cipher-suites:tls-1.1"
+      ],
+      "paths": [],
+      "domains": []
+    },
+    "records": [
+      {
+        "type": "finding",
+        "id": "cookies-without-secure",
+        "protocol": "javascript",
+        "severity": "info",
+        "target": "luckyone.us [\"NEXT_LOCALE\"]"
+      },
+      {
+        "type": "finding",
+        "id": "cookies-without-httponly",
+        "protocol": "javascript",
+        "severity": "info",
+        "target": "luckyone.us [\"NEXT_LOCALE\"]"
+      },
+      {
+        "type": "finding",
+        "id": "weak-cipher-suites:tls-1.0",
+        "protocol": "ssl",
+        "severity": "low",
+        "target": "luckyone.us:443 [\"[tls10 TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA]\"]"
+      },
+      {
+        "type": "finding",
+        "id": "weak-cipher-suites:tls-1.1",
+        "protocol": "ssl",
+        "severity": "low",
+        "target": "luckyone.us:443 [\"[tls11 TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA]\"]"
+      }
+    ],
+    "derived": {
+      "urls": [],
+      "domains": [
+        "luckyone.us"
+      ],
+      "cves": []
+    }
+  }
+}

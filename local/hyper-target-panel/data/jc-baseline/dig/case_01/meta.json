@@ -1,0 +1,8 @@
+{
+  "tool": "dig",
+  "jc_parser": "dig",
+  "source_fixture": "ParsingGlobal/jc/tests/fixtures/ubuntu-18.04/dig.out",
+  "case": 1,
+  "parsed_type": "list",
+  "parsed_count": 2
+}

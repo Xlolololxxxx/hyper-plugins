@@ -1,0 +1,170 @@
+{
+  "dig": [
+    {
+      "tool": "dig",
+      "jc_parser": "dig",
+      "source_fixture": "ParsingGlobal/jc/tests/fixtures/ubuntu-18.04/dig.out",
+      "case": 1,
+      "parsed_type": "list",
+      "parsed_count": 2
+    },
+    {
+      "tool": "dig",
+      "jc_parser": "dig",
+      "source_fixture": "ParsingGlobal/jc/tests/fixtures/ubuntu-18.04/dig-x.out",
+      "case": 2,
+      "parsed_type": "list",
+      "parsed_count": 1
+    },
+    {
+      "tool": "dig",
+      "jc_parser": "dig",
+      "source_fixture": "ParsingGlobal/jc/tests/fixtures/ubuntu-18.04/dig-aaaa.out",
+      "case": 3,
+      "parsed_type": "list",
+      "parsed_count": 1
+    },
+    {
+      "tool": "dig",
+      "jc_parser": "dig",
+      "source_fixture": "ParsingGlobal/jc/tests/fixtures/ubuntu-18.04/dig-axfr.out",
+      "case": 4,
+      "parsed_type": "list",
+      "parsed_count": 1
+    },
+    {
+      "tool": "dig",
+      "jc_parser": "dig",
+      "source_fixture": "ParsingGlobal/jc/tests/fixtures/osx-10.14.6/dig-noall-answer.out",
+      "case": 5,
+      "parsed_type": "list",
+      "parsed_count": 1
+    }
+  ],
+  "ping": [
+    {
+      "tool": "ping",
+      "jc_parser": "ping",
+      "source_fixture": "ParsingGlobal/jc/tests/fixtures/ubuntu-18.04/ping-ip-O.out",
+      "case": 1,
+      "parsed_type": "dict",
+      "parsed_count": 14
+    },
+    {
+      "tool": "ping",
+      "jc_parser": "ping",
+      "source_fixture": "ParsingGlobal/jc/tests/fixtures/ubuntu-18.04/ping-hostname-O.out",
+      "case": 2,
+      "parsed_type": "dict",
+      "parsed_count": 14
+    },
+    {
+      "tool": "ping",
+      "jc_parser": "ping",
+      "source_fixture": "ParsingGlobal/jc/tests/fixtures/centos-7.7/ping-ip-O-D.out",
+      "case": 3,
+      "parsed_type": "dict",
+      "parsed_count": 14
+    },
+    {
+      "tool": "ping",
+      "jc_parser": "ping",
+      "source_fixture": "ParsingGlobal/jc/tests/fixtures/alpine-linux-3.13/ping-ip.out",
+      "case": 4,
+      "parsed_type": "dict",
+      "parsed_count": 13
+    },
+    {
+      "tool": "ping",
+      "jc_parser": "ping",
+      "source_fixture": "ParsingGlobal/jc/tests/fixtures/ubuntu-22.04/ping-dest-unreachable.out",
+      "case": 5,
+      "parsed_type": "dict",
+      "parsed_count": 11
+    }
+  ],
+  "traceroute": [
+    {
+      "tool": "traceroute",
+      "jc_parser": "traceroute",
+      "source_fixture": "ParsingGlobal/jc/tests/fixtures/centos-7.7/traceroute.out",
+      "case": 1,
+      "parsed_type": "dict",
+      "parsed_count": 5
+    },
+    {
+      "tool": "traceroute",
+      "jc_parser": "traceroute",
+      "source_fixture": "ParsingGlobal/jc/tests/fixtures/freebsd12/traceroute.out",
+      "case": 2,
+      "parsed_type": "dict",
+      "parsed_count": 5
+    },
+    {
+      "tool": "traceroute",
+      "jc_parser": "traceroute",
+      "source_fixture": "ParsingGlobal/jc/tests/fixtures/osx-10.14.6/traceroute.out",
+      "case": 3,
+      "parsed_type": "dict",
+      "parsed_count": 5
+    },
+    {
+      "tool": "traceroute",
+      "jc_parser": "traceroute",
+      "source_fixture": "ParsingGlobal/jc/tests/fixtures/generic/traceroute-long-ipv6.out",
+      "case": 4,
+      "parsed_type": "dict",
+      "parsed_count": 5
+    },
+    {
+      "tool": "traceroute",
+      "jc_parser": "traceroute",
+      "source_fixture": "ParsingGlobal/jc/tests/fixtures/generic/traceroute-n-q1-ipv4.out",
+      "case": 5,
+      "parsed_type": "dict",
+      "parsed_count": 5
+    }
+  ],
+  "curl_head": [
+    {
+      "tool": "curl_head",
+      "jc_parser": "curl_head",
+      "source_fixture": "ParsingGlobal/jc/tests/fixtures/generic/curl_head--ILvs-google-com.out",
+      "case": 1,
+      "parsed_type": "list",
+      "parsed_count": 4
+    },
+    {
+      "tool": "curl_head",
+      "jc_parser": "curl_head",
+      "source_fixture": "ParsingGlobal/jc/tests/fixtures/generic/curl_head--ILvs-yahoo-com.out",
+      "case": 2,
+      "parsed_type": "list",
+      "parsed_count": 6
+    },
+    {
+      "tool": "curl_head",
+      "jc_parser": "curl_head",
+      "source_fixture": "ParsingGlobal/jc/tests/fixtures/generic/curl_head--ILvs-cnn-com.out",
+      "case": 3,
+      "parsed_type": "list",
+      "parsed_count": 6
+    },
+    {
+      "tool": "curl_head",
+      "jc_parser": "curl_head",
+      "source_fixture": "ParsingGlobal/jc/tests/fixtures/generic/curl_head--ILvs-facebook-com.out",
+      "case": 4,
+      "parsed_type": "list",
+      "parsed_count": 6
+    },
+    {
+      "tool": "curl_head",
+      "jc_parser": "curl_head",
+      "source_fixture": "ParsingGlobal/jc/tests/fixtures/generic/curl_head--ILvs-microsoft-com.out",
+      "case": 5,
+      "parsed_type": "list",
+      "parsed_count": 4
+    }
+  ]
+}

@@ -1,490 +1,829 @@
 [
   {
-    "id": "nmap",
-    "name": "Nmap Basic",
+    "id": "nmap_service",
+    "name": "NMAP SERVICE SCAN",
     "command": "nmap -sV -sC -T4 {target} -oN {log_file}",
     "category": "Recon",
     "parser": "nmap",
+    "input_mode": "domain",
+    "types": [
+      "domain",
+      "ipv4",
+      "cidr"
+    ]
+  },
+  {
+    "id": "nmap_full_tcp",
+    "name": "NMAP FULL TCP",
+    "command": "nmap -p- -T4 --min-rate 1000 {target} -oN {log_file}",
+    "category": "Recon",
+    "parser": "nmap",
+    "input_mode": "domain",
+    "types": [
+      "domain",
+      "ipv4"
+    ]
+  },
+  {
+    "id": "nmap_vuln",
+    "name": "NMAP VULN SCRIPTS",
+    "command": "nmap -sV --script vuln {target} -oN {log_file}",
+    "category": "Vuln",
+    "parser": "nmap",
+    "input_mode": "domain",
+    "types": [
+      "domain",
+      "ipv4"
+    ]
+  },
+  {
+    "id": "nmap_udp_top",
+    "name": "NMAP UDP TOP 100",
+    "command": "nmap -sU --top-ports 100 {target} -oN {log_file}",
+    "category": "Recon",
+    "parser": "nmap",
+    "input_mode": "domain",
+    "types": [
+      "domain",
+      "ipv4"
+    ]
+  },
+  {
+    "id": "whois",
+    "name": "WHOIS",
+    "command": "whois {target} | tee {log_file}",
+    "category": "Recon",
+    "parser": "generic",
+    "input_mode": "domain",
+    "types": [
+      "domain",
+      "email",
+      "ipv4"
+    ]
+  },
+  {
+    "id": "dig_any",
+    "name": "DIG ANY",
+    "command": "dig {target} ANY | tee {log_file}",
+    "category": "DNS",
+    "parser": "generic",
+    "input_mode": "domain",
+    "types": [
+      "domain"
+    ]
+  },
+  {
+    "id": "subfinder",
+    "name": "SUBFINDER",
+    "command": "subfinder -d {target} -o {log_file}",
+    "category": "Recon",
+    "parser": "generic",
+    "input_mode": "domain",
+    "types": [
+      "domain"
+    ]
+  },
+  {
+    "id": "amass_passive",
+    "name": "AMASS PASSIVE",
+    "command": "amass enum -passive -d {target} -o {log_file}",
+    "category": "Recon",
+    "parser": "generic",
+    "input_mode": "domain",
+    "types": [
+      "domain"
+    ]
+  },
+  {
+    "id": "gau_passive",
+    "name": "GAU PASSIVE URLS",
+    "command": "gau --subs {target} | tee {log_file}",
+    "category": "Spidering",
+    "parser": "generic",
+    "input_mode": "domain",
+    "types": [
+      "domain"
+    ]
+  },
+  {
+    "id": "waybackurls",
+    "name": "WAYBACKURLS",
+    "command": "echo {target} | waybackurls | tee {log_file}",
+    "category": "Spidering",
+    "parser": "generic",
+    "input_mode": "domain",
+    "types": [
+      "domain"
+    ]
+  },
+  {
+    "id": "httpx_from_subfinder",
+    "name": "HTTPX FROM SUBFINDER",
+    "command": "httpx -l {log:subfinder} -o {log_file} -title -tech-detect -status-code -silent",
+    "category": "Recon",
+    "parser": "generic",
+    "input_mode": "domain",
+    "types": [
+      "domain"
+    ]
+  },
+  {
+    "id": "nuclei_from_httpx",
+    "name": "NUCLEI FROM HTTPX",
+    "command": "nuclei -l {log:httpx_from_subfinder} -severity low,medium,high,critical -silent -ni -jsonl -o {log_file}",
+    "category": "Vuln",
+    "parser": "nuclei",
+    "input_mode": "domain",
+    "types": [
+      "domain"
+    ],
     "presets": [
       {
-        "name": "Quick",
-        "command": "nmap -T4 -F {target} -oN {log_file}",
-        "description": "Top 100 ports"
+        "name": "HTTPX FINDINGS",
+        "description": "Run default severity scan on discovered live hosts",
+        "command": "nuclei -l {log:httpx_from_subfinder} -severity low,medium,high,critical -silent -ni -jsonl -o {log_file}"
       },
       {
-        "name": "Full",
-        "command": "nmap -p- -T4 {target} -oN {log_file}",
-        "description": "All 65535 ports"
-      },
-      {
-        "name": "Vuln",
-        "command": "nmap -sV --script vuln {target} -oN {log_file}",
-        "description": "Check for vulnerabilities"
-      },
-      {
-        "name": "UDP",
-        "command": "sudo nmap -sU --top-ports 100 {target} -oN {log_file}",
-        "description": "Top 100 UDP ports"
+        "name": "WEB CVE FOCUS",
+        "description": "Focus templates on CVE and misconfiguration signals",
+        "command": "nuclei -l {log:httpx_from_subfinder} -tags cve,misconfig,exposure -silent -ni -jsonl -o {log_file}"
       }
     ]
   },
   {
-    "id": "gobuster_dir",
-    "name": "Gobuster Dir",
-    "command": "gobuster dir -u http://{target} -w /usr/share/wordlists/dirb/common.txt -o {log_file}",
+    "id": "curl_headers",
+    "name": "CURL HEADERS",
+    "command": "curl -skI {target} | tee {log_file}",
     "category": "Web",
-    "parser": "gobuster",
+    "parser": "generic",
+    "input_mode": "url",
+    "types": [
+      "url",
+      "domain",
+      "domain_port",
+      "ip_port",
+      "ipv4"
+    ]
+  },
+  {
+    "id": "curl_dump_full",
+    "name": "CURL RESPONSE DUMP",
+    "command": "curl -skL -D - {target} -o - | tee {log_file}",
+    "category": "Web",
+    "parser": "generic",
+    "input_mode": "url",
+    "types": [
+      "url",
+      "domain",
+      "domain_port",
+      "ip_port",
+      "ipv4"
+    ]
+  },
+  {
+    "id": "httpx_probe",
+    "name": "HTTPX PROBE",
+    "command": "httpx -u {target} -status-code -title -tech-detect -server -content-type -location -method -json -silent -o {log_file}",
+    "category": "Web",
+    "parser": "generic",
+    "input_mode": "url",
+    "types": [
+      "url",
+      "domain",
+      "domain_port",
+      "ip_port",
+      "ipv4"
+    ],
     "presets": [
       {
-        "name": "Common Wordlist",
-        "command": "gobuster dir -u http://{target} -w /usr/share/wordlists/dirb/common.txt -o {log_file}",
-        "description": "Quick directory scan"
+        "name": "QUICK PROBE",
+        "description": "Fast HTTP fingerprinting for a single host",
+        "command": "httpx -u {target} -status-code -title -tech-detect -server -content-type -json -silent -o {log_file}"
       },
       {
-        "name": "Medium Wordlist",
-        "command": "gobuster dir -u http://{target} -w /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt -o {log_file}",
-        "description": "More thorough scan"
+        "name": "DEEP PROBE",
+        "description": "Expanded probe with redirect chain and response metadata",
+        "command": "httpx -u {target} -status-code -title -tech-detect -server -content-type -location -method -websocket -hash md5 -json -silent -o {log_file}"
+      }
+    ]
+  },
+  {
+    "id": "whatweb",
+    "name": "WHATWEB",
+    "command": "whatweb {target} | tee {log_file}",
+    "category": "Web",
+    "parser": "generic",
+    "input_mode": "url",
+    "types": [
+      "url",
+      "domain",
+      "domain_port",
+      "ip_port",
+      "ipv4"
+    ]
+  },
+  {
+    "id": "katana_standard",
+    "name": "KATANA STANDARD",
+    "command": "katana -u {target} -d 3 -jc -silent -o {log_file}",
+    "category": "Spidering",
+    "parser": "katana",
+    "input_mode": "url",
+    "types": [
+      "url",
+      "domain",
+      "domain_port",
+      "ip_port",
+      "ipv4"
+    ],
+    "presets": [
+      {
+        "name": "STANDARD CRAWL",
+        "description": "Depth 3 crawl optimized for web app route discovery",
+        "command": "katana -u {target} -d 3 -jc -silent -o {log_file}"
       },
       {
-        "name": "Extensions",
-        "command": "gobuster dir -u http://{target} -w /usr/share/wordlists/dirb/common.txt -x php,html,txt -o {log_file}",
-        "description": "Scan with extensions"
+        "name": "JS DISCOVERY",
+        "description": "Include JavaScript crawl and known files for route expansion",
+        "command": "katana -u {target} -d 4 -jc -js-crawl -known-files all -silent -o {log_file}"
+      }
+    ]
+  },
+  {
+    "id": "katana_deep",
+    "name": "KATANA DEEP + JS",
+    "command": "katana -u {target} -d 5 -jc -js-crawl -known-files all -silent -o {log_file}",
+    "category": "Spidering",
+    "parser": "katana",
+    "input_mode": "url",
+    "types": [
+      "url",
+      "domain",
+      "domain_port",
+      "ip_port",
+      "ipv4"
+    ],
+    "presets": [
+      {
+        "name": "DEEP CRAWL",
+        "description": "Depth 5 crawl with JS and known files enabled",
+        "command": "katana -u {target} -d 5 -jc -js-crawl -known-files all -silent -o {log_file}"
+      },
+      {
+        "name": "DEEP FORM CRAWL",
+        "description": "Deep crawl with form extraction for API endpoint hints",
+        "command": "katana -u {target} -d 5 -jc -js-crawl -known-files all -form-extraction -silent -o {log_file}"
       }
     ]
   },
   {
     "id": "nikto",
-    "name": "Nikto",
-    "command": "nikto -h http://{target} -o {log_file}",
+    "name": "NIKTO",
+    "command": "nikto -h {target} -Format txt -output {log_file}",
     "category": "Web",
     "parser": "nikto",
+    "input_mode": "url",
+    "types": [
+      "url",
+      "domain",
+      "domain_port",
+      "ip_port",
+      "ipv4"
+    ],
     "presets": [
       {
-        "name": "Standard",
-        "command": "nikto -h http://{target} -o {log_file}",
-        "description": "Default scan"
+        "name": "QUICK WEB CHECK",
+        "description": "Baseline web misconfiguration and known path checks",
+        "command": "nikto -h {target} -Format txt -Tuning b -output {log_file}"
       },
       {
-        "name": "Tuning 1 (Interest)",
-        "command": "nikto -h http://{target} -Tuning 1 -o {log_file}",
-        "description": "Scan for interesting files"
-      },
-      {
-        "name": "Tuning x (Reverse)",
-        "command": "nikto -h http://{target} -Tuning x -o {log_file}",
-        "description": "Reverse proxy check"
+        "name": "FULL WEB ENUM",
+        "description": "Broader Nikto checks for outdated components and exposures",
+        "command": "nikto -h {target} -Format txt -ask no -nointeractive -output {log_file}"
       }
-    ],
-    "types": [
-      "url",
-      "domain"
     ]
   },
   {
-    "id": "nmap-quick",
-    "name": "Nmap Quick Scan",
-    "command": "nmap -sV -sC {target}",
-    "category": "Recon",
+    "id": "gobuster_dir",
+    "name": "GOBUSTER DIRECTORIES",
+    "command": "gobuster dir -u {target} -w {wordlist_file} -o {log_file}",
+    "category": "Web",
+    "parser": "gobuster",
+    "input_mode": "url",
     "types": [
-      "ip",
+      "url",
       "domain",
-      "ip_port",
       "domain_port",
-      "ipv4",
-      "cidr"
-    ]
-  },
-  {
-    "id": "nmap-all",
-    "name": "Nmap All Ports",
-    "command": "nmap -p- --min-rate 1000 {target}",
-    "category": "Recon",
-    "types": [
-      "ip",
-      "domain",
-      "ipv4"
-    ]
-  },
-  {
-    "id": "nmap-udp",
-    "name": "Nmap UDP Top 50",
-    "command": "sudo nmap -sU --top-ports 50 {target}",
-    "category": "Recon",
-    "types": [
-      "ip",
-      "ipv4"
-    ]
-  },
-  {
-    "id": "curl-headers",
-    "name": "cURL Headers",
-    "command": "curl -sI {target}",
-    "category": "Web",
-    "types": [
-      "url",
-      "domain",
       "ip_port",
-      "domain_port"
+      "ipv4"
+    ],
+    "wordlist": {
+      "profile": "dir_enum",
+      "label": "DIRECTORY WORDLIST"
+    },
+    "presets": [
+      {
+        "name": "COMMON ROUTES",
+        "description": "Default directory brute force with selected wordlist",
+        "command": "gobuster dir -u {target} -w {wordlist_file} -k -o {log_file}"
+      },
+      {
+        "name": "ROUTES + FILE EXT",
+        "description": "Directory plus common file extension discovery",
+        "command": "gobuster dir -u {target} -w {wordlist_file} -k -x php,html,js,json,txt -o {log_file}"
+      }
     ]
   },
   {
-    "id": "curl-full",
-    "name": "cURL Full Response",
-    "command": "curl -sk {target}",
+    "id": "dirsearch",
+    "name": "DIRSEARCH",
+    "command": "dirsearch -u {target} -w {wordlist_file} --format plain -o {log_file}",
     "category": "Web",
+    "parser": "dirsearch",
+    "input_mode": "url",
     "types": [
       "url",
-      "domain"
+      "domain",
+      "domain_port",
+      "ip_port",
+      "ipv4"
+    ],
+    "wordlist": {
+      "profile": "dir_enum",
+      "label": "DIRECTORY WORDLIST"
+    },
+    "presets": [
+      {
+        "name": "STANDARD DIRSEARCH",
+        "description": "Directory and file discovery with plain output",
+        "command": "dirsearch -u {target} -w {wordlist_file} --format plain -o {log_file}"
+      },
+      {
+        "name": "RECURSIVE API PATHS",
+        "description": "Recursive scan tuned for API paths and common extension hits",
+        "command": "dirsearch -u {target} -w {wordlist_file} --recursive --include-status 200,201,204,301,302,307,401,403 --format plain -o {log_file}"
+      }
     ]
   },
   {
-    "id": "whatweb",
-    "name": "WhatWeb",
-    "command": "whatweb {target} | tee {log_file}",
+    "id": "feroxbuster",
+    "name": "FEROXBUSTER",
+    "command": "feroxbuster -u {target} -w {wordlist_file} -k -o {log_file}",
     "category": "Web",
     "parser": "generic",
-    "presets": [
-      {
-        "name": "Standard",
-        "command": "whatweb {target} | tee {log_file}",
-        "description": "Standard scan"
-      },
-      {
-        "name": "Aggressive",
-        "command": "whatweb -a 3 {target} | tee {log_file}",
-        "description": "Aggressive plugin scan"
-      }
-    ],
+    "input_mode": "url",
     "types": [
       "url",
-      "domain"
+      "domain",
+      "domain_port",
+      "ip_port",
+      "ipv4"
+    ],
+    "wordlist": {
+      "profile": "dir_enum",
+      "label": "DIRECTORY WORDLIST"
+    },
+    "presets": [
+      {
+        "name": "FEROX QUICK",
+        "description": "Fast recursive content discovery",
+        "command": "feroxbuster -u {target} -w {wordlist_file} -k -o {log_file}"
+      },
+      {
+        "name": "FEROX WEB + API",
+        "description": "Recursive scan with API-relevant extensions and filtered noise",
+        "command": "feroxbuster -u {target} -w {wordlist_file} -x php,html,js,json,txt -k -C 404 -o {log_file}"
+      }
+    ]
+  },
+  {
+    "id": "ffuf_dir",
+    "name": "FFUF DIRECTORIES",
+    "command": "ffuf -u {target}/FUZZ -w {wordlist_file} -o {log_file} -of json",
+    "category": "Web",
+    "parser": "ffuf",
+    "input_mode": "url",
+    "types": [
+      "url",
+      "domain",
+      "domain_port",
+      "ip_port",
+      "ipv4"
+    ],
+    "wordlist": {
+      "profile": "dir_enum",
+      "label": "DIRECTORY WORDLIST"
+    },
+    "presets": [
+      {
+        "name": "FFUF QUICK DIR",
+        "description": "Quick directory fuzz with status output in JSON",
+        "command": "ffuf -u {target}/FUZZ -w {wordlist_file} -mc 200,204,301,302,307,401,403 -o {log_file} -of json"
+      },
+      {
+        "name": "FFUF DIR + EXT",
+        "description": "Directory and file extension fuzzing for web apps",
+        "command": "ffuf -u {target}/FUZZ -w {wordlist_file} -e .php,.html,.js,.json,.txt -mc 200,204,301,302,307,401,403 -o {log_file} -of json"
+      }
+    ]
+  },
+  {
+    "id": "arjun_get",
+    "name": "ARJUN GET PARAMS",
+    "command": "arjun -u {target} -m GET -oT {log_file}",
+    "category": "API",
+    "parser": "generic",
+    "input_mode": "url",
+    "types": [
+      "url",
+      "domain",
+      "domain_port",
+      "ip_port",
+      "ipv4"
+    ],
+    "presets": [
+      {
+        "name": "GET PARAM DISCOVERY",
+        "description": "Find hidden GET parameters on target endpoint",
+        "command": "arjun -u {target} -m GET -oT {log_file}"
+      },
+      {
+        "name": "GET PARAM DEEP",
+        "description": "Use stable mode with response checks for noisy apps",
+        "command": "arjun -u {target} -m GET --stable --rate-limit 6 -oT {log_file}"
+      }
+    ]
+  },
+  {
+    "id": "arjun_post",
+    "name": "ARJUN POST PARAMS",
+    "command": "arjun -u {target} -m POST -oT {log_file}",
+    "category": "API",
+    "parser": "generic",
+    "input_mode": "url",
+    "types": [
+      "url",
+      "domain",
+      "domain_port",
+      "ip_port",
+      "ipv4"
+    ],
+    "presets": [
+      {
+        "name": "POST PARAM DISCOVERY",
+        "description": "Find hidden POST parameters for API endpoints",
+        "command": "arjun -u {target} -m POST -oT {log_file}"
+      },
+      {
+        "name": "POST PARAM DEEP",
+        "description": "Stable mode with lower request rate for API testing",
+        "command": "arjun -u {target} -m POST --stable --rate-limit 6 -oT {log_file}"
+      }
+    ]
+  },
+  {
+    "id": "ffuf_param",
+    "name": "FFUF PARAM FUZZ",
+    "command": "ffuf -u {target}/?FUZZ=test -w {wordlist_file} -o {log_file} -of json",
+    "category": "API",
+    "parser": "ffuf",
+    "input_mode": "url",
+    "types": [
+      "url",
+      "domain",
+      "domain_port",
+      "ip_port",
+      "ipv4"
+    ],
+    "wordlist": {
+      "profile": "param_fuzz",
+      "label": "PARAMETER WORDLIST"
+    },
+    "presets": [
+      {
+        "name": "PARAM NAME FUZZ",
+        "description": "Enumerate potential query parameter names",
+        "command": "ffuf -u {target}/?FUZZ=test -w {wordlist_file} -mc all -fc 404 -o {log_file} -of json"
+      },
+      {
+        "name": "PARAM BOOL FUZZ",
+        "description": "Probe boolean-like API parameters for logic differences",
+        "command": "ffuf -u {target}/?FUZZ=true -w {wordlist_file} -mc all -fc 404 -o {log_file} -of json"
+      }
+    ]
+  },
+  {
+    "id": "nuclei_url",
+    "name": "NUCLEI URL",
+    "command": "nuclei -u {target} -severity low,medium,high,critical -silent -ni -jsonl -o {log_file}",
+    "category": "Vuln",
+    "parser": "nuclei",
+    "input_mode": "url",
+    "types": [
+      "url",
+      "domain",
+      "domain_port",
+      "ip_port",
+      "ipv4"
+    ],
+    "presets": [
+      {
+        "name": "STANDARD NUCLEI",
+        "description": "Core severity-driven web application scan",
+        "command": "nuclei -u {target} -severity low,medium,high,critical -silent -ni -jsonl -o {log_file}"
+      },
+      {
+        "name": "WEB + API TAGS",
+        "description": "Target API and web misconfiguration templates",
+        "command": "nuclei -u {target} -tags api,misconfig,exposure,token,auth -silent -ni -jsonl -o {log_file}"
+      }
+    ]
+  },
+  {
+    "id": "nuclei_exposure",
+    "name": "NUCLEI EXPOSURES",
+    "command": "nuclei -u {target} -tags exposure,token,secret,misconfig -silent -ni -jsonl -o {log_file}",
+    "category": "Vuln",
+    "parser": "nuclei",
+    "input_mode": "url",
+    "types": [
+      "url",
+      "domain",
+      "domain_port",
+      "ip_port",
+      "ipv4"
+    ],
+    "presets": [
+      {
+        "name": "EXPOSURE TAGS",
+        "description": "Secrets, token leaks, and exposure templates",
+        "command": "nuclei -u {target} -tags exposure,token,secret,misconfig -silent -ni -jsonl -o {log_file}"
+      },
+      {
+        "name": "AUTH + SENSITIVE",
+        "description": "Auth and sensitive file exposure checks",
+        "command": "nuclei -u {target} -tags auth,default-login,exposure,sensitive-files -silent -ni -jsonl -o {log_file}"
+      }
     ]
   },
   {
     "id": "sqlmap",
-    "name": "SQLMap",
-    "command": "sqlmap -u \"http://{target}\" --batch --random-agent | tee {log_file}",
-    "category": "Exploit",
+    "name": "SQLMAP",
+    "command": "sqlmap -u \"{target}\" --batch --random-agent --level=2 --risk=2 | tee {log_file}",
+    "category": "Vuln",
     "parser": "sqlmap",
-    "presets": [
-      {
-        "name": "Auto",
-        "command": "sqlmap -u \"http://{target}\" --batch --random-agent | tee {log_file}",
-        "description": "Automatic scan"
-      },
-      {
-        "name": "Forms",
-        "command": "sqlmap -u \"http://{target}\" --forms --batch --random-agent | tee {log_file}",
-        "description": "Scan forms on page"
-      },
-      {
-        "name": "Crawl",
-        "command": "sqlmap -u \"http://{target}\" --crawl=2 --batch --random-agent | tee {log_file}",
-        "description": "Crawl and scan"
-      }
-    ]
-  },
-  {
-    "id": "enum4linux",
-    "name": "Enum4Linux",
-    "command": "enum4linux -a {target} | tee {log_file}",
-    "category": "SMB",
-    "parser": "generic"
-  },
-  {
-    "id": "wpscan",
-    "name": "WPScan",
-    "command": "wpscan --url http://{target} --enumerate p,t,u | tee {log_file}",
-    "category": "CMS",
-    "parser": "wpscan",
-    "presets": [
-      {
-        "name": "Quick Enum",
-        "command": "wpscan --url http://{target} --enumerate p,t,u | tee {log_file}",
-        "description": "Plugins, Themes, Users"
-      },
-      {
-        "name": "Aggressive Users",
-        "command": "wpscan --url http://{target} --enumerate u1-100 | tee {log_file}",
-        "description": "Enumerate first 100 users"
-      },
-      {
-        "name": "Vulnerable Plugins",
-        "command": "wpscan --url http://{target} --enumerate vp | tee {log_file}",
-        "description": "Vulnerable plugins only"
-      }
-    ]
-  },
-  {
-    "id": "ffuf",
-    "name": "FFUF",
-    "command": "ffuf -u http://{target}/FUZZ -w /usr/share/wordlists/dirb/common.txt -o {log_file}",
-    "category": "Web",
-    "parser": "ffuf",
-    "presets": [
-      {
-        "name": "Common Dir",
-        "command": "ffuf -u http://{target}/FUZZ -w /usr/share/wordlists/dirb/common.txt -o {log_file}",
-        "description": "Common directories"
-      },
-      {
-        "name": "Subdomains",
-        "command": "ffuf -u http://FUZZ.{target} -w /usr/share/wordlists/SecLists/Discovery/DNS/subdomains-top1million-5000.txt -o {log_file}",
-        "description": "Subdomain fuzzing"
-      },
-      {
-        "name": "Post Data",
-        "command": "ffuf -u http://{target} -X POST -d \"id=FUZZ\" -w /usr/share/wordlists/rockyou.txt -o {log_file}",
-        "description": "Fuzz POST parameter"
-      }
-    ]
-  },
-  {
-    "id": "nuclei",
-    "name": "Nuclei",
-    "command": "nuclei -u http://{target} -o {log_file}",
-    "category": "Vuln",
-    "parser": "nuclei",
-    "presets": [
-      {
-        "name": "Default",
-        "command": "nuclei -u http://{target} -o {log_file}",
-        "description": "Default templates"
-      },
-      {
-        "name": "Critical",
-        "command": "nuclei -u http://{target} -s critical -o {log_file}",
-        "description": "Critical severity only"
-      },
-      {
-        "name": "CVEs",
-        "command": "nuclei -u http://{target} -t cves/ -o {log_file}",
-        "description": "Check for known CVEs"
-      }
-    ]
-  },
-  {
-    "id": "subfinder",
-    "name": "Subfinder",
-    "command": "subfinder -d {target} -o {log_file}",
-    "category": "Recon",
-    "parser": "generic",
-    "types": [
-      "domain"
-    ]
-  },
-  {
-    "id": "amass",
-    "name": "Amass Enum",
-    "command": "amass enum -d {target} -o {log_file}",
-    "category": "Recon",
-    "parser": "generic",
-    "presets": [
-      {
-        "name": "Passive",
-        "command": "amass enum -passive -d {target} -o {log_file}",
-        "description": "Passive enumeration only"
-      },
-      {
-        "name": "Active",
-        "command": "amass enum -active -d {target} -o {log_file}",
-        "description": "Active enumeration"
-      }
-    ]
-  },
-  {
-    "id": "httpx_from_subfinder",
-    "name": "HTTPX (from Subfinder)",
-    "command": "httpx -l {log:subfinder} -o {log_file} -title -tech-detect -status-code",
-    "category": "Recon",
-    "parser": "generic"
-  },
-  {
-    "id": "nuclei_from_httpx",
-    "name": "Nuclei (from HTTPX)",
-    "command": "nuclei -l {log:httpx_from_subfinder} -o {log_file}",
-    "category": "Vuln",
-    "parser": "nuclei"
-  },
-  {
-    "id": "gobuster",
-    "name": "Gobuster Dir",
-    "command": "gobuster dir -u {target} -w /usr/share/wordlists/dirb/common.txt",
-    "category": "Web",
+    "input_mode": "url",
     "types": [
       "url",
-      "domain"
-    ]
-  },
-  {
-    "id": "whois",
-    "name": "Whois",
-    "command": "whois {target}",
-    "category": "Recon",
-    "types": [
-      "ip",
       "domain",
-      "email",
-      "ipv4",
-      "cidr"
+      "domain_port",
+      "ip_port",
+      "ipv4"
+    ],
+    "presets": [
+      {
+        "name": "SQLMAP QUICK",
+        "description": "Low-risk SQLi checks for a target URL",
+        "command": "sqlmap -u \"{target}\" --batch --random-agent --level=1 --risk=1 --flush-session | tee {log_file}"
+      },
+      {
+        "name": "SQLMAP STANDARD",
+        "description": "Balanced SQLi checks with broader payload coverage",
+        "command": "sqlmap -u \"{target}\" --batch --random-agent --level=2 --risk=2 | tee {log_file}"
+      }
     ]
   },
   {
-    "id": "dig-any",
-    "name": "Dig ANY",
-    "command": "dig {target} ANY",
-    "category": "DNS",
+    "id": "dalfox",
+    "name": "DALFOX URL",
+    "command": "dalfox url {target} --skip-bav --no-color --output {log_file}",
+    "category": "Vuln",
+    "parser": "generic",
+    "input_mode": "url",
+    "types": [
+      "url",
+      "domain",
+      "domain_port",
+      "ip_port",
+      "ipv4"
+    ],
+    "presets": [
+      {
+        "name": "DALFOX QUICK",
+        "description": "URL-focused reflected XSS checks",
+        "command": "dalfox url {target} --skip-bav --no-color --output {log_file}"
+      },
+      {
+        "name": "DALFOX PARAM",
+        "description": "Parameter mining and deeper reflected checks",
+        "command": "dalfox url {target} --mining-dict --skip-bav --no-color --output {log_file}"
+      }
+    ]
+  },
+  {
+    "id": "ffuf_sqli",
+    "name": "FFUF SQLI PROBE",
+    "command": "ffuf -u {target}/?id=FUZZ -w {wordlist_file} -o {log_file} -of json",
+    "category": "Vuln",
+    "parser": "ffuf",
+    "input_mode": "url",
+    "types": [
+      "url",
+      "domain",
+      "domain_port",
+      "ip_port",
+      "ipv4"
+    ],
+    "wordlist": {
+      "profile": "sqli_payloads",
+      "label": "SQLI PAYLOADS"
+    },
+    "presets": [
+      {
+        "name": "SQLI ERROR PROBE",
+        "description": "Payload fuzzing for error-based SQL signals",
+        "command": "ffuf -u {target}/?id=FUZZ -w {wordlist_file} -mc all -fc 404 -o {log_file} -of json"
+      },
+      {
+        "name": "SQLI POST-LIKE PROBE",
+        "description": "Probe alternate key names for SQLi behavior differences",
+        "command": "ffuf -u {target}/?user=FUZZ -w {wordlist_file} -mc all -fc 404 -o {log_file} -of json"
+      }
+    ]
+  },
+  {
+    "id": "ffuf_xss",
+    "name": "FFUF XSS PROBE",
+    "command": "ffuf -u {target}/?q=FUZZ -w {wordlist_file} -o {log_file} -of json",
+    "category": "Vuln",
+    "parser": "ffuf",
+    "input_mode": "url",
+    "types": [
+      "url",
+      "domain",
+      "domain_port",
+      "ip_port",
+      "ipv4"
+    ],
+    "wordlist": {
+      "profile": "xss_payloads",
+      "label": "XSS PAYLOADS"
+    },
+    "presets": [
+      {
+        "name": "XSS QUERY PROBE",
+        "description": "Fuzz query parameter with XSS payload list",
+        "command": "ffuf -u {target}/?q=FUZZ -w {wordlist_file} -mc all -fc 404 -o {log_file} -of json"
+      },
+      {
+        "name": "XSS SEARCH PROBE",
+        "description": "Fuzz alternate search parameter for reflection paths",
+        "command": "ffuf -u {target}/?search=FUZZ -w {wordlist_file} -mc all -fc 404 -o {log_file} -of json"
+      }
+    ]
+  },
+  {
+    "id": "ffuf_lfi",
+    "name": "FFUF LFI PROBE",
+    "command": "ffuf -u {target}/?file=FUZZ -w {wordlist_file} -o {log_file} -of json",
+    "category": "Vuln",
+    "parser": "ffuf",
+    "input_mode": "url",
+    "types": [
+      "url",
+      "domain",
+      "domain_port",
+      "ip_port",
+      "ipv4"
+    ],
+    "wordlist": {
+      "profile": "lfi_payloads",
+      "label": "LFI PAYLOADS"
+    },
+    "presets": [
+      {
+        "name": "LFI FILE PROBE",
+        "description": "LFI payload fuzzing on file-style parameter",
+        "command": "ffuf -u {target}/?file=FUZZ -w {wordlist_file} -mc all -fc 404 -o {log_file} -of json"
+      },
+      {
+        "name": "LFI PATH PROBE",
+        "description": "LFI payload fuzzing on path-style parameter",
+        "command": "ffuf -u {target}/?path=FUZZ -w {wordlist_file} -mc all -fc 404 -o {log_file} -of json"
+      }
+    ]
+  },
+  {
+    "id": "hydra_ssh_combo",
+    "name": "HYDRA SSH (COMBO)",
+    "command": "hydra -C {wordlist_file} -s 22 {target} ssh -I -f -o {log_file}",
+    "category": "Bruteforce",
+    "parser": "generic",
+    "input_mode": "domain",
     "types": [
       "domain",
-      "domain_port"
-    ]
+      "ipv4"
+    ],
+    "wordlist": {
+      "profile": "credential_pairs",
+      "label": "CREDENTIAL PAIRS"
+    }
   },
   {
-    "id": "dig-short",
-    "name": "Dig A (Short)",
-    "command": "dig +short {target} A",
-    "category": "DNS",
+    "id": "hydra_ftp_combo",
+    "name": "HYDRA FTP (COMBO)",
+    "command": "hydra -C {wordlist_file} -s 21 {target} ftp -I -f -o {log_file}",
+    "category": "Bruteforce",
+    "parser": "generic",
+    "input_mode": "domain",
     "types": [
-      "domain"
-    ]
+      "domain",
+      "ipv4"
+    ],
+    "wordlist": {
+      "profile": "credential_pairs",
+      "label": "CREDENTIAL PAIRS"
+    }
   },
   {
-    "id": "httpx",
-    "name": "HTTPX Probe",
-    "command": "echo {target} | httpx -silent -status-code -title",
-    "category": "Recon",
+    "id": "hydra_http_get_combo",
+    "name": "HYDRA HTTP GET BASIC",
+    "command": "hydra -C {wordlist_file} -s 80 {target} http-get / -I -f -o {log_file}",
+    "category": "Bruteforce",
+    "parser": "generic",
+    "input_mode": "domain",
     "types": [
-      "domain"
-    ]
+      "domain",
+      "ipv4"
+    ],
+    "wordlist": {
+      "profile": "credential_pairs",
+      "label": "CREDENTIAL PAIRS"
+    }
   },
   {
-    "id": "theharvester",
-    "name": "theHarvester",
-    "command": "theHarvester -d {target} -b all -l 100",
-    "category": "Recon",
+    "id": "hydra_https_get_combo",
+    "name": "HYDRA HTTPS GET BASIC",
+    "command": "hydra -C {wordlist_file} -s 443 {target} https-get / -I -f -o {log_file}",
+    "category": "Bruteforce",
+    "parser": "generic",
+    "input_mode": "domain",
     "types": [
-      "email",
-      "domain"
-    ]
+      "domain",
+      "ipv4"
+    ],
+    "wordlist": {
+      "profile": "credential_pairs",
+      "label": "CREDENTIAL PAIRS"
+    }
   },
   {
     "id": "searchsploit",
-    "name": "SearchSploit",
-    "command": "searchsploit {target}",
+    "name": "SEARCHSPLOIT",
+    "command": "searchsploit {target} | tee {log_file}",
     "category": "Exploit",
+    "parser": "generic",
+    "input_mode": "domain",
     "types": [
       "cve",
       "text"
     ]
   },
   {
-    "id": "hashid",
-    "name": "HashID",
-    "command": "hashid {target}",
-    "category": "Crypto",
+    "id": "open_nvd",
+    "name": "OPEN NVD",
+    "command": "https://nvd.nist.gov/vuln/detail/{target}",
+    "category": "OSINT",
+    "runner": "internal",
+    "action": "open-browser",
+    "input_mode": "domain",
     "types": [
-      "hash_format",
-      "hash_hex"
+      "cve"
     ]
   },
   {
-    "id": "hash-identifier",
-    "name": "Hash Identifier",
-    "command": "echo {target} | hash-identifier",
-    "category": "Crypto",
+    "id": "open_exploitdb",
+    "name": "OPEN EXPLOIT-DB",
+    "command": "https://www.exploit-db.com/search?cve={target}",
+    "category": "OSINT",
+    "runner": "internal",
+    "action": "open-browser",
+    "input_mode": "domain",
     "types": [
-      "hash_format",
-      "hash_hex"
+      "cve"
     ]
   },
   {
-    "id": "base64-decode",
-    "name": "Base64 Decode",
-    "command": "echo {target} | base64 -d",
-    "category": "Crypto",
-    "types": [
-      "base64",
-      "base64_double"
-    ]
-  },
-  {
-    "id": "double-base64-decode",
-    "name": "Double Base64 Decode",
-    "command": "echo {target} | base64 -d | base64 -d",
-    "category": "Crypto",
-    "types": [
-      "base64_double"
-    ]
-  },
-  {
-    "id": "ping",
-    "name": "Ping",
-    "command": "ping -c 4 {target}",
-    "category": "Network",
-    "types": [
-      "ip",
-      "ipv4",
-      "domain"
-    ]
-  },
-  {
-    "id": "traceroute",
-    "name": "Traceroute",
-    "command": "traceroute {target}",
-    "category": "Network",
-    "types": [
-      "ip",
-      "ipv4",
-      "domain"
-    ]
-  },
-  {
-    "id": "browser-open-url",
-    "name": "Open URL",
+    "id": "copy_target",
+    "name": "COPY TARGET",
     "command": "{target}",
-    "runner": "internal",
-    "action": "open-browser",
     "category": "General",
-    "types": [
-      "url"
-    ]
-  },
-  {
-    "id": "browser-open-domain",
-    "name": "Open Domain (HTTPS)",
-    "command": "https://{target}",
-    "runner": "internal",
-    "action": "open-browser",
-    "category": "General",
-    "types": [
-      "domain",
-      "domain_port"
-    ]
-  },
-  {
-    "id": "browser-open-ip",
-    "name": "Open IP (HTTP)",
-    "command": "http://{target}",
-    "runner": "internal",
-    "action": "open-browser",
-    "category": "General",
-    "types": [
-      "ip",
-      "ipv4",
-      "ip_port"
-    ]
-  },
-  {
-    "id": "copy-target",
-    "name": "Copy to Clipboard",
-    "command": "{target}",
     "runner": "internal",
     "action": "copy",
-    "category": "General",
+    "input_mode": "domain",
     "types": [
       "url",
       "domain",
-      "ip",
       "ipv4",
       "cidr",
       "email",
@@ -499,128 +838,63 @@
     ]
   },
   {
-    "id": "shodan-host",
-    "name": "Shodan Host",
-    "command": "https://www.shodan.io/host/{target}",
-    "runner": "internal",
-    "action": "open-browser",
-    "category": "OSINT",
-    "types": [
-      "ip",
-      "ipv4"
-    ]
-  },
-  {
-    "id": "shodan-search",
-    "name": "Shodan Search",
-    "command": "https://www.shodan.io/search?query=hostname%3A{target}",
-    "runner": "internal",
-    "action": "open-browser",
-    "category": "OSINT",
-    "types": [
-      "domain"
-    ]
-  },
-  {
-    "id": "censys-host",
-    "name": "Censys Host",
-    "command": "https://search.censys.io/hosts/{target}",
-    "runner": "internal",
-    "action": "open-browser",
-    "category": "OSINT",
-    "types": [
-      "ip",
-      "ipv4"
-    ]
-  },
-  {
-    "id": "virustotal-ip",
-    "name": "VirusTotal IP",
-    "command": "https://www.virustotal.com/gui/ip-address/{target}",
-    "runner": "internal",
-    "action": "open-browser",
-    "category": "OSINT",
-    "types": [
-      "ip",
-      "ipv4"
-    ]
-  },
-  {
-    "id": "virustotal-domain",
-    "name": "VirusTotal Domain",
-    "command": "https://www.virustotal.com/gui/domain/{target}",
-    "runner": "internal",
-    "action": "open-browser",
-    "category": "OSINT",
-    "types": [
-      "domain"
-    ]
-  },
-  {
-    "id": "virustotal-hash",
-    "name": "VirusTotal Hash",
-    "command": "https://www.virustotal.com/gui/file/{target}",
-    "runner": "internal",
-    "action": "open-browser",
-    "category": "OSINT",
-    "types": [
-      "hash_hex"
-    ]
-  },
-  {
-    "id": "wayback-machine",
-    "name": "Wayback Machine",
-    "command": "https://web.archive.org/web/*/{target}",
-    "runner": "internal",
-    "action": "open-browser",
-    "category": "OSINT",
+    "id": "wpscan",
+    "name": "WPSCAN",
+    "command": "wpscan --url {target} --disable-tls-checks --no-update --format cli-no-color --output {log_file}",
+    "category": "Web",
+    "parser": "wpscan",
+    "input_mode": "url",
     "types": [
       "url",
-      "domain"
+      "domain",
+      "domain_port",
+      "ip_port",
+      "ipv4"
     ]
   },
   {
-    "id": "crt-sh",
-    "name": "crt.sh Certificates",
-    "command": "https://crt.sh/?q=%25.{target}",
-    "runner": "internal",
-    "action": "open-browser",
-    "category": "OSINT",
+    "id": "api_swagger_probe",
+    "name": "API SWAGGER PROBE",
+    "command": "curl -skL {target}/swagger.json | tee {log_file}",
+    "category": "API",
+    "parser": "generic",
+    "input_mode": "url",
     "types": [
-      "domain"
+      "url",
+      "domain",
+      "domain_port",
+      "ip_port",
+      "ipv4"
     ]
   },
   {
-    "id": "exploit-db",
-    "name": "Exploit-DB",
-    "command": "https://www.exploit-db.com/search?cve={target}",
-    "runner": "internal",
-    "action": "open-browser",
-    "category": "Exploit",
+    "id": "api_openapi_probe",
+    "name": "API OPENAPI PROBE",
+    "command": "curl -skL {target}/openapi.json | tee {log_file}",
+    "category": "API",
+    "parser": "generic",
+    "input_mode": "url",
     "types": [
-      "cve"
+      "url",
+      "domain",
+      "domain_port",
+      "ip_port",
+      "ipv4"
     ]
   },
   {
-    "id": "nvd",
-    "name": "NVD Details",
-    "command": "https://nvd.nist.gov/vuln/detail/{target}",
-    "runner": "internal",
-    "action": "open-browser",
-    "category": "Exploit",
+    "id": "api_graphql_introspection",
+    "name": "API GRAPHQL INTROSPECTION",
+    "command": "curl -skL -X POST {target}/graphql -H 'Content-Type: application/json' --data '{\"query\":\"{__schema{types{name}}}\"}' | tee {log_file}",
+    "category": "API",
+    "parser": "generic",
+    "input_mode": "url",
     "types": [
-      "cve"
-    ]
-  },
-  {
-    "id": "hibp",
-    "name": "Have I Been Pwned",
-    "command": "https://haveibeenpwned.com/account/{target}",
-    "runner": "internal",
-    "action": "open-browser",
-    "category": "OSINT",
-    "types": [
-      "email"
+      "url",
+      "domain",
+      "domain_port",
+      "ip_port",
+      "ipv4"
     ]
   }
 ]

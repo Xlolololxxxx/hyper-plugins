@@ -1,0 +1,8 @@
+{
+  "tool": "traceroute",
+  "jc_parser": "traceroute",
+  "source_fixture": "ParsingGlobal/jc/tests/fixtures/osx-10.14.6/traceroute.out",
+  "case": 3,
+  "parsed_type": "dict",
+  "parsed_count": 5
+}

@@ -1,33 +1,37 @@
 'use strict';
 const fs = require('fs');
 const path = require('path');
-const os = require('os');
 const { exec } = require('child_process');
 const { shell, clipboard } = require('electron');
 const ToolRunner = require('./lib/ToolRunner');
+const { normalizeTarget } = require('./lib/TargetNormalizer');
+const { buildWordlistCatalog } = require('./lib/WordlistCatalog');
+const TargetStore = require('./lib/storage/TargetStore');
+const { verifyWorkflows, buildAutomationHints } = require('./lib/WorkflowVerifier');
+const { extractSetTarget } = require('./lib/SetTargetParser');
 
-const FINDINGS_DIR = path.join(os.homedir(), '.gemini/tmp');
-const TARGET_CONFIG_FILE = path.join(FINDINGS_DIR, 'target_config.json');
+const DATA_DIR = path.join(__dirname, 'data');
+const LEGACY_FINDINGS_DIR = path.join(require('os').homedir(), '.gemini/tmp');
 
 // Ensure directory exists
 try {
-    fs.mkdirSync(FINDINGS_DIR, { recursive: true });
+    fs.mkdirSync(DATA_DIR, { recursive: true });
 } catch (e) {}
 
 function sanitizeTarget(target) {
-    if (!target) return 'None';
-    // Remove protocol
-    let clean = target.replace(/^https?:\/\//, '');
-    // Remove path and query
-    clean = clean.split('/')[0].split('?')[0];
-    // Remove port if present
-    clean = clean.split(':')[0];
-    return clean || 'None';
+  const normalized = normalizeTarget(target);
+  return normalized || 'None';
 }
 
-function getFindingsPath(target) {
+function isToolCompatibleWithType(tool, selectorType) {
+  if (!selectorType) return true;
+  if (!tool || !Array.isArray(tool.types) || tool.types.length === 0) return false;
+  return tool.types.includes(selectorType);
+}
+
+function getLegacyFindingsPath(target) {
     const safeTarget = sanitizeTarget(target).replace(/[^a-zA-Z0-9.-]/g, '_');
-    return path.join(FINDINGS_DIR, `findings_${safeTarget}.json`);
+    return path.join(LEGACY_FINDINGS_DIR, `findings_${safeTarget}.json`);
 }
 
 const CONFIG_DIR = path.join(__dirname, 'config');
@@ -38,20 +42,38 @@ const WORKFLOWS_FILE = path.join(CONFIG_DIR, 'workflows.json');
 const pendingCommands = [];
 
 if (typeof window !== 'undefined') {
-    window.__hyperTargetPanel_queue = (cmd) => {
-        pendingCommands.push(cmd);
+    window.__hyperTargetPanel_queue = (item) => {
+        pendingCommands.push(item);
+    };
+    window.__hyperTargetPanel_cancelQueued = (id) => {
+        const idx = pendingCommands.findIndex((entry) => entry && entry.id === id);
+        if (idx >= 0) pendingCommands.splice(idx, 1);
     };
 }
 
 // Middleware to intercept SESSION_ADD and execute pending commands
 exports.middleware = (store) => (next) => (action) => {
     if (action.type === 'SESSION_ADD') {
+        if (typeof window !== 'undefined') {
+            window.__hyperTargetPanel_lastSessionAddAt = Date.now();
+        }
         if (pendingCommands.length > 0) {
-            const cmd = pendingCommands.shift();
+            const queued = pendingCommands.shift();
+            const cmd = typeof queued === 'string' ? queued : queued && queued.cmd;
+            const id = typeof queued === 'string' ? null : queued && queued.id;
+            if (!cmd) return next(action);
             // Execute cmd in action.uid with a small delay to ensure shell readiness
             setTimeout(() => {
-                window.rpc.emit('data', { uid: action.uid, data: cmd + '\n' });
+                window.rpc.emit('data', { uid: action.uid, data: cmd + '\n', escaped: false });
+                if (typeof window !== 'undefined' && typeof window.__hyperTargetPanel_onCommandDispatched === 'function' && id) {
+                    window.__hyperTargetPanel_onCommandDispatched(id, action.uid);
+                }
             }, 500);
+        }
+    } else if (action.type === 'SESSION_PTY_DATA') {
+        const target = extractSetTarget(action.data);
+        if (target && typeof window !== 'undefined') {
+            window.dispatchEvent(new CustomEvent('hyper-target-panel:set-target', { detail: { target } }));
         }
     }
     return next(action);
@@ -81,6 +103,8 @@ exports.decorateTerm = (Term, { React, notify }) => {
     constructor(props, context) {
       super(props, context);
       this.onTerminal = this.onTerminal.bind(this);
+      this._inputBuf = '';
+      this._inputDisposable = null;
     }
 
     onTerminal(term) {
@@ -123,6 +147,35 @@ exports.decorateTerm = (Term, { React, notify }) => {
               }
           });
       }
+
+      if (!this._inputDisposable && term.onData) {
+          this._inputDisposable = term.onData((data) => {
+              if (!data) return;
+              for (let i = 0; i < data.length; i++) {
+                  const ch = data[i];
+                  if (ch === '\r' || ch === '\n') {
+                      const line = this._inputBuf;
+                      this._inputBuf = '';
+                      const target = extractSetTarget(line);
+                      if (target && typeof window !== 'undefined') {
+                          window.dispatchEvent(new CustomEvent('hyper-target-panel:set-target', { detail: { target } }));
+                      }
+                  } else if (ch === '\x7f' || ch === '\b') {
+                      if (this._inputBuf.length > 0) {
+                          this._inputBuf = this._inputBuf.slice(0, -1);
+                      }
+                  } else if (ch >= ' ') {
+                      this._inputBuf += ch;
+                  }
+              }
+          });
+      }
+    }
+
+    componentWillUnmount() {
+      if (this._inputDisposable && this._inputDisposable.dispose) {
+          this._inputDisposable.dispose();
+      }
     }
 
     render() {
@@ -143,10 +196,44 @@ exports.decorateTerms = (Terms, { React }) => {
         workflows: [],
         activeTool: null,
         toolSelectorOpen: false,
-        selectorType: null
+        selectorType: null,
+        selectorTarget: null,
+        selectorActions: [],
+        schemeOverride: 'auto',
+        wordlistModalOpen: false,
+        wordlistTool: null,
+        wordlistSections: [],
+        targetEditing: false,
+        targetDraft: '',
+        runStatus: null,
+        recentRuns: [],
+        workflowIssues: [],
+        automationHints: [],
+        storageMode: 'json'
       };
-      this.toolRunner = new ToolRunner(window.rpc, window.store);
+      this.targetStore = new TargetStore({ baseDir: DATA_DIR });
+      this.toolRunner = new ToolRunner(window.rpc, window.store, {
+        onRunStatus: (runStatus) => {
+          if (runStatus && runStatus.target) {
+            this.targetStore.recordRun(runStatus);
+          }
+          const activeTarget = this.state.data && this.state.data.target;
+          const recentRuns = activeTarget ? this.targetStore.getRecentRuns(activeTarget, 8) : [];
+          this.setState({ runStatus, recentRuns });
+        },
+        onFindings: (target, findings, context) => {
+          this.targetStore.mergeFindings(target, findings, context && context.toolId);
+          const activeTarget = this.state.data && this.state.data.target;
+          if (activeTarget && sanitizeTarget(activeTarget) === sanitizeTarget(target)) {
+            this.reloadFindings(activeTarget);
+          }
+        },
+        onJcOutput: (target, jcData, context) => {
+          this.targetStore.storeJcSnapshot(target, jcData, context || {});
+        }
+      });
       this.handleOpenToolSelector = this.handleOpenToolSelector.bind(this);
+      this.handleSetTarget = this.handleSetTarget.bind(this);
     }
 
     componentDidMount() {
@@ -154,25 +241,40 @@ exports.decorateTerms = (Terms, { React }) => {
       this.loadTargetConfig();
       
       window.addEventListener('hyper-target-panel:open-tool-selector', this.handleOpenToolSelector);
+      window.addEventListener('hyper-target-panel:set-target', this.handleSetTarget);
     }
 
     componentWillUnmount() {
       window.removeEventListener('hyper-target-panel:open-tool-selector', this.handleOpenToolSelector);
-      if (this.watcher) this.watcher.close();
+      window.removeEventListener('hyper-target-panel:set-target', this.handleSetTarget);
       if (this.toolRunner) this.toolRunner.stop();
     }
 
     handleOpenToolSelector(e) {
-        const { target, type } = e.detail;
-        this.setTarget(target);
-        this.setState({ toolSelectorOpen: true, selectorType: type });
+        const { target, type, actions } = e.detail || {};
+        const rawTarget = String(target || '').trim();
+        const normalized = sanitizeTarget(rawTarget);
+        if (normalized && normalized !== 'None') this.setTarget(normalized);
+        this.setState({
+          toolSelectorOpen: true,
+          selectorType: type,
+          selectorTarget: rawTarget || normalized,
+          selectorActions: Array.isArray(actions) ? actions : []
+        });
+    }
+
+    handleSetTarget(e) {
+        const { target } = e.detail || {};
+        if (target) this.setTarget(target);
     }
 
     loadConfig() {
       fs.readFile(TOOLS_FILE, 'utf8', (err, content) => {
         if (!err) {
           try {
-            this.setState({ tools: JSON.parse(content) });
+            const tools = JSON.parse(content);
+            this.setState({ tools });
+            this.refreshWorkflowInsights(tools, this.state.workflows);
           } catch (e) { console.error("Failed to parse tools.json", e); }
         }
       });
@@ -180,97 +282,97 @@ exports.decorateTerms = (Terms, { React }) => {
       fs.readFile(WORKFLOWS_FILE, 'utf8', (err, content) => {
         if (!err) {
           try {
-            this.setState({ workflows: JSON.parse(content) });
+            const workflows = JSON.parse(content);
+            this.setState({ workflows });
+            this.refreshWorkflowInsights(this.state.tools, workflows);
           } catch (e) { console.error("Failed to parse workflows.json", e); }
         }
       });
     }
 
+    refreshWorkflowInsights(tools, workflows) {
+      const listTools = Array.isArray(tools) ? tools : [];
+      const listWorkflows = Array.isArray(workflows) ? workflows : [];
+      const report = verifyWorkflows(listTools, listWorkflows);
+      const hints = buildAutomationHints(listTools);
+      this.setState({
+        workflowIssues: report.issues || [],
+        automationHints: hints.slice(0, 6),
+      });
+    }
+
     loadTargetConfig() {
-        fs.readFile(TARGET_CONFIG_FILE, 'utf8', (err, content) => {
-            if (!err) {
-                try {
-                    const config = JSON.parse(content);
-                    if (config.lastTarget) {
-                        this.fetchData(config.lastTarget);
-                        return;
-                    }
-                } catch (e) {}
-            }
-            // Default if no config
-            this.fetchData('None');
-        });
+        const savedTarget = this.targetStore.loadLastTarget();
+        this.fetchData(savedTarget || 'None');
     }
 
     fetchData(target) {
-      // If target provided, use it. Otherwise use state.data.target
       const currentTarget = target || this.state.data.target || 'None';
-      const findingsFile = getFindingsPath(currentTarget);
-
-      // Update watcher
-      if (this.watcher) this.watcher.close();
-      try {
-        this.watcher = fs.watch(findingsFile, (eventType, filename) => {
-             // Debounce logic
-             if (this.fetchTimeout) clearTimeout(this.fetchTimeout);
-             this.fetchTimeout = setTimeout(() => this.reloadFindings(findingsFile), 100);
-        });
-      } catch (e) {
-         // Create if missing
-         if (!fs.existsSync(findingsFile)) {
-             const initData = { target: currentTarget, ports: [], domains: [], vulns: [], paths: [], history: [] };
-             fs.writeFileSync(findingsFile, JSON.stringify(initData));
-             this.watcher = fs.watch(findingsFile, () => this.reloadFindings(findingsFile));
-         }
-      }
-      
-      this.reloadFindings(findingsFile);
+      const findingsFile = getLegacyFindingsPath(currentTarget);
+      this.targetStore.importLegacyFindings(currentTarget, findingsFile);
+      this.reloadFindings(currentTarget);
     }
 
-    reloadFindings(filepath) {
-        fs.readFile(filepath, 'utf8', (err, content) => {
-            if (!err) {
-                try {
-                    const data = JSON.parse(content);
-                    if (!data.history) data.history = [];
-                    if (!data.domains) data.domains = [];
-                    this.setState({ data });
-                } catch (e) {}
-            }
+    reloadFindings(target) {
+        const safeTarget = sanitizeTarget(target || this.state.data.target || 'None');
+        const data = this.targetStore.getTargetData(safeTarget);
+        const recentRuns = this.targetStore.getRecentRuns(safeTarget, 8);
+        this.setState({
+          data,
+          recentRuns,
+          storageMode: this.targetStore.getMode()
         });
     }
 
     setTarget(rawTarget) {
       const newTarget = sanitizeTarget(rawTarget);
+      if (newTarget === 'None') return;
       if (newTarget === this.state.data.target) return;
 
-      // Save current target to config
-      fs.writeFile(TARGET_CONFIG_FILE, JSON.stringify({ lastTarget: newTarget }), () => {});
-
-      // Switch to new target findings
+      this.targetStore.saveLastTarget(newTarget);
+      this.targetStore.addHistory(newTarget, newTarget);
       this.fetchData(newTarget);
     }
 
-    launchTool(tool) {
+    launchTool(tool, contextTarget = null) {
       // If triggered from tool selector, close it first
       this.setState({ toolSelectorOpen: false });
+
+      if (tool.wordlist && tool.wordlist.profile) {
+        const catalog = buildWordlistCatalog({ profile: tool.wordlist.profile });
+        this.setState({
+          wordlistModalOpen: true,
+          wordlistTool: tool,
+          wordlistSections: catalog.sections || [],
+          selectorTarget: contextTarget || this.state.selectorTarget
+        });
+        return;
+      }
 
       if (tool.presets && tool.presets.length > 0) {
         this.setState({ activeTool: tool });
       } else {
-        this.executeTool(tool);
+        this.executeTool(tool, null, '', contextTarget);
       }
     }
 
-    executeTool(tool, preset = null) {
+    executeTool(tool, preset = null, wordlistFile = '', contextTarget = null) {
       const { data } = this.state;
+      const resolvedTarget = String(contextTarget || this.state.selectorTarget || data.target || '').trim() || data.target;
       const commandToRun = preset ? preset.command : tool.command;
       const toolToRun = { ...tool, command: commandToRun };
+      const runData = {
+        ...data,
+        target: resolvedTarget,
+        schemeOverride: this.state.schemeOverride,
+        wordlistFile
+      };
+      this.targetStore.addHistory(resolvedTarget, resolvedTarget);
       
       if (tool.runner === 'internal') {
-          const target = data.target || '';
-          // Simple substitution for internal commands
-          const command = commandToRun.replace(/{target}/g, target);
+          const command = commandToRun
+            .replace(/{target}/g, runData.target || '')
+            .replace(/{wordlist_file}/g, wordlistFile || '');
 
           if (tool.action === 'open-browser') {
              shell.openExternal(command);
@@ -281,20 +383,25 @@ exports.decorateTerms = (Terms, { React }) => {
           return;
       }
 
-      this.toolRunner.launch(toolToRun, data);
-      this.setState({ activeTool: null, toolSelectorOpen: false });
+      this.toolRunner.launch(toolToRun, runData);
+      this.setState({ activeTool: null, toolSelectorOpen: false, wordlistModalOpen: false, wordlistTool: null, wordlistSections: [] });
     }
     
     closeModal() {
-      this.setState({ activeTool: null, toolSelectorOpen: false });
+      this.setState({
+        activeTool: null,
+        toolSelectorOpen: false,
+        selectorActions: [],
+        wordlistModalOpen: false,
+        wordlistTool: null,
+        wordlistSections: []
+      });
     }
 
     launchWorkflow(workflow) {
       const { tools, data } = this.state;
       const sequence = workflow.tools.map(id => tools.find(t => t.id === id)).filter(Boolean);
-      sequence.forEach(tool => {
-        this.toolRunner.launch(tool, data);
-      });
+      this.toolRunner.launchWorkflow(sequence, data);
       this.setState({ toolSelectorOpen: false });
     }
 
@@ -335,12 +442,12 @@ exports.decorateTerms = (Terms, { React }) => {
 
       // Heuristic 1: If HTTP/HTTPS ports open (80, 443, 8080), recommend Web tools
       if (/80|443|8080|3000|5000|8000/.test(portsStr)) {
-          recs.push(...tools.filter(t => ['gobuster_dir', 'nikto', 'whatweb', 'wpscan', 'ffuf', 'nuclei'].includes(t.id)));
+          recs.push(...tools.filter(t => ['gobuster_dir', 'nikto', 'whatweb', 'wpscan', 'ffuf_dir', 'nuclei_url'].includes(t.id)));
       }
 
       // Heuristic 2: If SMB ports open (139, 445), recommend Enum4Linux
       if (/139|445/.test(portsStr)) {
-          recs.push(...tools.filter(t => t.id === 'enum4linux'));
+          recs.push(...tools.filter(t => t.id === 'nmap_vuln'));
       }
 
       // Heuristic 3: If SQL mentioned or port 3306, recommend SQLMap
@@ -353,7 +460,24 @@ exports.decorateTerms = (Terms, { React }) => {
     }
 
     render() {
-      const { data, tools, workflows, activeTool, toolSelectorOpen, selectorType } = this.state;
+      const {
+        data,
+        tools,
+        workflows,
+        activeTool,
+        toolSelectorOpen,
+        selectorType,
+        selectorTarget,
+        selectorActions,
+        runStatus,
+        workflowIssues,
+        automationHints,
+        storageMode,
+        schemeOverride,
+        wordlistModalOpen,
+        wordlistTool,
+        wordlistSections
+      } = this.state;
       const sidebarWidth = 280;
       const bottomHeight = 150;
 
@@ -406,14 +530,96 @@ exports.decorateTerms = (Terms, { React }) => {
                       color: C.target,
                       marginBottom: '10px',
                       borderBottom: `2px solid ${C.accent}`,
-                      paddingBottom: '5px',
-                      cursor: 'pointer'
-                    },
-                    onClick: () => {
-                         const newTarget = prompt("Set Target IP/URL:", data.target);
-                         if (newTarget) this.setTarget(newTarget);
+                      paddingBottom: '5px'
                     }
-                  }, `🎯 ${data.target}`),
+                  }, 
+                  this.state.targetEditing
+                    ? React.createElement('input', {
+                        autoFocus: true,
+                        value: this.state.targetDraft,
+                        placeholder: 'Set target (domain/IP)',
+                        style: {
+                          width: '100%',
+                          backgroundColor: C.bg,
+                          color: C.target,
+                          border: `1px solid ${C.border}`,
+                          borderRadius: '4px',
+                          padding: '4px 6px',
+                          fontFamily: '"Fira Code", monospace',
+                          fontSize: '11px',
+                          boxSizing: 'border-box'
+                        },
+                        onChange: (e) => this.setState({ targetDraft: e.target.value }),
+                        onBlur: () => {
+                          const val = this.state.targetDraft.trim();
+                          if (val) this.setTarget(val);
+                          this.setState({ targetEditing: false, targetDraft: '' });
+                        },
+                        onKeyDown: (e) => {
+                          if (e.key === 'Enter') {
+                            const val = this.state.targetDraft.trim();
+                            if (val) this.setTarget(val);
+                            this.setState({ targetEditing: false, targetDraft: '' });
+                          } else if (e.key === 'Escape') {
+                            this.setState({ targetEditing: false, targetDraft: '' });
+                          }
+                        }
+                      })
+                    : React.createElement('span', {
+                        style: { cursor: 'pointer' },
+                        onClick: () => this.setState({ targetEditing: true, targetDraft: data.target })
+                      }, `🎯 ${data.target}`)
+                  ),
+                  React.createElement('div', {
+                    style: {
+                      color: C.header,
+                      fontSize: '10px',
+                      fontWeight: 'bold',
+                      marginTop: '8px',
+                      marginBottom: '4px',
+                      borderBottom: `1px solid ${C.border}`
+                    }
+                  }, 'OVERRIDE'),
+                  React.createElement('div', { style: { display: 'flex', gap: '4px', marginBottom: '8px' } }, [
+                    ['auto', 'AUTO'],
+                    ['https', 'HTTPS'],
+                    ['http', 'HTTP']
+                  ].map(([value, label]) =>
+                    React.createElement('div', {
+                      key: value,
+                      style: {
+                        color: schemeOverride === value ? C.bg : C.target,
+                        backgroundColor: schemeOverride === value ? C.target : C.buttonBg,
+                        border: `1px solid ${C.border}`,
+                        borderRadius: '3px',
+                        padding: '2px 6px',
+                        cursor: 'pointer',
+                        fontSize: '10px',
+                        fontWeight: 'bold'
+                      },
+                      onClick: () => this.setState({ schemeOverride: value })
+                    }, label)
+                  )),
+                  runStatus && React.createElement('div', {
+                    style: {
+                      marginBottom: '10px',
+                      fontSize: '10px',
+                      color: runStatus.status === 'failed' ? C.vuln : C.port,
+                      border: `1px solid ${C.border}`,
+                      borderRadius: '4px',
+                      padding: '4px 6px',
+                      wordBreak: 'break-word'
+                    }
+                  }, runStatus.status === 'failed'
+                    ? `Last run failed (${runStatus.transport || 'none'}): ${runStatus.error || 'unknown error'}`
+                    : `Last run ${runStatus.status} via ${runStatus.transport || 'pending'}: ${runStatus.toolName || runStatus.toolId || 'tool'}`),
+                  React.createElement('div', {
+                    style: {
+                      marginBottom: '8px',
+                      fontSize: '10px',
+                      color: C.header
+                    }
+                  }, `Storage: ${storageMode}`),
 
                    React.createElement('div', {
                     style: {
@@ -445,6 +651,36 @@ exports.decorateTerms = (Terms, { React }) => {
                       }, `⚡ ${wf.name}`)
                     )
                   ),
+                  workflowIssues.length > 0 && React.createElement('div', { key: 'workflow-issues' }, [
+                    React.createElement('div', {
+                      style: {
+                        color: C.vuln,
+                        fontSize: '10px',
+                        fontWeight: 'bold',
+                        marginBottom: '4px',
+                        marginTop: '10px'
+                      }
+                    }, 'WORKFLOW WARNINGS'),
+                    React.createElement('div', {
+                      style: { color: C.vuln, fontSize: '10px', lineHeight: '1.4' }
+                    }, workflowIssues.slice(0, 3).map((issue) =>
+                      `${issue.workflowId}: ${issue.type} ${issue.toolId || ''} ${issue.dependency || ''}`
+                    ).join(' | '))
+                  ]),
+                  automationHints.length > 0 && React.createElement('div', { key: 'automation-hints' }, [
+                    React.createElement('div', {
+                      style: {
+                        color: C.port,
+                        fontSize: '10px',
+                        fontWeight: 'bold',
+                        marginBottom: '4px',
+                        marginTop: '10px'
+                      }
+                    }, 'AUTOMATION HINTS'),
+                    React.createElement('div', {
+                      style: { color: C.port, fontSize: '10px', lineHeight: '1.4' }
+                    }, automationHints.slice(0, 3).map((hint) => `${hint.from} -> ${hint.to}`).join(' | '))
+                  ]),
 
                   // Recommended Tools Section
                   recommendedTools.length > 0 && React.createElement('div', { key: 'recommended' }, [
@@ -476,7 +712,7 @@ exports.decorateTerms = (Terms, { React }) => {
                               whiteSpace: 'nowrap',
                               backgroundColor: 'rgba(80, 250, 123, 0.1)'
                             },
-                            onClick: () => this.launchTool(tool)
+                            onClick: () => this.launchTool(tool, data.target)
                           }, tool.name)
                         )
                       )
@@ -511,7 +747,7 @@ exports.decorateTerms = (Terms, { React }) => {
                               textOverflow: 'ellipsis',
                               whiteSpace: 'nowrap'
                             },
-                            onClick: () => this.launchTool(tool)
+                            onClick: () => this.launchTool(tool, data.target)
                           }, tool.name)
                         )
                       )
@@ -585,7 +821,7 @@ exports.decorateTerms = (Terms, { React }) => {
 
       // Tool Selector Modal
       if (toolSelectorOpen) {
-          const filteredTools = tools.filter(t => !selectorType || !t.types || t.types.includes(selectorType));
+          const filteredTools = tools.filter((t) => isToolCompatibleWithType(t, selectorType));
           const modalToolsByCategory = filteredTools.reduce((acc, tool) => {
             const cat = tool.category || 'Other';
             if (!acc[cat]) acc[cat] = [];
@@ -629,6 +865,33 @@ exports.decorateTerms = (Terms, { React }) => {
                   style: { fontSize: '20px', fontWeight: 'bold', color: C.target, textAlign: 'center', borderBottom: `1px solid ${C.border}`, paddingBottom: '10px' }
               }, `Select Tool for ${data.target}` + (selectorType ? ` (${selectorType})` : '')),
 
+              selectorActions.length > 0 && React.createElement('div', {
+                  style: { display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap' }
+              },
+                selectorActions.map((action) =>
+                  React.createElement('div', {
+                    key: action.id,
+                    style: {
+                      backgroundColor: C.buttonBg,
+                      padding: '6px 10px',
+                      borderRadius: '4px',
+                      cursor: 'pointer',
+                      color: C.target,
+                      fontWeight: 'bold',
+                      fontSize: '11px'
+                    },
+                    onClick: () => {
+                      if (action.id === 'set_target' && selectorTarget) {
+                        this.setTarget(selectorTarget);
+                        this.setState({ toolSelectorOpen: false });
+                      }
+                    },
+                    onMouseEnter: (e) => e.currentTarget.style.backgroundColor = C.buttonHover,
+                    onMouseLeave: (e) => e.currentTarget.style.backgroundColor = C.buttonBg
+                  }, action.label || action.id)
+                )
+              ),
+
               // Workflows
               React.createElement('div', { style: { color: C.header, fontWeight: 'bold' } }, "WORKFLOWS"),
               React.createElement('div', { style: { display: 'flex', flexWrap: 'wrap', gap: '10px' } }, 
@@ -669,7 +932,7 @@ exports.decorateTerms = (Terms, { React }) => {
                                       color: C.tool,
                                       flex: '1 0 30%'
                                   },
-                                  onClick: () => this.launchTool(tool),
+                                  onClick: () => this.launchTool(tool, selectorTarget || data.target),
                                   onMouseEnter: (e) => e.currentTarget.style.backgroundColor = C.buttonHover,
                                   onMouseLeave: (e) => e.currentTarget.style.backgroundColor = C.buttonBg
                               }, tool.name)
@@ -690,6 +953,99 @@ exports.decorateTerms = (Terms, { React }) => {
               }, "Cancel")
           ])
         ));
+      }
+
+      if (wordlistModalOpen && wordlistTool) {
+        children.push(React.createElement('div', {
+          key: 'wordlist-selector-overlay',
+          style: {
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0,0,0,0.85)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 9999
+          },
+          onClick: () => this.closeModal()
+        },
+        React.createElement('div', {
+          style: {
+            backgroundColor: C.bg,
+            border: `1px solid ${C.target}`,
+            padding: '18px',
+            width: '680px',
+            maxHeight: '80%',
+            overflowY: 'auto',
+            borderRadius: '8px'
+          },
+          onClick: (e) => e.stopPropagation()
+        }, [
+          React.createElement('div', {
+            key: 'wordlist-header',
+            style: {
+              fontSize: '18px',
+              fontWeight: 'bold',
+              color: C.target,
+              borderBottom: `1px solid ${C.border}`,
+              paddingBottom: '8px',
+              marginBottom: '10px'
+            }
+          }, `SELECT WORDLIST - ${wordlistTool.name}`),
+          ...wordlistSections.map((section) =>
+            React.createElement('div', { key: `wl-${section.id}`, style: { marginBottom: '12px' } }, [
+              React.createElement('div', {
+                key: `wl-title-${section.id}`,
+                style: {
+                  color: C.header,
+                  fontWeight: 'bold',
+                  fontSize: '12px',
+                  borderBottom: `1px solid ${C.border}`,
+                  marginBottom: '6px'
+                }
+              }, section.id),
+              React.createElement('div', {
+                key: `wl-files-${section.id}`,
+                style: { display: 'flex', flexWrap: 'wrap', gap: '8px' }
+              }, (section.files || []).map((file) =>
+                React.createElement('div', {
+                  key: file.path,
+                  style: {
+                    backgroundColor: C.buttonBg,
+                    color: C.path,
+                    borderRadius: '4px',
+                    padding: '8px 10px',
+                    cursor: 'pointer',
+                    fontSize: '11px',
+                    flex: '1 0 45%'
+                  },
+                  onClick: () => this.executeTool(wordlistTool, null, file.path, selectorTarget || data.target),
+                  onMouseEnter: (e) => e.currentTarget.style.backgroundColor = C.buttonHover,
+                  onMouseLeave: (e) => e.currentTarget.style.backgroundColor = C.buttonBg,
+                  title: file.path
+                }, file.name)
+              ))
+            ])
+          ),
+          wordlistSections.every((section) => !section.files || section.files.length === 0) && React.createElement('div', {
+            key: 'wordlist-empty',
+            style: { color: C.vuln, fontSize: '12px', marginTop: '8px' }
+          }, 'No matching wordlist files found in ~/Wordlists or ~/Wordlist.'),
+          React.createElement('div', {
+            key: 'wordlist-cancel',
+            style: {
+              color: '#aaa',
+              textAlign: 'center',
+              cursor: 'pointer',
+              marginTop: '8px',
+              fontSize: '12px'
+            },
+            onClick: () => this.closeModal()
+          }, 'Cancel')
+        ])));
       }
 
       // Preset Modal (Existing)
@@ -739,7 +1095,7 @@ exports.decorateTerms = (Terms, { React }) => {
                           display: 'flex',
                           flexDirection: 'column'
                       },
-                      onClick: () => this.executeTool(activeTool, preset),
+                      onClick: () => this.executeTool(activeTool, preset, '', selectorTarget || data.target),
                       onMouseEnter: (e) => e.currentTarget.style.backgroundColor = C.buttonHover,
                       onMouseLeave: (e) => e.currentTarget.style.backgroundColor = C.buttonBg
                   }, [
@@ -758,7 +1114,7 @@ exports.decorateTerms = (Terms, { React }) => {
                       textAlign: 'center',
                       fontWeight: 'bold'
                   },
-                  onClick: () => this.executeTool(activeTool),
+                  onClick: () => this.executeTool(activeTool, null, '', selectorTarget || data.target),
                   onMouseEnter: (e) => e.currentTarget.style.backgroundColor = C.buttonHover,
                   onMouseLeave: (e) => e.currentTarget.style.backgroundColor = C.buttonBg
               }, "Run Default Command"),
@@ -793,4 +1149,3 @@ exports.decorateTerms = (Terms, { React }) => {
     }
   };
 };
-

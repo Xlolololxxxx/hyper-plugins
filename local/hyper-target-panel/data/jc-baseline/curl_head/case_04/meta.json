@@ -1,0 +1,8 @@
+{
+  "tool": "curl_head",
+  "jc_parser": "curl_head",
+  "source_fixture": "ParsingGlobal/jc/tests/fixtures/generic/curl_head--ILvs-facebook-com.out",
+  "case": 4,
+  "parsed_type": "list",
+  "parsed_count": 6
+}

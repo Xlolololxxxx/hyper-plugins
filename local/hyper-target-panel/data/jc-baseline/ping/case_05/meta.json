@@ -1,0 +1,8 @@
+{
+  "tool": "ping",
+  "jc_parser": "ping",
+  "source_fixture": "ParsingGlobal/jc/tests/fixtures/ubuntu-22.04/ping-dest-unreachable.out",
+  "case": 5,
+  "parsed_type": "dict",
+  "parsed_count": 11
+}

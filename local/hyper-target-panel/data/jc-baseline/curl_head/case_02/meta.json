@@ -1,0 +1,8 @@
+{
+  "tool": "curl_head",
+  "jc_parser": "curl_head",
+  "source_fixture": "ParsingGlobal/jc/tests/fixtures/generic/curl_head--ILvs-yahoo-com.out",
+  "case": 2,
+  "parsed_type": "list",
+  "parsed_count": 6
+}

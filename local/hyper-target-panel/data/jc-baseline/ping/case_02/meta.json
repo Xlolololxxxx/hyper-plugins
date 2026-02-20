@@ -1,0 +1,8 @@
+{
+  "tool": "ping",
+  "jc_parser": "ping",
+  "source_fixture": "ParsingGlobal/jc/tests/fixtures/ubuntu-18.04/ping-hostname-O.out",
+  "case": 2,
+  "parsed_type": "dict",
+  "parsed_count": 14
+}

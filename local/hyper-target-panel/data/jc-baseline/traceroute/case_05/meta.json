@@ -1,0 +1,8 @@
+{
+  "tool": "traceroute",
+  "jc_parser": "traceroute",
+  "source_fixture": "ParsingGlobal/jc/tests/fixtures/generic/traceroute-n-q1-ipv4.out",
+  "case": 5,
+  "parsed_type": "dict",
+  "parsed_count": 5
+}

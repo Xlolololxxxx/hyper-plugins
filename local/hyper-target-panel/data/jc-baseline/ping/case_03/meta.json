@@ -1,0 +1,8 @@
+{
+  "tool": "ping",
+  "jc_parser": "ping",
+  "source_fixture": "ParsingGlobal/jc/tests/fixtures/centos-7.7/ping-ip-O-D.out",
+  "case": 3,
+  "parsed_type": "dict",
+  "parsed_count": 14
+}

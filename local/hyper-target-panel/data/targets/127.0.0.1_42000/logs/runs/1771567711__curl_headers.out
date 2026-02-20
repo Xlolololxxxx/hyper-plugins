@@ -1,0 +1,44 @@
+*   Trying 127.0.0.1:42000...
+* Established connection to 127.0.0.1 (127.0.0.1 port 42000) from 127.0.0.1 port 57726 
+* using HTTP/1.x
+> HEAD / HTTP/1.1
+> Host: 127.0.0.1:42000
+> User-Agent: curl/8.18.0
+> Accept: */*
+> 
+* Request completely sent off
+< HTTP/1.1 200 OK
+< Access-Control-Allow-Origin: *
+< X-Content-Type-Options: nosniff
+< X-Frame-Options: SAMEORIGIN
+< Feature-Policy: payment 'self'
+< X-Recruiting: /#/jobs
+< Accept-Ranges: bytes
+< Cache-Control: public, max-age=0
+< Last-Modified: Fri, 20 Feb 2026 06:07:20 GMT
+< ETag: W/"1252f-19c79a8f015"
+< Content-Type: text/html; charset=UTF-8
+< Content-Length: 75055
+< Vary: Accept-Encoding
+< Date: Fri, 20 Feb 2026 06:08:31 GMT
+< Connection: keep-alive
+< Keep-Alive: timeout=5
+< 
+* Connection #0 to host 127.0.0.1:42000 left intact
+HTTP/1.1 200 OK
+Access-Control-Allow-Origin: *
+X-Content-Type-Options: nosniff
+X-Frame-Options: SAMEORIGIN
+Feature-Policy: payment 'self'
+X-Recruiting: /#/jobs
+Accept-Ranges: bytes
+Cache-Control: public, max-age=0
+Last-Modified: Fri, 20 Feb 2026 06:07:20 GMT
+ETag: W/"1252f-19c79a8f015"
+Content-Type: text/html; charset=UTF-8
+Content-Length: 75055
+Vary: Accept-Encoding
+Date: Fri, 20 Feb 2026 06:08:31 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+

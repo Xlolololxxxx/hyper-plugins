@@ -1,44 +1,91 @@
 [
   {
+    "id": "workflow_surface_mapping",
+    "name": "SURFACE MAPPING",
+    "description": "Passive URLs, crawling, and endpoint expansion",
+    "tools": [
+      "gau_passive",
+      "waybackurls",
+      "katana_standard",
+      "katana_deep"
+    ]
+  },
+  {
     "id": "workflow_web_enum",
-    "name": "Full Web Enum",
-    "description": "Nmap + Gobuster + Nikto",
-    "tools": ["nmap", "gobuster_dir", "nikto"]
+    "name": "FULL WEB ENUM",
+    "description": "Fingerprint, probe, crawl, and directory enumeration",
+    "tools": [
+      "curl_headers",
+      "httpx_probe",
+      "whatweb",
+      "katana_standard",
+      "gobuster_dir",
+      "dirsearch",
+      "feroxbuster"
+    ]
   },
   {
-    "id": "workflow_vuln_check",
-    "name": "Vuln Check",
-    "description": "Nmap (Vuln) + Nuclei",
-    "tools": ["nmap", "nuclei"]
+    "id": "workflow_api_focus",
+    "name": "API FOCUS",
+    "description": "Probe specs, discover params, and fuzz API inputs",
+    "tools": [
+      "api_swagger_probe",
+      "api_openapi_probe",
+      "api_graphql_introspection",
+      "katana_standard",
+      "arjun_get",
+      "arjun_post",
+      "ffuf_param"
+    ]
   },
   {
-    "id": "workflow_wordpress",
-    "name": "WP Attack",
-    "description": "Gobuster + WPScan",
-    "tools": ["gobuster_dir", "wpscan"]
+    "id": "workflow_vuln_validation",
+    "name": "VULN VALIDATION",
+    "description": "Nuclei plus SQLi/XSS/LFI-focused probing",
+    "tools": [
+      "nuclei_url",
+      "nuclei_exposure",
+      "ffuf_sqli",
+      "ffuf_xss",
+      "ffuf_lfi",
+      "dalfox",
+      "sqlmap"
+    ]
   },
   {
     "id": "workflow_subdomain_pipeline",
-    "name": "Subdomain Pipeline",
-    "description": "Subfinder -> HTTPX -> Nuclei",
-    "tools": ["subfinder", "httpx_from_subfinder", "nuclei_from_httpx"]
+    "name": "SUBDOMAIN PIPELINE",
+    "description": "Subfinder to HTTPX to Nuclei",
+    "tools": [
+      "subfinder",
+      "httpx_from_subfinder",
+      "nuclei_from_httpx"
+    ]
   },
   {
-    "id": "recon-basic",
-    "name": "Basic Recon",
-    "description": "Ping and Quick Nmap",
-    "tools": ["ping", "nmap-quick"]
+    "id": "workflow_service_bruteforce",
+    "name": "SERVICE BRUTEFORCE",
+    "description": "Hydra combo checks for SSH/FTP/HTTP basic auth",
+    "tools": [
+      "hydra_ssh_combo",
+      "hydra_ftp_combo",
+      "hydra_http_get_combo",
+      "hydra_https_get_combo"
+    ]
   },
   {
-    "id": "web-recon",
-    "name": "Web Recon",
-    "description": "WhatWeb, Nikto, and Gobuster",
-    "tools": ["whatweb", "nikto", "gobuster"]
-  },
-  {
-    "id": "domain-intel",
-    "name": "Domain Intel",
-    "description": "Whois, Dig, and Subfinder",
-    "tools": ["whois", "dig-any", "subfinder"]
+    "id": "workflow_juice_shop_webapi",
+    "name": "JUICE SHOP WEB+API",
+    "description": "Targeted web and API checks for Juice Shop style apps",
+    "tools": [
+      "curl_headers",
+      "httpx_probe",
+      "whatweb",
+      "katana_standard",
+      "api_openapi_probe",
+      "arjun_get",
+      "ffuf_param",
+      "nuclei_url"
+    ]
   }
 ]

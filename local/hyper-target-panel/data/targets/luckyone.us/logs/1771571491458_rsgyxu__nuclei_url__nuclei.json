@@ -1,0 +1,54 @@
+{
+  "target": "luckyone.us",
+  "toolId": "nuclei_url",
+  "toolName": "NUCLEI URL",
+  "parser": "nuclei",
+  "parserEngine": "adapter",
+  "runId": "1771571491458_rsgyxu",
+  "sourceLogFile": null,
+  "capturedAt": "2026-02-20T07:15:08.254Z",
+  "data": {
+    "parser": "nuclei",
+    "engine": "jc-adapter",
+    "summary": {
+      "line_count": 2,
+      "record_count": 2,
+      "domain_count": 1,
+      "url_count": 0,
+      "vuln_count": 0,
+      "nuclei_findings": 2
+    },
+    "findings": {
+      "ports": [],
+      "vulns": [
+        "weak-cipher-suites:tls-1.0",
+        "weak-cipher-suites:tls-1.1"
+      ],
+      "paths": [],
+      "domains": []
+    },
+    "records": [
+      {
+        "type": "finding",
+        "id": "weak-cipher-suites:tls-1.0",
+        "protocol": "ssl",
+        "severity": "low",
+        "target": "luckyone.us:443 [\"[tls10 TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA]\"]"
+      },
+      {
+        "type": "finding",
+        "id": "weak-cipher-suites:tls-1.1",
+        "protocol": "ssl",
+        "severity": "low",
+        "target": "luckyone.us:443 [\"[tls11 TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA]\"]"
+      }
+    ],
+    "derived": {
+      "urls": [],
+      "domains": [
+        "luckyone.us"
+      ],
+      "cves": []
+    }
+  }
+}

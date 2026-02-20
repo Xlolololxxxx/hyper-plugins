@@ -1,0 +1,8 @@
+{
+  "tool": "traceroute",
+  "jc_parser": "traceroute",
+  "source_fixture": "ParsingGlobal/jc/tests/fixtures/centos-7.7/traceroute.out",
+  "case": 1,
+  "parsed_type": "dict",
+  "parsed_count": 5
+}

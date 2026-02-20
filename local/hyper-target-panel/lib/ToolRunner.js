@@ -1,182 +1,295 @@
-const path = require('path');
-const os = require('os');
-const { exec } = require('child_process');
-const OutputProcessor = require('./OutputProcessor');
+'use strict';
 
-const TEMP_DIR = path.join(os.homedir(), '.gemini/tmp');
+const path = require('path');
+const fs = require('fs');
+const OutputProcessor = require('./OutputProcessor');
+const { normalizeTarget } = require('./TargetNormalizer');
+const { renderCommand } = require('./CommandRenderer');
+const { buildLogFileName } = require('./LogFileNaming');
+const { resolveJcPlan } = require('./jc/JcRegistry');
+const ExecutionStrategyManager = require('./execution/ExecutionStrategyManager');
+const ExternalTerminalStrategy = require('./execution/ExternalTerminalStrategy');
+
+const DATA_DIR = path.resolve(__dirname, '../data');
+const RUNTIME_LOG_DIR = path.join(DATA_DIR, 'runtime');
+fs.mkdirSync(RUNTIME_LOG_DIR, { recursive: true });
 
 class ToolRunner {
-  constructor(rpc, store) {
+  constructor(rpc, store, callbacks) {
     this.rpc = rpc;
     this.store = store;
-    this.processor = new OutputProcessor();
+    this.onRunStatus = null;
+    this.onFindings = null;
+    if (typeof callbacks === 'function') {
+      this.onRunStatus = callbacks;
+    } else if (callbacks && typeof callbacks === 'object') {
+      this.onRunStatus = typeof callbacks.onRunStatus === 'function' ? callbacks.onRunStatus : null;
+      this.onFindings = typeof callbacks.onFindings === 'function' ? callbacks.onFindings : null;
+    }
+    this.onJcOutput = null;
+    if (callbacks && typeof callbacks === 'object') {
+      this.onJcOutput = typeof callbacks.onJcOutput === 'function' ? callbacks.onJcOutput : null;
+    }
+    this.processor = new OutputProcessor({
+      onFindings: (target, findings, context) => {
+        if (this.onFindings) this.onFindings(target, findings, context);
+      },
+      onJcOutput: (target, jcData, context) => {
+        if (this.onJcOutput) this.onJcOutput(target, jcData, context);
+      }
+    });
     this.launching = false;
     this.queue = [];
+
+    this.externalStrategy = new ExternalTerminalStrategy({
+      terminal: 'konsole',
+      shell: 'fish',
+      defaultMode: 'window',
+    });
+    this.strategyManager = new ExecutionStrategyManager([this.externalStrategy]);
   }
 
   stop() {
     if (this.processor) this.processor.stopAll();
   }
 
-  sanitizeTarget(target) {
-    if (!target) return 'target';
-    // Remove protocol and sanitize for filename
-    return target.replace(/^https?:\/\//, '').replace(/[\/:]/g, '_');
+  sanitizeTargetForFile(target) {
+    return String(target || 'target').replace(/[^a-zA-Z0-9._-]/g, '_');
+  }
+
+  emitRunStatus(event) {
+    if (this.onRunStatus) {
+      this.onRunStatus(event);
+    }
+
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('hyper-target-panel:run-status', { detail: event }));
+    }
   }
 
   launch(tool, data) {
     if (this.launching) {
-        this.queue.push({ tool, data });
-        return;
+      this.queue.push({ tool, data });
+      return;
     }
+
     this.launching = true;
+    this.launchInternal(tool, data)
+      .catch((err) => {
+        this.emitRunStatus({
+          toolId: tool && tool.id,
+          toolName: tool && tool.name,
+          status: 'failed',
+          transport: 'none',
+          error: err && err.message ? err.message : String(err),
+        });
+      })
+      .finally(() => {
+        this.launching = false;
+        this.processQueue();
+      });
+  }
 
-    // Refresh rpc/store references if needed
-    const activeRpc = this.rpc || window.rpc;
-    const activeStore = this.store || window.store;
-
-    if (!activeRpc || !activeStore) {
-      console.error("Hyper Target Panel: RPC or Store not available!");
-      // Retry acquiring from window
-      this.rpc = window.rpc;
-      this.store = window.store;
-
-      if (!this.rpc || !this.store) {
-          console.error("Hyper Target Panel: RPC or Store still not available after retry.");
-          this.launching = false;
-          return;
-      }
+  launchWorkflow(tools, data) {
+    if (this.launching) {
+      this.queue.push({ workflow: true, tools, data });
+      return;
     }
 
-    // Extract target and ports
+    this.launching = true;
+    this.launchWorkflowInternal(tools, data)
+      .catch((err) => {
+        this.emitRunStatus({
+          toolId: 'workflow',
+          toolName: 'Workflow',
+          status: 'failed',
+          transport: 'external_terminal',
+          error: err && err.message ? err.message : String(err),
+        });
+      })
+      .finally(() => {
+        this.launching = false;
+        this.processQueue();
+      });
+  }
+
+  prepareExecution(tool, data) {
     let target = 'localhost';
     let ports = [];
+    let schemeOverride = 'auto';
+    let wordlistFile = '';
     if (typeof data === 'string') {
-        target = data;
-    } else {
-        target = data.target || 'localhost';
-        ports = data.ports || [];
+      target = data;
+    } else if (data && typeof data === 'object') {
+      target = data.target || 'localhost';
+      ports = Array.isArray(data.ports) ? data.ports : [];
+      schemeOverride = data.schemeOverride || 'auto';
+      wordlistFile = data.wordlistFile || '';
     }
 
-    const targetSafe = this.sanitizeTarget(target);
-    const logFile = path.join(TEMP_DIR, `${targetSafe}_${tool.id}.log`);
-    
-    let cmd = tool.command;
-    let finalTarget = target;
+    const inputMode = tool && tool.input_mode ? String(tool.input_mode) : 'domain';
+    const normalizedTarget = normalizeTarget(target) || 'localhost';
+    const effectiveTarget = inputMode === 'url'
+      ? String(target || '').trim() || normalizedTarget
+      : normalizedTarget;
+    const targetSafe = this.sanitizeTargetForFile(normalizedTarget);
+    const logFile = path.join(RUNTIME_LOG_DIR, buildLogFileName(targetSafe, tool));
+    const jcPlan = resolveJcPlan(tool);
+    const jcParser = jcPlan ? jcPlan.parser : null;
+    const jcEngine = jcPlan ? jcPlan.engine : null;
+    const runId = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
 
-    // Intelligent Protocol Switching
-    // If command template expects HTTP but we have HTTPS port open (443), switch to HTTPS
-    if (cmd.includes('http://{target}')) {
-        if (ports.includes(443) || ports.includes('443')) {
-            cmd = cmd.replace('http://{target}', 'https://{target}');
-        }
-    }
-
-    // Handle duplicated protocol if target already has it and command also adds it
-    // (Though index.js strips protocol now, we keep this for safety or if user manually enters http://)
-    if (cmd.includes('http://{target}')) {
-        if (finalTarget.startsWith('http://') || finalTarget.startsWith('https://')) {
-            cmd = cmd.replace('http://{target}', '{target}');
-        }
-    } else if (cmd.includes('https://{target}')) {
-        if (finalTarget.startsWith('http://') || finalTarget.startsWith('https://')) {
-            cmd = cmd.replace('https://{target}', '{target}');
-        }
-    }
-
-    cmd = cmd
-      .replace(/{target}/g, finalTarget)
-      .replace(/{target_safe}/g, targetSafe)
-      .replace(/{log_file}/g, logFile);
-
-    // Support for {log:TOOL_ID}
-    cmd = cmd.replace(/{log:([a-zA-Z0-9_-]+)}/g, (match, toolId) => {
-        return path.join(TEMP_DIR, `${targetSafe}_${toolId}.log`);
+    const command = renderCommand(tool.command, {
+      target: normalizedTarget,
+      rawTarget: effectiveTarget,
+      ports,
+      targetSafe,
+      logFile,
+      tempDir: RUNTIME_LOG_DIR,
+      tool,
+      schemeOverride,
+      wordlistFile,
+      logPathByToolId: (toolId) => path.join(RUNTIME_LOG_DIR, buildLogFileName(targetSafe, { id: toolId })),
     });
 
-    console.log(`Launching ${tool.name}: ${cmd}`);
+    return { normalizedTarget, effectiveTarget, logFile, command, jcParser, jcEngine, runId };
+  }
 
-    // Start watching output
+  async launchInternal(tool, data) {
+    const { normalizedTarget, logFile, command, jcParser, jcEngine, runId } = this.prepareExecution(tool, data);
+
+    this.emitRunStatus({
+      toolId: tool.id,
+      toolName: tool.name,
+      target: normalizedTarget,
+      command,
+      logFile,
+      status: 'running',
+      transport: 'pending',
+      startedAt: Date.now(),
+    });
+
     if (this.processor && this.processor.watch) {
-        this.processor.watch(logFile, tool.parser || 'generic');
+      this.processor.watch(logFile, tool.parser || 'generic', {
+        target: normalizedTarget,
+        toolId: tool.id,
+        toolName: tool.name,
+        jcParser,
+        jcEngine,
+        runId,
+      });
     }
 
-    // Execute in new tab
-    let oldActiveUid = null;
-    try {
-        const state = activeStore.getState();
-        if (state && state.termgroups) {
-            oldActiveUid = state.termgroups.activeUid;
-        }
-    } catch (e) {
-        console.warn("Hyper Target Panel: Could not get old activeUid", e);
+    const result = await this.strategyManager.launch({
+      command,
+      target: normalizedTarget,
+      tool,
+      logFile,
+      konsoleMode: 'window',
+    });
+
+    if (result && result.started) {
+      this.emitRunStatus({
+        toolId: tool.id,
+        toolName: tool.name,
+        target: normalizedTarget,
+        command,
+        logFile,
+        status: 'started',
+        transport: result.transport,
+        sessionUid: result.sessionUid,
+        pid: result.pid,
+        startedAt: Date.now(),
+      });
+      return;
     }
 
-    activeRpc.emit('termgroups:new');
-    
-    // Wait for the new tab to be active
-    let attempts = 0;
-    // Small delay to allow React state to update
-    setTimeout(() => {
-        const checkActive = setInterval(() => {
-            try {
-                // Always check current store
-                const currentStore = this.store || window.store;
-                const state = currentStore ? currentStore.getState() : null;
-                
-                if (!state || !state.termgroups) {
-                     attempts++;
-                     if (attempts > 50) {
-                         clearInterval(checkActive);
-                         this.launching = false;
-                         this.processQueue();
-                     }
-                     return;
-                }
+    this.emitRunStatus({
+      toolId: tool.id,
+      toolName: tool.name,
+      target: normalizedTarget,
+      command,
+      logFile,
+      status: 'failed',
+      transport: (result && result.transport) || 'none',
+      error: (result && result.error) || 'unable to launch command',
+      endedAt: Date.now(),
+    });
+  }
 
-                const activeUid = state.termgroups.activeUid;
+  async launchWorkflowInternal(tools, data) {
+    const list = Array.isArray(tools) ? tools : [];
+    for (let i = 0; i < list.length; i++) {
+      const tool = list[i];
+      if (!tool || !tool.command) continue;
+      const prepared = this.prepareExecution(tool, data);
 
-                // Check if activeUid changed AND is valid
-                if (activeUid && activeUid !== oldActiveUid) {
-                    clearInterval(checkActive);
+      this.emitRunStatus({
+        toolId: tool.id,
+        toolName: tool.name,
+        target: prepared.normalizedTarget,
+        command: prepared.command,
+        logFile: prepared.logFile,
+        status: 'running',
+        transport: 'pending',
+        startedAt: Date.now(),
+      });
 
-                    // Send the command with a slight delay to ensure shell is ready
-                    setTimeout(() => {
-                        activeRpc.emit('data', { uid: activeUid, data: cmd + '\n' });
+      if (this.processor && this.processor.watch) {
+        this.processor.watch(prepared.logFile, tool.parser || 'generic', {
+          target: prepared.normalizedTarget,
+          toolId: tool.id,
+          toolName: tool.name,
+          jcParser: prepared.jcParser,
+          jcEngine: prepared.jcEngine,
+          runId: prepared.runId,
+        });
+      }
 
-                        // Done, move to next after a small delay to let tab settle
-                        setTimeout(() => {
-                            this.launching = false;
-                            this.processQueue();
-                        }, 500);
-                    }, 300);
+      const result = await this.externalStrategy.launch({
+        command: prepared.command,
+        konsoleMode: i === 0 ? 'window' : 'tab',
+      });
 
-                } else if (attempts > 50) { // 5 seconds timeout
-                    clearInterval(checkActive);
-                    console.error("Hyper Target Panel: No active terminal found after creating new tab (timeout).");
-                    // Fallback: try the current active one if we really have to
-                    if (activeUid) {
-                        activeRpc.emit('data', { uid: activeUid, data: cmd + '\n' });
-                    }
-                    this.launching = false;
-                    this.processQueue();
-                }
-                attempts++;
-            } catch (e) {
-                clearInterval(checkActive);
-                console.error("Hyper Target Panel: Error sending command to terminal", e);
-                this.launching = false;
-                this.processQueue();
-            }
-        }, 100);
-    }, 50);
+      if (result && result.started) {
+        this.emitRunStatus({
+          toolId: tool.id,
+          toolName: tool.name,
+          target: prepared.normalizedTarget,
+          command: prepared.command,
+          logFile: prepared.logFile,
+          status: 'started',
+          transport: result.transport,
+          pid: result.pid,
+          startedAt: Date.now(),
+        });
+      } else {
+        this.emitRunStatus({
+          toolId: tool.id,
+          toolName: tool.name,
+          target: prepared.normalizedTarget,
+          command: prepared.command,
+          logFile: prepared.logFile,
+          status: 'failed',
+          transport: (result && result.transport) || 'external_terminal',
+          error: (result && result.error) || 'unable to launch workflow command',
+          endedAt: Date.now(),
+        });
+      }
+
+      // Let Konsole fully register the window/tab before issuing the next tab request.
+      await new Promise((resolve) => setTimeout(resolve, i === 0 ? 260 : 180));
+    }
   }
 
   processQueue() {
-      if (this.queue.length > 0) {
-          const { tool, data } = this.queue.shift();
-          this.launch(tool, data);
-      }
+    if (this.queue.length === 0) return;
+    const next = this.queue.shift();
+    if (next.workflow) {
+      this.launchWorkflow(next.tools, next.data);
+      return;
+    }
+    this.launch(next.tool, next.data);
   }
 }
 

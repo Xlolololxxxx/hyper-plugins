@@ -1,0 +1,44 @@
+{
+  "target": "luckyone.us",
+  "toolId": "curl_headers",
+  "toolName": "CURL HEADERS",
+  "parser": "curl_head",
+  "parserEngine": "jc",
+  "runId": "1771574262961_db0kol",
+  "sourceLogFile": null,
+  "capturedAt": "2026-02-20T07:57:43.958Z",
+  "data": [
+    {
+      "_type": "response",
+      "_response_version": "HTTP/2",
+      "_response_status": 307,
+      "_response_reason": null,
+      "date": "Fri, 20 Feb 2026 07:57:43 GMT",
+      "server": [
+        "cloudflare"
+      ],
+      "permissions-policy": [
+        "camera=*"
+      ],
+      "x-content-type-options": "nosniff",
+      "x-frame-options": "DENY",
+      "x-xss-protection": "1; mode=block",
+      "location": "/en",
+      "set-cookie": [
+        "NEXT_LOCALE=en; Path=/; Expires=Sat, 20 Feb 2027 07:57:43 GMT; Max-Age=31536000; SameSite=strict"
+      ],
+      "x-cache": "BYPASS",
+      "cache-control": [
+        "no-store"
+      ],
+      "x-debug-loc": "root",
+      "cf-cache-status": "DYNAMIC",
+      "speculation-rules": "\"/cdn-cgi/speculation\"",
+      "cf-ray": "9d0c7469fd574e01-MCI",
+      "alt-svc": [
+        "h3=\":443\"; ma=86400"
+      ],
+      "date_epoch_utc": 1771574263
+    }
+  ]
+}

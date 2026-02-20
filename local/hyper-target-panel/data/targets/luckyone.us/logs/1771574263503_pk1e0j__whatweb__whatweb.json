@@ -1,0 +1,86 @@
+{
+  "target": "luckyone.us",
+  "toolId": "whatweb",
+  "toolName": "WHATWEB",
+  "parser": "whatweb",
+  "parserEngine": "adapter",
+  "runId": "1771574263503_pk1e0j",
+  "sourceLogFile": null,
+  "capturedAt": "2026-02-20T07:58:49.841Z",
+  "data": {
+    "parser": "whatweb",
+    "engine": "jc-adapter",
+    "summary": {
+      "line_count": 2,
+      "record_count": 2,
+      "domain_count": 1,
+      "url_count": 2,
+      "vuln_count": 0
+    },
+    "findings": {
+      "ports": [],
+      "vulns": [],
+      "paths": [],
+      "domains": [
+        "luckyone.us"
+      ]
+    },
+    "records": [
+      {
+        "type": "tech",
+        "plugins": [
+          "\u001b[1m\u001b[34mhttps://luckyone.us\u001b[0m [307 Temporary Redirect] \u001b[1mCookies\u001b[0m[\u001b[0m\u001b[22mNEXT_LOCALE\u001b[0m]",
+          "\u001b[1mCountry\u001b[0m[\u001b[0m\u001b[22mUNITED STATES\u001b[0m][\u001b[1m\u001b[31mUS\u001b[0m]",
+          "\u001b[1mHTTPServer\u001b[0m[\u001b[1m\u001b[36mcloudflare\u001b[0m]",
+          "\u001b[1mIP\u001b[0m[\u001b[0m\u001b[22m104.20.17.116\u001b[0m]",
+          "\u001b[1mRedirectLocation\u001b[0m[\u001b[0m\u001b[22m/en\u001b[0m]",
+          "\u001b[1mUncommonHeaders\u001b[0m[\u001b[0m\u001b[22mspeculation-rules",
+          "permissions-policy",
+          "x-content-type-options",
+          "x-debug-loc",
+          "cf-cache-status",
+          "cf-ray",
+          "alt-svc\u001b[0m]",
+          "\u001b[1mX-Frame-Options\u001b[0m[\u001b[0m\u001b[22mDENY\u001b[0m]",
+          "\u001b[1mX-XSS-Protection\u001b[0m[\u001b[0m\u001b[22m1; mode=block\u001b[0m]"
+        ]
+      },
+      {
+        "type": "tech",
+        "plugins": [
+          "\u001b[1m\u001b[34mhttps://luckyone.us/en\u001b[0m [200 OK] \u001b[1mCountry\u001b[0m[\u001b[0m\u001b[22mRESERVED\u001b[0m][\u001b[1m\u001b[31mZZ\u001b[0m]",
+          "\u001b[1mEmail\u001b[0m[\u001b[0m\u001b[22msupport@luckyone.us\u001b[0m]",
+          "\u001b[1mFrame\u001b[0m",
+          "\u001b[1mGoogle-Tag-Manager\u001b[0m",
+          "\u001b[1mHTML5\u001b[0m",
+          "\u001b[1mHTTPServer\u001b[0m[\u001b[1m\u001b[36mcloudflare\u001b[0m]",
+          "\u001b[1mIP\u001b[0m[\u001b[0m\u001b[22m172.66.173.75\u001b[0m]",
+          "\u001b[1mOpen-Graph-Protocol\u001b[0m[\u001b[1m\u001b[32mwebsite\u001b[0m]",
+          "\u001b[1mScript\u001b[0m",
+          "\u001b[1mTitle\u001b[0m[\u001b[1m\u001b[33mLuckyone online casino | Luckyone\u001b[0m]",
+          "\u001b[1mUncommonHeaders\u001b[0m[\u001b[0m\u001b[22mspeculation-rules",
+          "permissions-policy",
+          "x-content-type-options",
+          "x-middleware-rewrite",
+          "link",
+          "x-debug-loc",
+          "cf-cache-status",
+          "cf-ray",
+          "alt-svc\u001b[0m]",
+          "\u001b[1mX-Frame-Options\u001b[0m[\u001b[0m\u001b[22mDENY\u001b[0m]",
+          "\u001b[1mX-XSS-Protection\u001b[0m[\u001b[0m\u001b[22m1; mode=block\u001b[0m]"
+        ]
+      }
+    ],
+    "derived": {
+      "urls": [
+        "https://luckyone.us\u001b[0m",
+        "https://luckyone.us/en\u001b[0m"
+      ],
+      "domains": [
+        "luckyone.us"
+      ],
+      "cves": []
+    }
+  }
+}

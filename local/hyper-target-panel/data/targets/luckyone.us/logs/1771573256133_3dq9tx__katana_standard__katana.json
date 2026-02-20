@@ -1,0 +1,351 @@
+{
+  "target": "luckyone.us",
+  "toolId": "katana_standard",
+  "toolName": "KATANA STANDARD",
+  "parser": "katana",
+  "parserEngine": "adapter",
+  "runId": "1771573256133_3dq9tx",
+  "sourceLogFile": null,
+  "capturedAt": "2026-02-20T07:41:50.137Z",
+  "data": {
+    "parser": "katana",
+    "engine": "jc-adapter",
+    "summary": {
+      "line_count": 38,
+      "record_count": 38,
+      "domain_count": 12,
+      "url_count": 36,
+      "vuln_count": 0
+    },
+    "findings": {
+      "ports": [],
+      "vulns": [],
+      "paths": [
+        "/",
+        "/en",
+        "/_next/static/css/d6749f5146f01bc5.css",
+        "/uploads/social_raf_9318023bba.gif%5C",
+        "/uploads/social_jackpots_3bdef00d51.gif%5C",
+        "/uploads/social_leaderboard_8f07341802.gif%5C",
+        "/static/chunks/redux-8611c0a3e018ed00.js",
+        "/static/chunks/app/%5Blocale%5D/not-found-c29322a4fabe8c48.js",
+        "/static/chunks/app/%5Blocale%5D/error-ef318d136413d820.js",
+        "/static/chunks/app/%5Blocale%5D/page-1f950ee707c85df4.js",
+        "/static/css/7717a9d33c8bec47.css",
+        "/static/chunks/vendor-d7fc04e8ff004eca.js",
+        "/static/chunks/common-282dc60bf6b32521.js",
+        "/uploads/Social_center_01_ezgif_com_optimize_4b8aaeb606.gif%5C",
+        "/uploads/social_challenges_83eea45cce.gif%5C",
+        "/static/chunks/ui-45b66ed22e95f97f.js",
+        "/static/chunks/app/global-error-69f8225081eab15a.js",
+        "/static/chunks/tic/chunks/redux-8611c0a3e018ed00.js",
+        "/static/chunks/app/%5Blocale%5D/chunks/app/%5Blocale%5D/error-ef318d136413d820.js",
+        "/static/chunks/app/%5Blocale%5D/tic/chunks/redux-8611c0a3e018ed00.js",
+        "/static/chunks/app/%5Blocale%5D/atic/chunks/redux-8611c0a3e018ed00.js",
+        "/static/chunks/app/%5Blocale%5D/static/chunks/app/%5Blocale%5D/not-found-c29322a4fabe8c48.js",
+        "/static/css/tic/chunks/redux-8611c0a3e018ed00.js",
+        "/static/chunks/chunks/vendor-d7fc04e8ff004eca.js",
+        "/static/chunks/chunks/common-282dc60bf6b32521.js",
+        "/static/css/static/chunks/app/%5Blocale%5D/not-found-c29322a4fabe8c48.js",
+        "/static/css/static/chunks/app/%5Blocale%5D/error-ef318d136413d820.js",
+        "/static/css/atic/chunks/redux-8611c0a3e018ed00.js",
+        "/static/css/static/chunks/app/%5Blocale%5D/page-1f950ee707c85df4.js",
+        "/static/chunks/tic/chunks/tic/chunks/redux-8611c0a3e018ed00.js",
+        "/static/chunks/app/%5Blocale%5D/chunks/app/%5Blocale%5D/tic/chunks/redux-8611c0a3e018ed00.js",
+        "/static/chunks/app/%5Blocale%5D/tic/chunks/tic/chunks/redux-8611c0a3e018ed00.js",
+        "/static/chunks/app/%5Blocale%5D/atic/chunks/tic/chunks/redux-8611c0a3e018ed00.js",
+        "/static/chunks/app/%5Blocale%5D/static/chunks/app/%5Blocale%5D/tic/chunks/redux-8611c0a3e018ed00.js",
+        "/static/css/tic/chunks/tic/chunks/redux-8611c0a3e018ed00.js"
+      ],
+      "domains": [
+        "luckyone.us",
+        "cms.luckyone.us"
+      ]
+    },
+    "records": [
+      {
+        "type": "url",
+        "url": "https://luckyone.us",
+        "host": "luckyone.us",
+        "path": "/"
+      },
+      {
+        "type": "url",
+        "url": "https://luckyone.us/en",
+        "host": "luckyone.us",
+        "path": "/en"
+      },
+      {
+        "type": "url",
+        "url": "https://luckyone.us/_next/static/css/d6749f5146f01bc5.css",
+        "host": "luckyone.us",
+        "path": "/_next/static/css/d6749f5146f01bc5.css"
+      },
+      {
+        "type": "url",
+        "url": "https://cms.luckyone.us/en",
+        "host": "cms.luckyone.us",
+        "path": "/en"
+      },
+      {
+        "type": "url",
+        "url": "https://cms.luckyone.us/uploads/social_raf_9318023bba.gif%5C",
+        "host": "cms.luckyone.us",
+        "path": "/uploads/social_raf_9318023bba.gif%5C"
+      },
+      {
+        "type": "url",
+        "url": "https://luckyone.us/en",
+        "host": "luckyone.us",
+        "path": "/en"
+      },
+      {
+        "type": "url",
+        "url": "https://cms.luckyone.us/uploads/social_jackpots_3bdef00d51.gif%5C",
+        "host": "cms.luckyone.us",
+        "path": "/uploads/social_jackpots_3bdef00d51.gif%5C"
+      },
+      {
+        "type": "url",
+        "url": "https://cms.luckyone.us/uploads/social_leaderboard_8f07341802.gif%5C",
+        "host": "cms.luckyone.us",
+        "path": "/uploads/social_leaderboard_8f07341802.gif%5C"
+      },
+      {
+        "type": "url",
+        "url": "https://luckyone.us/en",
+        "host": "luckyone.us",
+        "path": "/en"
+      },
+      {
+        "type": "url",
+        "url": "https://luckyone.us/static/chunks/redux-8611c0a3e018ed00.js",
+        "host": "luckyone.us",
+        "path": "/static/chunks/redux-8611c0a3e018ed00.js"
+      },
+      {
+        "type": "url",
+        "url": "https://luckyone.us/static/chunks/app/%5Blocale%5D/not-found-c29322a4fabe8c48.js",
+        "host": "luckyone.us",
+        "path": "/static/chunks/app/%5Blocale%5D/not-found-c29322a4fabe8c48.js"
+      },
+      {
+        "type": "url",
+        "url": "https://luckyone.us/static/chunks/app/%5Blocale%5D/error-ef318d136413d820.js",
+        "host": "luckyone.us",
+        "path": "/static/chunks/app/%5Blocale%5D/error-ef318d136413d820.js"
+      },
+      {
+        "type": "url",
+        "url": "https://luckyone.us/static/chunks/app/%5Blocale%5D/page-1f950ee707c85df4.js",
+        "host": "luckyone.us",
+        "path": "/static/chunks/app/%5Blocale%5D/page-1f950ee707c85df4.js"
+      },
+      {
+        "type": "url",
+        "url": "https://luckyone.us/static/css/7717a9d33c8bec47.css",
+        "host": "luckyone.us",
+        "path": "/static/css/7717a9d33c8bec47.css"
+      },
+      {
+        "type": "url",
+        "url": "https://luckyone.us/static/chunks/vendor-d7fc04e8ff004eca.js",
+        "host": "luckyone.us",
+        "path": "/static/chunks/vendor-d7fc04e8ff004eca.js"
+      },
+      {
+        "type": "url",
+        "url": "https://luckyone.us/static/chunks/common-282dc60bf6b32521.js",
+        "host": "luckyone.us",
+        "path": "/static/chunks/common-282dc60bf6b32521.js"
+      },
+      {
+        "type": "url",
+        "url": "https://cms.luckyone.us/uploads/Social_center_01_ezgif_com_optimize_4b8aaeb606.gif%5C",
+        "host": "cms.luckyone.us",
+        "path": "/uploads/Social_center_01_ezgif_com_optimize_4b8aaeb606.gif%5C"
+      },
+      {
+        "type": "url",
+        "url": "https://cms.luckyone.us/uploads/social_challenges_83eea45cce.gif%5C",
+        "host": "cms.luckyone.us",
+        "path": "/uploads/social_challenges_83eea45cce.gif%5C"
+      },
+      {
+        "type": "url",
+        "url": "https://luckyone.us/static/chunks/ui-45b66ed22e95f97f.js",
+        "host": "luckyone.us",
+        "path": "/static/chunks/ui-45b66ed22e95f97f.js"
+      },
+      {
+        "type": "url",
+        "url": "https://luckyone.us/static/chunks/app/global-error-69f8225081eab15a.js",
+        "host": "luckyone.us",
+        "path": "/static/chunks/app/global-error-69f8225081eab15a.js"
+      },
+      {
+        "type": "url",
+        "url": "https://luckyone.us/static/chunks/tic/chunks/redux-8611c0a3e018ed00.js",
+        "host": "luckyone.us",
+        "path": "/static/chunks/tic/chunks/redux-8611c0a3e018ed00.js"
+      },
+      {
+        "type": "url",
+        "url": "https://luckyone.us/static/chunks/app/%5Blocale%5D/chunks/app/%5Blocale%5D/error-ef318d136413d820.js",
+        "host": "luckyone.us",
+        "path": "/static/chunks/app/%5Blocale%5D/chunks/app/%5Blocale%5D/error-ef318d136413d820.js"
+      },
+      {
+        "type": "url",
+        "url": "https://luckyone.us/static/chunks/app/%5Blocale%5D/tic/chunks/redux-8611c0a3e018ed00.js",
+        "host": "luckyone.us",
+        "path": "/static/chunks/app/%5Blocale%5D/tic/chunks/redux-8611c0a3e018ed00.js"
+      },
+      {
+        "type": "url",
+        "url": "https://luckyone.us/static/chunks/app/%5Blocale%5D/atic/chunks/redux-8611c0a3e018ed00.js",
+        "host": "luckyone.us",
+        "path": "/static/chunks/app/%5Blocale%5D/atic/chunks/redux-8611c0a3e018ed00.js"
+      },
+      {
+        "type": "url",
+        "url": "https://luckyone.us/static/chunks/app/%5Blocale%5D/static/chunks/app/%5Blocale%5D/not-found-c29322a4fabe8c48.js",
+        "host": "luckyone.us",
+        "path": "/static/chunks/app/%5Blocale%5D/static/chunks/app/%5Blocale%5D/not-found-c29322a4fabe8c48.js"
+      },
+      {
+        "type": "url",
+        "url": "https://luckyone.us/static/css/tic/chunks/redux-8611c0a3e018ed00.js",
+        "host": "luckyone.us",
+        "path": "/static/css/tic/chunks/redux-8611c0a3e018ed00.js"
+      },
+      {
+        "type": "url",
+        "url": "https://luckyone.us/static/chunks/chunks/vendor-d7fc04e8ff004eca.js",
+        "host": "luckyone.us",
+        "path": "/static/chunks/chunks/vendor-d7fc04e8ff004eca.js"
+      },
+      {
+        "type": "url",
+        "url": "https://luckyone.us/static/chunks/chunks/common-282dc60bf6b32521.js",
+        "host": "luckyone.us",
+        "path": "/static/chunks/chunks/common-282dc60bf6b32521.js"
+      },
+      {
+        "type": "url",
+        "url": "https://luckyone.us/static/css/static/chunks/app/%5Blocale%5D/not-found-c29322a4fabe8c48.js",
+        "host": "luckyone.us",
+        "path": "/static/css/static/chunks/app/%5Blocale%5D/not-found-c29322a4fabe8c48.js"
+      },
+      {
+        "type": "url",
+        "url": "https://luckyone.us/static/css/static/chunks/app/%5Blocale%5D/error-ef318d136413d820.js",
+        "host": "luckyone.us",
+        "path": "/static/css/static/chunks/app/%5Blocale%5D/error-ef318d136413d820.js"
+      },
+      {
+        "type": "url",
+        "url": "https://luckyone.us/static/css/atic/chunks/redux-8611c0a3e018ed00.js",
+        "host": "luckyone.us",
+        "path": "/static/css/atic/chunks/redux-8611c0a3e018ed00.js"
+      },
+      {
+        "type": "url",
+        "url": "https://luckyone.us/static/css/static/chunks/app/%5Blocale%5D/page-1f950ee707c85df4.js",
+        "host": "luckyone.us",
+        "path": "/static/css/static/chunks/app/%5Blocale%5D/page-1f950ee707c85df4.js"
+      },
+      {
+        "type": "url",
+        "url": "https://luckyone.us/static/chunks/tic/chunks/tic/chunks/redux-8611c0a3e018ed00.js",
+        "host": "luckyone.us",
+        "path": "/static/chunks/tic/chunks/tic/chunks/redux-8611c0a3e018ed00.js"
+      },
+      {
+        "type": "url",
+        "url": "https://luckyone.us/static/chunks/app/%5Blocale%5D/chunks/app/%5Blocale%5D/tic/chunks/redux-8611c0a3e018ed00.js",
+        "host": "luckyone.us",
+        "path": "/static/chunks/app/%5Blocale%5D/chunks/app/%5Blocale%5D/tic/chunks/redux-8611c0a3e018ed00.js"
+      },
+      {
+        "type": "url",
+        "url": "https://luckyone.us/static/chunks/app/%5Blocale%5D/tic/chunks/tic/chunks/redux-8611c0a3e018ed00.js",
+        "host": "luckyone.us",
+        "path": "/static/chunks/app/%5Blocale%5D/tic/chunks/tic/chunks/redux-8611c0a3e018ed00.js"
+      },
+      {
+        "type": "url",
+        "url": "https://luckyone.us/static/chunks/app/%5Blocale%5D/atic/chunks/tic/chunks/redux-8611c0a3e018ed00.js",
+        "host": "luckyone.us",
+        "path": "/static/chunks/app/%5Blocale%5D/atic/chunks/tic/chunks/redux-8611c0a3e018ed00.js"
+      },
+      {
+        "type": "url",
+        "url": "https://luckyone.us/static/chunks/app/%5Blocale%5D/static/chunks/app/%5Blocale%5D/tic/chunks/redux-8611c0a3e018ed00.js",
+        "host": "luckyone.us",
+        "path": "/static/chunks/app/%5Blocale%5D/static/chunks/app/%5Blocale%5D/tic/chunks/redux-8611c0a3e018ed00.js"
+      },
+      {
+        "type": "url",
+        "url": "https://luckyone.us/static/css/tic/chunks/tic/chunks/redux-8611c0a3e018ed00.js",
+        "host": "luckyone.us",
+        "path": "/static/css/tic/chunks/tic/chunks/redux-8611c0a3e018ed00.js"
+      }
+    ],
+    "derived": {
+      "urls": [
+        "https://luckyone.us",
+        "https://luckyone.us/en",
+        "https://luckyone.us/_next/static/css/d6749f5146f01bc5.css",
+        "https://cms.luckyone.us/en",
+        "https://cms.luckyone.us/uploads/social_raf_9318023bba.gif%5C",
+        "https://cms.luckyone.us/uploads/social_jackpots_3bdef00d51.gif%5C",
+        "https://cms.luckyone.us/uploads/social_leaderboard_8f07341802.gif%5C",
+        "https://luckyone.us/static/chunks/redux-8611c0a3e018ed00.js",
+        "https://luckyone.us/static/chunks/app/%5Blocale%5D/not-found-c29322a4fabe8c48.js",
+        "https://luckyone.us/static/chunks/app/%5Blocale%5D/error-ef318d136413d820.js",
+        "https://luckyone.us/static/chunks/app/%5Blocale%5D/page-1f950ee707c85df4.js",
+        "https://luckyone.us/static/css/7717a9d33c8bec47.css",
+        "https://luckyone.us/static/chunks/vendor-d7fc04e8ff004eca.js",
+        "https://luckyone.us/static/chunks/common-282dc60bf6b32521.js",
+        "https://cms.luckyone.us/uploads/Social_center_01_ezgif_com_optimize_4b8aaeb606.gif%5C",
+        "https://cms.luckyone.us/uploads/social_challenges_83eea45cce.gif%5C",
+        "https://luckyone.us/static/chunks/ui-45b66ed22e95f97f.js",
+        "https://luckyone.us/static/chunks/app/global-error-69f8225081eab15a.js",
+        "https://luckyone.us/static/chunks/tic/chunks/redux-8611c0a3e018ed00.js",
+        "https://luckyone.us/static/chunks/app/%5Blocale%5D/chunks/app/%5Blocale%5D/error-ef318d136413d820.js",
+        "https://luckyone.us/static/chunks/app/%5Blocale%5D/tic/chunks/redux-8611c0a3e018ed00.js",
+        "https://luckyone.us/static/chunks/app/%5Blocale%5D/atic/chunks/redux-8611c0a3e018ed00.js",
+        "https://luckyone.us/static/chunks/app/%5Blocale%5D/static/chunks/app/%5Blocale%5D/not-found-c29322a4fabe8c48.js",
+        "https://luckyone.us/static/css/tic/chunks/redux-8611c0a3e018ed00.js",
+        "https://luckyone.us/static/chunks/chunks/vendor-d7fc04e8ff004eca.js",
+        "https://luckyone.us/static/chunks/chunks/common-282dc60bf6b32521.js",
+        "https://luckyone.us/static/css/static/chunks/app/%5Blocale%5D/not-found-c29322a4fabe8c48.js",
+        "https://luckyone.us/static/css/static/chunks/app/%5Blocale%5D/error-ef318d136413d820.js",
+        "https://luckyone.us/static/css/atic/chunks/redux-8611c0a3e018ed00.js",
+        "https://luckyone.us/static/css/static/chunks/app/%5Blocale%5D/page-1f950ee707c85df4.js",
+        "https://luckyone.us/static/chunks/tic/chunks/tic/chunks/redux-8611c0a3e018ed00.js",
+        "https://luckyone.us/static/chunks/app/%5Blocale%5D/chunks/app/%5Blocale%5D/tic/chunks/redux-8611c0a3e018ed00.js",
+        "https://luckyone.us/static/chunks/app/%5Blocale%5D/tic/chunks/tic/chunks/redux-8611c0a3e018ed00.js",
+        "https://luckyone.us/static/chunks/app/%5Blocale%5D/atic/chunks/tic/chunks/redux-8611c0a3e018ed00.js",
+        "https://luckyone.us/static/chunks/app/%5Blocale%5D/static/chunks/app/%5Blocale%5D/tic/chunks/redux-8611c0a3e018ed00.js",
+        "https://luckyone.us/static/css/tic/chunks/tic/chunks/redux-8611c0a3e018ed00.js"
+      ],
+      "domains": [
+        "luckyone.us",
+        "d6749f5146f01bc5.css",
+        "cms.luckyone.us",
+        "redux-8611c0a3e018ed00.js",
+        "not-found-c29322a4fabe8c48.js",
+        "error-ef318d136413d820.js",
+        "page-1f950ee707c85df4.js",
+        "7717a9d33c8bec47.css",
+        "vendor-d7fc04e8ff004eca.js",
+        "common-282dc60bf6b32521.js",
+        "ui-45b66ed22e95f97f.js",
+        "global-error-69f8225081eab15a.js"
+      ],
+      "cves": []
+    }
+  }
+}

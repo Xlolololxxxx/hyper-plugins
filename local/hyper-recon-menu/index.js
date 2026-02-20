@@ -1,4 +1,5 @@
 'use strict';
+const { diffVisibleRows } = require('./viewportDiff');
 
 // ══════════════════════════════════════════════════════════════
 //  HYPER RECON MENU
@@ -263,6 +264,9 @@ exports.decorateTerm = (Term, { React }) => {
       this._scanTimer = null;
       this._disposables = [];
       this._cache = new Map();
+      this._visibleRows = new Map();
+      this._iconsByRow = new Map();
+      this._cellSig = '';
     }
 
     _onDecorated(term) {
@@ -303,7 +307,11 @@ exports.decorateTerm = (Term, { React }) => {
       this._disposables.push(
         xterm.onRender(() => this._queueScan()),
         xterm.onScroll(() => this._queueScan()),
-        xterm.onResize(() => { this._cache.clear(); this._queueScan(); }),
+        xterm.onResize(() => {
+          this._cache.clear();
+          this._cellSig = '';
+          this._queueScan();
+        }),
       );
 
       this._queueScan();
@@ -337,34 +345,61 @@ exports.decorateTerm = (Term, { React }) => {
       const xterm = this._xterm;
       const buf = xterm.buffer.active;
       const cell = this._cellSize();
-
-      // Clear all existing icons
-      this._overlay.innerHTML = '';
+      const nextRows = new Map();
 
       for (let vr = 0; vr < xterm.rows; vr++) {
         const br = buf.viewportY + vr;
         const line = buf.getLine(br);
         if (!line) continue;
+        nextRows.set(br, { vr, text: line.translateToString(true) });
+      }
 
-        const text = line.translateToString(true);
-        if (!text.trim()) continue;
+      const diff = diffVisibleRows(this._visibleRows, nextRows);
+      const updateSet = new Set(diff.update);
+      const nextCellSig = `${cell.w}:${cell.h}`;
+      const geometryChanged = this._cellSig !== nextCellSig;
+      this._cellSig = nextCellSig;
 
-        // Check cache by buffer row + content
-        const key = `${br}:${text}`;
+      if (geometryChanged) {
+        for (const br of nextRows.keys()) updateSet.add(br);
+      }
+
+      for (const br of diff.remove) this._removeRowIcons(br);
+
+      for (const br of updateSet) {
+        const row = nextRows.get(br);
+        this._removeRowIcons(br);
+        if (!row || !row.text || !row.text.trim()) continue;
+
+        // Cache by buffer row + content so unchanged rows skip regex work.
+        const key = `${br}:${row.text}`;
         let matches = this._cache.get(key);
         if (!matches) {
-          matches = findMatchesInLine(text);
+          matches = findMatchesInLine(row.text);
           this._cache.set(key, matches);
-          // Evict oldest if cache too large
           if (this._cache.size > 500) {
             this._cache.delete(this._cache.keys().next().value);
           }
         }
 
+        if (!matches.length) continue;
+        const rowIcons = [];
         for (const match of matches) {
-          this._placeIcon(vr, match, cell);
+          rowIcons.push(this._placeIcon(row.vr, match, cell));
         }
+        this._iconsByRow.set(br, rowIcons);
       }
+
+      this._visibleRows = nextRows;
+    }
+
+    _removeRowIcons(br) {
+      const icons = this._iconsByRow.get(br);
+      if (!icons) return;
+      for (const el of icons) {
+        if (el && el.remove) el.remove();
+      }
+      this._iconsByRow.delete(br);
     }
 
     _placeIcon(viewRow, match, cell) {
@@ -414,11 +449,18 @@ exports.decorateTerm = (Term, { React }) => {
         }
 
         window.dispatchEvent(new CustomEvent('hyper-target-panel:open-tool-selector', {
-            detail: { target: target, type: type }
+            detail: {
+              target: target,
+              type: type,
+              actions: [
+                { id: 'set_target', label: 'Set Target' }
+              ]
+            }
         }));
       });
 
       this._overlay.appendChild(el);
+      return el;
     }
 
     componentWillUnmount() {
@@ -427,6 +469,8 @@ exports.decorateTerm = (Term, { React }) => {
       this._disposables = [];
       if (this._overlay) { this._overlay.remove(); this._overlay = null; }
       this._cache.clear();
+      this._visibleRows.clear();
+      this._iconsByRow.clear();
     }
 
     render() {
