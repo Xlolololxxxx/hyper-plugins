@@ -3,11 +3,12 @@
 const fs = require('fs');
 const path = require('path');
 const { normalizeTarget } = require('../TargetNormalizer');
+const { DATA_DIR } = require('../PathResolver');
 
 class TargetStore {
   constructor(options) {
     const opts = options || {};
-    this.baseDir = opts.baseDir || path.join(require('os').homedir(), '.gemini/tmp');
+    this.baseDir = opts.baseDir || DATA_DIR;
     this.configFile = path.join(this.baseDir, 'target_config.json');
     this.jsonDir = path.join(this.baseDir, 'targets');
 

@@ -2,7 +2,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const os = require('os');
+const { getWordlistRoots } = require('./PathResolver');
 
 const PROFILE_FILTERS = {
   dir_enum: {
@@ -68,8 +68,7 @@ const PROFILE_FILTERS = {
 };
 
 function defaultRoots() {
-  const home = os.homedir();
-  return [path.join(home, 'Wordlists'), path.join(home, 'Wordlist')];
+  return getWordlistRoots();
 }
 
 function listTextFiles(dir, out) {

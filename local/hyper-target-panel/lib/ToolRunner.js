@@ -9,8 +9,8 @@ const { buildLogFileName } = require('./LogFileNaming');
 const { resolveJcPlan } = require('./jc/JcRegistry');
 const ExecutionStrategyManager = require('./execution/ExecutionStrategyManager');
 const ExternalTerminalStrategy = require('./execution/ExternalTerminalStrategy');
+const { DATA_DIR } = require('./PathResolver');
 
-const DATA_DIR = path.resolve(__dirname, '../data');
 const RUNTIME_LOG_DIR = path.join(DATA_DIR, 'runtime');
 fs.mkdirSync(RUNTIME_LOG_DIR, { recursive: true });
 
@@ -126,7 +126,6 @@ class ToolRunner {
       schemeOverride = data.schemeOverride || 'auto';
       wordlistFile = data.wordlistFile || '';
     }
-
     const inputMode = tool && tool.input_mode ? String(tool.input_mode) : 'domain';
     const normalizedTarget = normalizeTarget(target) || 'localhost';
     const effectiveTarget = inputMode === 'url'

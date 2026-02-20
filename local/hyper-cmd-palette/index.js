@@ -7,6 +7,52 @@
 // ══════════════════════════════════════════════════════════════
 
 const { clipboard } = require('electron');
+const fs = require('fs');
+const path = require('path');
+const os = require('os');
+
+const WORKSPACE_ROOT = path.resolve(__dirname, '..', '..');
+const VENDOR_WORDLIST_DIR = path.join(WORKSPACE_ROOT, 'cache', 'wordlists', 'vendor');
+
+function firstExisting(paths) {
+  for (const candidate of paths) {
+    if (candidate && fs.existsSync(candidate)) return candidate;
+  }
+  return '';
+}
+
+function expandHome(inputPath) {
+  const value = String(inputPath || '').trim();
+  if (!value) return '';
+  if (value === '~') return os.homedir();
+  if (value.startsWith('~/')) return path.join(os.homedir(), value.slice(2));
+  return value;
+}
+
+function localizeFilePath(inputPath) {
+  const expanded = expandHome(inputPath);
+  if (!expanded) return expanded;
+  return path.isAbsolute(expanded) ? expanded : path.resolve(process.cwd(), expanded);
+}
+
+const DEFAULT_WEB_WORDLIST = process.env.HYPER_WORDLIST_WEB || firstExisting([
+  path.join(VENDOR_WORDLIST_DIR, 'common.txt'),
+  path.join(VENDOR_WORDLIST_DIR, 'directory-list-2.3-medium.txt'),
+  path.join(WORKSPACE_ROOT, 'cache', 'wordlists', 'web_discovery_common.txt'),
+]);
+const DEFAULT_DNS_WORDLIST = process.env.HYPER_WORDLIST_DNS || firstExisting([
+  path.join(VENDOR_WORDLIST_DIR, 'subdomains-top1million-5000.txt'),
+  path.join(VENDOR_WORDLIST_DIR, 'subdomains-top1million-20000.txt'),
+  path.join(WORKSPACE_ROOT, 'cache', 'wordlists', 'network_subdomains_dns_common.txt'),
+]);
+const DEFAULT_PASSWORD_LIST = process.env.HYPER_PASSWORD_LIST || firstExisting([
+  path.join(VENDOR_WORDLIST_DIR, 'rockyou.txt'),
+  path.join(WORKSPACE_ROOT, 'cache', 'wordlists', 'passwords_common.txt'),
+]);
+const DEFAULT_DIRB_WORDLIST = process.env.HYPER_DIRB_WORDLIST || firstExisting([
+  path.join(VENDOR_WORDLIST_DIR, 'common.txt'),
+  path.join(WORKSPACE_ROOT, 'cache', 'wordlists', 'web_directories_common.txt'),
+]);
 
 // ─── Session Tracking ────────────────────────────────────────
 let activeUid = null;
@@ -219,13 +265,13 @@ const TOOLS = [
     category: 'Fuzzing',
     fields: [
       { id: 'url', label: 'URL (use FUZZ keyword)', type: 'text', placeholder: 'http://target.com/FUZZ', required: true },
-      { id: 'wordlist', label: 'Wordlist', type: 'select', default: '/usr/share/wordlists/dirb/common.txt', options: [
-        { value: '/usr/share/wordlists/dirb/common.txt', label: 'dirb/common.txt' },
-        { value: '/usr/share/wordlists/dirb/big.txt', label: 'dirb/big.txt' },
-        { value: '/usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt', label: 'dirbuster medium' },
-        { value: '/usr/share/wordlists/dirbuster/directory-list-2.3-small.txt', label: 'dirbuster small' },
-        { value: '/usr/share/seclists/Discovery/Web-Content/raft-medium-words.txt', label: 'raft-medium-words' },
-        { value: '/usr/share/seclists/Discovery/Web-Content/raft-large-words.txt', label: 'raft-large-words' },
+      { id: 'wordlist', label: 'Wordlist', type: 'select', default: DEFAULT_WEB_WORDLIST, options: [
+        { value: DEFAULT_WEB_WORDLIST, label: 'default web wordlist' },
+        { value: path.join(VENDOR_WORDLIST_DIR, 'big.txt'), label: 'vendor/big.txt' },
+        { value: path.join(VENDOR_WORDLIST_DIR, 'directory-list-2.3-medium.txt'), label: 'vendor/dirbuster-medium' },
+        { value: path.join(VENDOR_WORDLIST_DIR, 'directory-list-2.3-small.txt'), label: 'vendor/dirbuster-small' },
+        { value: path.join(VENDOR_WORDLIST_DIR, 'raft-medium-words.txt'), label: 'vendor/raft-medium-words' },
+        { value: path.join(VENDOR_WORDLIST_DIR, 'raft-large-words.txt'), label: 'vendor/raft-large-words' },
         { value: 'custom', label: 'Custom path...' },
       ]},
       { id: 'wordlist_custom', label: 'Custom Wordlist Path', type: 'text', placeholder: '/path/to/wordlist.txt', default: '' },
@@ -243,7 +289,7 @@ const TOOLS = [
     ],
     build: function(v) {
       const parts = ['ffuf'];
-      const wl = v.wordlist === 'custom' ? v.wordlist_custom : v.wordlist;
+      const wl = localizeFilePath(v.wordlist === 'custom' ? v.wordlist_custom : v.wordlist);
       parts.push('-w', esc(wl));
       parts.push('-u', esc(v.url));
       if (v.extensions) parts.push('-e', esc(v.extensions));
@@ -278,12 +324,13 @@ const TOOLS = [
         { value: 'vhost', label: 'vhost — Virtual host brute-force' },
       ]},
       { id: 'url', label: 'URL / Domain', type: 'text', placeholder: 'http://target.com or target.com', required: true },
-      { id: 'wordlist', label: 'Wordlist', type: 'select', default: '/usr/share/wordlists/dirb/common.txt', options: [
-        { value: '/usr/share/wordlists/dirb/common.txt', label: 'dirb/common.txt' },
-        { value: '/usr/share/wordlists/dirb/big.txt', label: 'dirb/big.txt' },
-        { value: '/usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt', label: 'dirbuster medium' },
-        { value: '/usr/share/seclists/Discovery/DNS/subdomains-top1million-5000.txt', label: 'subdomains top 5k' },
-        { value: '/usr/share/seclists/Discovery/DNS/subdomains-top1million-20000.txt', label: 'subdomains top 20k' },
+      { id: 'wordlist', label: 'Wordlist', type: 'select', default: DEFAULT_DNS_WORDLIST || DEFAULT_WEB_WORDLIST, options: [
+        { value: DEFAULT_DNS_WORDLIST || DEFAULT_WEB_WORDLIST, label: 'default dns/web wordlist' },
+        { value: path.join(VENDOR_WORDLIST_DIR, 'common.txt'), label: 'vendor/common.txt' },
+        { value: path.join(VENDOR_WORDLIST_DIR, 'big.txt'), label: 'vendor/big.txt' },
+        { value: path.join(VENDOR_WORDLIST_DIR, 'directory-list-2.3-medium.txt'), label: 'vendor/dirbuster-medium' },
+        { value: path.join(VENDOR_WORDLIST_DIR, 'subdomains-top1million-5000.txt'), label: 'vendor/subdomains-5k' },
+        { value: path.join(VENDOR_WORDLIST_DIR, 'subdomains-top1million-20000.txt'), label: 'vendor/subdomains-20k' },
         { value: 'custom', label: 'Custom path...' },
       ]},
       { id: 'wordlist_custom', label: 'Custom Wordlist Path', type: 'text', placeholder: '/path/to/wordlist.txt', default: '' },
@@ -301,7 +348,7 @@ const TOOLS = [
       } else {
         parts.push('-u', esc(v.url));
       }
-      const wl = v.wordlist === 'custom' ? v.wordlist_custom : v.wordlist;
+      const wl = localizeFilePath(v.wordlist === 'custom' ? v.wordlist_custom : v.wordlist);
       parts.push('-w', esc(wl));
       if (v.extensions && v.mode === 'dir') parts.push('-x', esc(v.extensions));
       if (v.status_codes && v.mode !== 'dns') parts.push('-s', esc(v.status_codes));
@@ -432,7 +479,7 @@ const TOOLS = [
         { value: 'single', label: 'Single password (-p)' },
         { value: 'list', label: 'Password list (-P)' },
       ]},
-      { id: 'password', label: 'Password / Pass List', type: 'text', placeholder: '/usr/share/wordlists/rockyou.txt', required: true, default: '/usr/share/wordlists/rockyou.txt' },
+      { id: 'password', label: 'Password / Pass List', type: 'text', placeholder: DEFAULT_PASSWORD_LIST || '/path/to/passwords.txt', required: true, default: DEFAULT_PASSWORD_LIST },
       { id: 'http_path', label: 'HTTP Form Path (http-*-form)', type: 'text', placeholder: '/login:user=^USER^&pass=^PASS^:F=incorrect', default: '' },
       { id: 'threads', label: 'Threads', type: 'text', placeholder: '16 (default)', default: '' },
       { id: 'verbose', label: 'Verbose (-V)', type: 'check', default: false },
@@ -441,9 +488,9 @@ const TOOLS = [
     build: function(v) {
       const parts = ['hydra'];
       if (v.user_mode === 'single') parts.push('-l', esc(v.username));
-      else parts.push('-L', esc(v.username));
+      else parts.push('-L', esc(localizeFilePath(v.username)));
       if (v.pass_mode === 'single') parts.push('-p', esc(v.password));
-      else parts.push('-P', esc(v.password));
+      else parts.push('-P', esc(localizeFilePath(v.password)));
       if (v.port) parts.push('-s', esc(v.port));
       if (v.threads) parts.push('-t', esc(v.threads));
       if (v.verbose) parts.push('-V');
@@ -498,7 +545,7 @@ const TOOLS = [
     category: 'Fuzzing',
     fields: [
       { id: 'url', label: 'URL (use FUZZ keyword)', type: 'text', placeholder: 'http://target.com/FUZZ', required: true },
-      { id: 'wordlist', label: 'Wordlist', type: 'text', placeholder: '/usr/share/wordlists/dirb/common.txt', default: '/usr/share/wordlists/dirb/common.txt' },
+      { id: 'wordlist', label: 'Wordlist', type: 'text', placeholder: DEFAULT_WEB_WORDLIST || '/path/to/wordlist.txt', default: DEFAULT_WEB_WORDLIST },
       { id: 'hc', label: 'Hide Status Codes', type: 'text', placeholder: '404,500', default: '404' },
       { id: 'hw', label: 'Hide Word Count', type: 'text', placeholder: 'e.g. 12', default: '' },
       { id: 'hl', label: 'Hide Line Count', type: 'text', placeholder: 'e.g. 5', default: '' },
@@ -522,7 +569,7 @@ const TOOLS = [
       if (v.header) parts.push('-H', esc(v.header));
       if (v.postdata) parts.push('-d', esc(v.postdata));
       if (v.extra) parts.push(v.extra);
-      parts.push('-w', esc(v.wordlist));
+      parts.push('-w', esc(localizeFilePath(v.wordlist)));
       parts.push(esc(v.url));
       return parts.join(' ');
     },
@@ -538,7 +585,7 @@ const TOOLS = [
     category: 'Fuzzing',
     fields: [
       { id: 'url', label: 'Target URL', type: 'text', placeholder: 'http://target.com/', required: true },
-      { id: 'wordlist', label: 'Wordlist', type: 'text', placeholder: '/usr/share/dirb/wordlists/common.txt', default: '/usr/share/dirb/wordlists/common.txt' },
+      { id: 'wordlist', label: 'Wordlist', type: 'text', placeholder: DEFAULT_DIRB_WORDLIST || '/path/to/wordlist.txt', default: DEFAULT_DIRB_WORDLIST },
       { id: 'extensions', label: 'Extensions (-X)', type: 'text', placeholder: '.php,.html,.txt', default: '' },
       { id: 'cookie', label: 'Cookie (-c)', type: 'text', placeholder: 'PHPSESSID=abc123', default: '' },
       { id: 'auth', label: 'Auth (-u user:pass)', type: 'text', placeholder: 'admin:password', default: '' },
@@ -550,7 +597,7 @@ const TOOLS = [
       { id: 'extra', label: 'Extra Flags', type: 'text', placeholder: '-S -N 403', default: '' },
     ],
     build: function(v) {
-      const parts = ['dirb', esc(v.url), esc(v.wordlist)];
+      const parts = ['dirb', esc(v.url), esc(localizeFilePath(v.wordlist))];
       if (v.extensions) parts.push('-X', esc(v.extensions));
       if (v.cookie) parts.push('-c', esc(v.cookie));
       if (v.auth) parts.push('-u', esc(v.auth));

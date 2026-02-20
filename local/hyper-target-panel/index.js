@@ -9,9 +9,7 @@ const { buildWordlistCatalog } = require('./lib/WordlistCatalog');
 const TargetStore = require('./lib/storage/TargetStore');
 const { verifyWorkflows, buildAutomationHints } = require('./lib/WorkflowVerifier');
 const { extractSetTarget } = require('./lib/SetTargetParser');
-
-const DATA_DIR = path.join(__dirname, 'data');
-const LEGACY_FINDINGS_DIR = path.join(require('os').homedir(), '.gemini/tmp');
+const { DATA_DIR, getLegacyFindingsPath } = require('./lib/PathResolver');
 
 // Ensure directory exists
 try {
@@ -29,9 +27,9 @@ function isToolCompatibleWithType(tool, selectorType) {
   return tool.types.includes(selectorType);
 }
 
-function getLegacyFindingsPath(target) {
-    const safeTarget = sanitizeTarget(target).replace(/[^a-zA-Z0-9.-]/g, '_');
-    return path.join(LEGACY_FINDINGS_DIR, `findings_${safeTarget}.json`);
+function resolveLegacyFindingsPath(target) {
+  const safeTarget = sanitizeTarget(target).replace(/[^a-zA-Z0-9.-]/g, '_');
+  return getLegacyFindingsPath(safeTarget);
 }
 
 const CONFIG_DIR = path.join(__dirname, 'config');
@@ -308,7 +306,7 @@ exports.decorateTerms = (Terms, { React }) => {
 
     fetchData(target) {
       const currentTarget = target || this.state.data.target || 'None';
-      const findingsFile = getLegacyFindingsPath(currentTarget);
+      const findingsFile = resolveLegacyFindingsPath(currentTarget);
       this.targetStore.importLegacyFindings(currentTarget, findingsFile);
       this.reloadFindings(currentTarget);
     }

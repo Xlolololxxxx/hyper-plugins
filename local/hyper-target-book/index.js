@@ -13,10 +13,22 @@ const os = require('os');
 const { shell, clipboard } = require('electron');
 
 // ─── Constants ───────────────────────────────────────────────
-const RECON_DIR = path.join(os.homedir(), '.hyper_recon');
+const WORKSPACE_ROOT = path.resolve(__dirname, '..', '..');
+const RECON_DIR = process.env.HYPER_RECON_DIR || path.join(WORKSPACE_ROOT, 'cache', 'hyper-recon');
+const LEGACY_RECON_DIR = path.join(os.homedir(), '.hyper_recon');
 const TARGETS_FILE = path.join(RECON_DIR, 'targets.json');
 const SAVE_DEBOUNCE_MS = 1500;
 const PTY_BUFFER_MAX = 8192;
+const WORDLIST_DIR = path.join(WORKSPACE_ROOT, 'cache', 'wordlists', 'vendor');
+const WEB_WORDLIST = process.env.HYPER_WORDLIST_WEB || path.join(WORDLIST_DIR, 'common.txt');
+const PASSWORD_LIST = process.env.HYPER_PASSWORD_LIST || path.join(WORDLIST_DIR, 'rockyou.txt');
+
+try {
+  fs.mkdirSync(RECON_DIR, { recursive: true });
+  if (!fs.existsSync(TARGETS_FILE) && fs.existsSync(path.join(LEGACY_RECON_DIR, 'targets.json'))) {
+    fs.copyFileSync(path.join(LEGACY_RECON_DIR, 'targets.json'), TARGETS_FILE);
+  }
+} catch (_e) {}
 
 // ─── Shared Recon Namespace ──────────────────────────────────
 function getRecon() {
@@ -476,7 +488,7 @@ function getQuickActions(target, service) {
     const urlBase = `${scheme}://${target.address}:${port}`;
     actions.push(
       { label: 'Nikto', cmd: `nikto -h ${esc(urlBase)}` },
-      { label: 'Gobuster', cmd: `gobuster dir -u ${esc(urlBase)} -w /usr/share/wordlists/dirb/common.txt` },
+      { label: 'Gobuster', cmd: `gobuster dir -u ${esc(urlBase)} -w ${esc(WEB_WORDLIST)}` },
       { label: 'Whatweb', cmd: `whatweb ${esc(urlBase)}` },
       { label: 'cURL Headers', cmd: `curl -sIk ${esc(urlBase)}` },
       { label: 'SQLMap (GET)', cmd: `sqlmap -u ${esc(urlBase + '/')} --batch --crawl=2` },
@@ -488,7 +500,7 @@ function getQuickActions(target, service) {
   if (svc === 'ssh' || port === 22) {
     actions.push(
       { label: 'SSH Banner', cmd: `nmap -sV -p ${port} --script ssh2-enum-algos,ssh-hostkey ${addr}` },
-      { label: 'Hydra SSH', cmd: `hydra -l root -P /usr/share/wordlists/rockyou.txt ${addr} ssh -s ${port} -t 4` },
+      { label: 'Hydra SSH', cmd: `hydra -l root -P ${esc(PASSWORD_LIST)} ${addr} ssh -s ${port} -t 4` },
     );
   }
 
@@ -496,7 +508,7 @@ function getQuickActions(target, service) {
   if (svc === 'ftp' || port === 21) {
     actions.push(
       { label: 'FTP Anon Check', cmd: `nmap -sV -p ${port} --script ftp-anon ${addr}` },
-      { label: 'Hydra FTP', cmd: `hydra -l anonymous -P /usr/share/wordlists/rockyou.txt ${addr} ftp -s ${port} -t 4` },
+      { label: 'Hydra FTP', cmd: `hydra -l anonymous -P ${esc(PASSWORD_LIST)} ${addr} ftp -s ${port} -t 4` },
     );
   }
 
@@ -513,7 +525,7 @@ function getQuickActions(target, service) {
   if (svc === 'mysql' || port === 3306) {
     actions.push(
       { label: 'MySQL Nmap Scripts', cmd: `nmap -sV -p ${port} --script mysql-info,mysql-enum ${addr}` },
-      { label: 'Hydra MySQL', cmd: `hydra -l root -P /usr/share/wordlists/rockyou.txt ${addr} mysql -s ${port}` },
+      { label: 'Hydra MySQL', cmd: `hydra -l root -P ${esc(PASSWORD_LIST)} ${addr} mysql -s ${port}` },
     );
   }
 
