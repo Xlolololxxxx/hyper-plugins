@@ -1,0 +1,926 @@
+jc changelog
+
+202501012 v1.25.6
+- Add `net-localgroup` Windows command parser
+- Add `net-user` Windows command parser
+- Add `route-print` Windows command parser
+- Add `traceroute-s` streaming command parser
+- Add `max_hops` and `data_bytes` fields to `traceroute` command parser
+- Add `x509-crl` file parser to support Certificate Revocation List PEM and DER files
+- Add `yay` as a magic command for the `pacman` command parser
+- Fix `bluetoothctl` command parser to support output with the `cable_pairing` attribute
+- Fix `nmcli` command parser to support blank `team.config` JSON value and `team-port.config` JSON value
+- Fix `top` command parsers to correct memory size field parsing. Several new unit
+  and byte conversion fields have been added
+- Fix `who` command parser to support the `process` field on Debian13
+
+20250503 v1.25.5
+- Add `amixer` command parser
+- Enhance `iptables` command parser to add default policy statistics fields
+- Fix `bluetoothctl` parser failing to parse controllers with power state prop
+- Fix `lsblk` command parser to support multiple mountpoints. Also, added
+  byte conversions for size fields.
+- Fix `nmcli` command parser to support `team.config` JSON field
+- Fix `time` command parser for output that does not contain centiseconds
+- Fix `x509-cert` parser to handle IDNA2008 encoded email addresses with a warning
+- Fix typing for upcoming python v3.14
+- Fix timezone setting for tests to support minimal chrooted builds
+
+20241125 v1.25.4
+- Add `ipconfig` command parser (`ipconfig` for Windows)
+- Add `pacman` command parser
+- Add `wg show` command parser
+- Enhance `ethtool` parser to support `link_partner_advertised_link_modes`
+- Enhance `ifconfig` parser to support `utun` interfaces with assigned IPv4 addresses on macOS
+- Enhance `nsd-control` parser with additional state fields
+- Enhance `ping-s` streaming parser to support error replies
+- Fix `bluetoothctl` parser when extra attributes like `manufacturer` and `version` exist
+- Fix `df` parser to correctly output binary vs. decimal size outputs
+- Fix `ip-address` parser for Python 3.13 changes to IPv4 mapped IPv6 addresses
+- Fix `iw-scan` parser to output more fields (still beta quality)
+- Fix `mount` parser for cases where there are spaces in the filesystem name
+- Fix `netstat` parser for cases where there are spaces in the program name
+- Fix `pkg-index-deb`, `apt-cache-show`, and  `rpm-qi` parsers to correctly convert contiguous packages with the same name
+- Fix `traceroute` parser to support extreme IPv6 cases
+- Fix `uptime` parser for data that contains `user` instead of `users`
+- Fix `yaml` parser to support values that start with an equal sign
+- Enhance `jc.utils.convert_size_to_int()` to add `posix_mode` and `decimal_bias` parameters
+- Enhance cli to coerce any non-JSON-serializable objects to a string
+
+20240609 v1.25.3
+- Enhance `bluetoothctl` parser with added `battery_percentage` field
+- Enhance `git-log` standard and streaming parsers with added `lines_changed` field under `file_stats`
+- Fix `lspci` parser to handle `physlot` fields with a range value
+- Fix `pci-ids` parser to correctly handle multiple subdevices
+- Fix `pip-show` parser to handle multi-line fields with a beginning blank line
+- Fix `ss` parser to correctly handle the `Recv-Q` field being too close to the `Status` field
+- Fix `top` parsers to quiet uptime info parsing
+- Fix `traceroute` parser to correctly handle hops with multiple IPs
+- Fix `zpool-status` parser for config items lacking data values
+- Optimize some tests by removing timezone settings and using quiet=True
+- Documentation updates
+
+20240323 v1.25.2
+- Add `apt-cache-show` command parser
+- Add `apt-get-sqq` command parser
+- Add `ethtool` command parser
+- Add `needrestart` command parser
+- Enhance `df` parser to add human readable output support. Note: the `size`
+  field has been changed to an integer and all size values have been normalized
+  to bytes.
+- Enhance `free` parser to add human readable output support. All size values
+  have been normalizd to bytes.
+- Enhance `iptables` parser to handle -x output
+- Enhance `/proc/pid/stat` parser to support "Idle" state
+- Enhance `rpm_qi` and `pkg_index_deb` parsers to split list fields into arrays
+- Fix `iwconfig` parser to handle more special characters in the SSID name
+- Fix `xrandr` parser to ignore extra horizontal and vertical stats lines
+- Add aarch64 binaries to Releases for macOS and Linux
+- Documentation and doc build updates
+
+20240212 v1.25.1
+- Fix for crash when optional libraries are not installed (e.g. xmltodict)
+- Fix for `ini` parser crashing with some keys with no values
+- Fix `xrandr` parser to extract more EDID data
+- Enhance `uptime` parser to support output with no user information
+- Enhance `--quiet` CLI option to cover more warning messages
+- Add tests for missing optional libraries
+- Documentation updates
+
+20240204 v1.25.0
+- Add `--slurp` functionality to wrap output from multiple lines into a single array.
+  Note, this only works with single-line input parsers. (e.g. `date`, `ip-address`, `url`, etc.)
+  Streaming parsers are not supported. Use `jc -hhh` to find parsers compatible with the slurp option.
+- Enhance `/proc` file magic syntax to allow slurping when multiple files are selected
+  and to include the `_file` metadata field in the data
+- Enhance `--meta-out` functionality to include a list of the input data when using `--slurp`
+  or `/proc` file magic syntax. For slurpable parsers, this is a list of string inputs in order.
+  For `/proc` file magic syntax, this is a list of `/proc` filenames in order. This can help with
+  identifying which input matches to which output when using `--slurp` or when converting multiple
+  files via `/proc` file magic syntax.
+- Add `curl-head` command parser for `curl --head` or `curl -I` with verbose support
+- Add `efibootmgr` command parser
+- Add `http-headers` parser for plain HTTP header output
+- Add `kv-dup` parser for Key/Value files with duplicate keys
+- Add `path` string parser to parse posix path
+- Add `path-list` string parser to parse path list strings found in env variables
+- Add source link to online parser documentation
+- Add snap package build scripts
+- Add `remove_quotes` function to `utils.py`
+- Add `normalize_key` function to `utils.py`
+- Add `line_slice` function to `utils.py`
+- Add `get_parser` function to `lib.py`
+- Enhance `nsd-control` parser to support more zone information
+- Enhance `ping` and `ping-s` parsers to support the `-I` command option
+- Enhance `proc-net-tcp` parser to add opposite endian support for architectures
+  like the s390x
+- Enhance `url` parser to add `parent`, `filename`, `stem`, and `extension` fields
+- Fix `ini` and `ini-dup` parsers to consistently handle null values as empty strings
+- Fix line slicer to not skip blank lines
+- Refactor parser aliases for `kv`, `pkg_index_deb`, `lsb_release`, and `os-release`
+- Update copyright date
+
+20231216 v1.24.0
+- Add `debconf-show` command parser
+- Add `iftop` command parser
+- Add `pkg-index-apk` parser for Alpine Linux Package Index files
+- Add `pkg-index-deb` parser for Debian/Ubuntu Package Index files
+- Add `proc-cmdline` parser for `/proc/cmdline` file
+- Add `swapon` command parser
+- Add `tune2fs` command parser
+- Remove `iso-datetime` parser deprecated since v1.22.1. (use `datetime-iso` instead)
+- Update timezone change in Github Actions for node v16 requirement
+- Add Python 3.12 tests to Github Actions
+- Refactor `acpi` command parser for code cleanup
+- Refactor vendored libraries to remove Python 2 support
+- Fix `iptables` parser for cases where the `target` field is blank in a rule
+- Fix `vmstat` parsers for some cases where wide output is used
+- Fix `mount` parser for cases with spaces in the mount point name
+- Fix `xrandr` parser for infinite loop issues
+
+20231023 v1.23.6
+- Fix XML parser for xmltodict library versions < 0.13.0
+- Fix `who` command parser for cases when the from field contains spaces
+
+20231021 v1.23.5
+- Add `host` command parser
+- Add `nsd-control` command parser
+- Add `lsb_release` command parser
+- Add `/etc/os-release` file parser
+- Enhance `env` command parser to support multi-line values
+- Enhance `ping` and `ping-s` parsers to add error and corrupted support
+- Enhance `xml` parser to include comments in the JSON output
+- Fix `pidstat` command parser when using `-T ALL`
+- Fix `x509-cert` parser to allow negative serial numbers
+- Fix `x509-cert` parser for cases when bitstrings are larger than standard
+- Fix `xrandr` command parser for associated device issues
+- Fix error when pygments library is not installed
+
+20230730 v1.23.4
+- Add `/etc/resolve.conf` file parser
+- Add `/proc/net/tcp` and `/proc/net/tcp6` file parser
+- Add `find` command parser
+- Add `ip route` command parser
+- Fix `certbot` command parser to be more robust with different line endings
+
+20230621 v1.23.3
+- Add `lsattr` command parser
+- Add `srt` file parser
+- Add `veracrypt` command parser
+- Add X509 Certificate Request file parser
+- Enhance X509 Certificate parser to allow non-compliant email addresses with a warning
+- Enhance `dig` command parser to support the `+nsid` option
+- Enhance `last` and `lastb` command parser to support the `-x` option
+- Enhance `route` command parser to add Windows support
+- Enhnace `netstat` command parser to add Windows support
+- Enhance `ss` command parser to support extended options
+- Enhance the compatibility warning message
+- Fix `bluetoothctl` command parser for some mouse devices
+- Fix `ping` command parsers for output with missing hostname
+- Fix `stat` command parser for older versions that may not contain all fields
+- Fix deprecated option in `setup.cfg`
+
+20230429 v1.23.2
+- Add `bluetoothctl` command parser
+- Add `certbot` command parser for `certificates` and `show_account` options
+- Fix `acpi` command parser for "Not charging" battery status lines
+- Fix `iwconfig` command parser for SSIDs with dashes in the name
+- Fix `crontab` command parsers for incorrect variable parsing in some cases
+- Fix `git-log` and `git-log-s` command parsers for incorrect insertion/deletion parsing
+- Fix `ufw-appinfo` command parser for parsing errors on multiline description fields
+- Fix pytest warnings
+
+20230323 v1.23.1
+- Fix `zpool-status` command parser for lines that start with tab
+- Fix `timedatectl` command parser when RTC set to local
+- Fix to ensure `py.typed` file is included in the package wheel
+- Fix `lsusb` command parser to support CDC MBIM and CDC MBIM Extended fields
+- Add support for the `timesync-status` for the `timedatectl` command parser
+- Fix to ignore non-parser-plugins in the parser plugin directory
+
+20230227 v1.23.0
+- Add input slicing as a `jc` command-line option
+- Add `ssh` configuration file parser
+- Add `ver` Version string parser
+- Add `zpool iostat` command parser
+- Add `zpool status` command parser
+- Fix `acpi` command parser for "will never fully discharge" battery state
+- Fix `crontab` and `crontab-u` command and file parsers for cases where only
+  shortcut schedule items exist
+- Fix `ifconfig` command parser for older-style linux output
+- Fix `xrandr` command parser for proper `is_current` output
+- Fix `xrandr` command parser for infinite loop with some device configurations
+- Add `reflection` key to `xrandr` parser schema
+- Add display model info from EDID to `xrandr` parser
+- Add `MPX-specific VMA` support for VM Flags in `/proc/<pid>/smaps` parser
+
+20230111 v1.22.5
+- Add TOML file parser
+- Add INI with duplicate key support file parser
+- Add AIX support for the `arp` command parser
+- Add AIX support for the `mount` command parser
+- Fix `lsusb` command parser when extra hub port status information is output
+- Refactor `lsusb` command parser for more code reuse
+- Fix INI file parser to include top-level values with no section header
+- Fix INI file parser to not specially handle the [DEFAULT] section
+- Fix INI file and Key/Value parsers to only remove one quotation mark from the
+  beginning and end of values.
+- Update copyright dates
+
+20221230 v1.22.4
+- Add `iwconfig` command parser
+- Add NeXTSTEP format support to the PLIST file parser
+- Fix `proc` parser magic signature detection for `/proc/pid/stat` hacks
+- Fix `x509-cert` parser for string serial numbers
+- Add category tags to parser metadata: generic, standard, file, string, binary, command
+- Add "list parsers by category" view to help
+- Fix python 3.6-related issues
+- Add python 3.6 to automated tests
+
+20221216 v1.22.3
+- Add Common Log Format and Combined Log Format file parser (standard and streaming)
+- Add PostgreSQL password file parser
+- Add openvpn-status.log file parser
+- Add `cbt` command parser (Google Big Table)
+- Enhance `ifconfig` parser with interface lane information on BSD
+- Enhance `ifconfig` parser with additional IPv6 `scope_id` info for BSD
+- Fix `ifconfig` parser to capture some IPv6 addresses missed on BSD
+- Fix `git-log` and `git-log-s` parsers for failure on empty author name
+- Update `os-prober` parser with split EFI partition fields
+- Add ISO string attribute (`.iso`) to `jc.utils.timestamp()`
+- Fix several documentation typos
+
+20221107 v1.22.2
+- add `sshd_conf` parser for `sshd` configuration files and `sshd -T` output
+- add `findmnt` command parser
+- add `git ls-remote` command parser
+- add `os-prober` command parser
+- add SemVer string parser
+- enhance the `ifconfig` parser so it can output multiple IPv4 and IPv6 addresses
+- enhance the `ifconfig` parser so it can output additional fields common on BSD
+- enhance `xml` parser with optional `_` prefix for attributes instead of
+  `@` by using the `--raw` option. This can make it easier to filter the
+  JSON output in some tools.
+- fix the `xml` parser to output a normal Dictionary instead of OrderdDict.
+  This cleans up YAML output. (No `!!omap` comments)
+- fix `csv` and `csv-s` parsers for UTF-8 encoded CSV files with leading BOM bytes
+- fix exit code to be non-zero on interrupt
+- allow parser module objects to be used as arguments to `jc.get_help()` and `jc.parser_info()`
+- catch unexpected exceptions in the CLI
+- add error message on interrupt to STDERR
+- add python 3.11 tests to github actions
+
+20221024 v1.22.1
+- add `udevadm` command parser
+- add `lspci` command parser
+- add `pci.ids` file parser
+- fix `proc-pid-stat` parser for command names with spaces and newlines
+- enhance `ip-address` parser to add `ip_split` field
+- rename `iso-datetime` parser to `datetime-iso`. A deprecation warning will
+  display until `iso-datetime` is removed in a future version.
+- refactor cli module
+- optimize performance of calculated timestamps
+- add more type annotations
+- add support for deprecating parsers
+- move jc-web demo site from heroku to render.com
+
+20220926 v1.22.0
+- Add /proc file parsers for linux. Support for the following files:
+  `/proc/buddyinfo`
+  `/proc/consoles`
+  `/proc/cpuinfo`
+  `/proc/crypto`
+  `/proc/devices`
+  `/proc/diskstats`
+  `/proc/filesystems`
+  `/proc/interrupts`
+  `/proc/iomem`
+  `/proc/ioports`
+  `/proc/loadavg`
+  `/proc/locks`
+  `/proc/meminfo`
+  `/proc/modules`
+  `/proc/mtrr`
+  `/proc/pagetypeinfo`
+  `/proc/partitions`
+  `/proc/slabinfo`
+  `/proc/softirqs`
+  `/proc/stat`
+  `/proc/swaps`
+  `/proc/uptime`
+  `/proc/version`
+  `/proc/vmallocinfo`
+  `/proc/vmstat`
+  `/proc/zoneinfo`
+  `/proc/driver/rtc`
+  `/proc/net/arp`
+  `/proc/net/dev`
+  `/proc/net/dev_mcast`
+  `/proc/net/if_inet6`
+  `/proc/net/igmp`
+  `/proc/net/igmp6`
+  `/proc/net/ipv6_route`
+  `/proc/net/netlink`
+  `/proc/net/netstat`
+  `/proc/net/packet`
+  `/proc/net/protocols`
+  `/proc/net/route`
+  `/proc/net/unix`
+  `/proc/<pid>/fdinfo/<fd>`
+  `/proc/<pid>/io`
+  `/proc/<pid>/maps`
+  `/proc/<pid>/mountinfo`
+  `/proc/<pid>/numa_maps`
+  `/proc/<pid>/smaps`
+  `/proc/<pid>/stat`
+  `/proc/<pid>/statm`
+  `/proc/<pid>/status`
+- Magic syntax support for `/proc` files
+- Enhance bash and zsh autocompletions for `/proc` files
+- Enhance `free` parser to support `-w` option integer conversions
+- Fix `ini` and `kv` parsers so they don't change keynames to lower case
+  NOTE: This can be a breaking change in your scripts
+- Fix `id` command parser to allow usernames and groupnames with spaces
+- Enhance metadata output to output metadata even when results are empty
+- Optimize tests
+- Optimize documentation build script
+
+20220829 v1.21.2
+- Fix IP Address string parser for older python versions that don't cleanly
+  accept decimal input format - IPv6 fix (e.g. python 3.6)
+
+20220828 v1.21.1
+- Fix IP Address string parser for older python versions that don't cleanly
+  accept decimal input format - IPv4 fix (e.g. python 3.6)
+- Fix `arp -a` parser for cases where incomplete hardware addresses are found
+  in the arp table on linux
+
+20220821 v1.21.0
+- Add IP Address string parser
+- Add Syslog standard and streaming string parsers (RFC 3164 and RFC 5424)
+- Add CEF standard and streaming string parser
+- Add PLIST file parser (XML and binary support)
+- Add `-n` support to the `traceroute` parser
+- Add `mdadm` command parser tested on linux
+- Add `--meta-out` or `-M` option to add metadata to the JSON output, including
+  a UTC timestamp, parser name, magic command, and magic command exit code
+- Fix `lsusb` command parser for output containing a `Device Qualifier` and
+  `Binary Object Store Descriptor` sections
+- Change `LANG=C` to `LC_ALL=C` in locale instructions
+- Add `__main__.py` to package allowing `python -m jc` usage
+- Add an enclosing top-level folder inside the windows.zip package
+
+20220723 v1.20.4
+- Fix URL string parser path list for URLs ending in a forward slash
+
+20220723 v1.20.3
+- Add URL string parser
+- Add Email Address string parser
+- Add JWT string parser
+- Add ISO 8601 Datetime string parser
+- Add UNIX Epoch Timestamp string parser
+- Add M3U/M3U8 file parser
+- Add pager functionality to help (parser documentation only)
+- Minor parser performance optimizations
+
+20220705 v1.20.2
+- Add `gpg --with-colons` parser tested on linux
+- Add DER and PEM encoded X.509 Certificate parser
+- Add Bash and Zsh completion scripts to DEB and RPM packages
+
+20220615 v1.20.1
+- Add `postconf -M` parser tested on linux
+- Update `asciitable` and `asciitable-m` parsers to preserve case in key
+  names when using the `-r` or `raw=True` options.
+- Add long options (e.g. `--help`, `--about`, `--pretty`, etc.)
+- Add shell completions for Bash and Zsh
+- Fix `id` parser for cases where the user or group name is not present
+
+20220531 v1.20.0
+- Add YAML output option with `-y`
+- Add `top -b` standard and streaming parsers tested on linux
+- Add `plugin_parser_count`, `standard_parser_count`, and `streaming_parser_count`
+  keys to `jc -a` output
+- Add `is_compatible` function to the `utils` module
+- Fix `pip-show` parser for packages with a multi-line license field
+- Fix ASCII Table parser for cases where centered headers cause mis-aligned fields
+
+20220513 v1.19.0
+- Add `chage --list` command parser tested on linux
+- Add `git log` command streaming parser
+- Fix `git log` standard parser for corner-cases where hash values are in messages
+- Fix `df` command parser for rare instances when a newline is found at the end
+- Allow jc to pip install on unsupported python version 3.6
+- Fix `asciitable-m` parser to skip some rows that contain column separator
+  characters in cell data. A warning message will be printed to STDERR
+  unless `-q` or `quiet=True` is used.
+
+20220427 v1.18.8
+- Fix `update-alternatives --query` parser for cases where `slaves` are not present
+- Fix UnicodeEncodeError on some systems where LANG=C is set and unicode
+  characters are in the output
+- Update `history` parser: do not drop non-ASCII characters if the system
+  is configured for UTF-8 encoding
+- Enhance "magic syntax" to always use UTF-8 encoding
+
+20220425 v1.18.7
+- Add `git log` command parser
+- Add `update-alternatives --query` parser
+- Add `update-alternatives --get-selections` parser
+- Fix key/value and ini parsers to allow duplicate keys
+- Fix yaml file parser for files including timestamp objects
+- Update `xrandr` parser: add a 'rotation' field
+- Fix failing tests by moving template files
+- Add python interpreter version and path to -v and -a output
+
+20220325 v1.18.6
+- Add `pidstat` command parser tested on linux
+- Add `pidstat` command streaming parser tested on linux
+- Add `mpstat` command parser tested on linux
+- Add `mpstat` command streaming parser tested on linux
+- Add single-line ASCII and Unicode table parser
+- Add multi-line ASCII and Unicode table parser
+- Add documentation option to `parser_info()` and `all_parser_info()`
+
+20220305 v1.18.5
+- Fix date parser to ensure AM/PM period string is always uppercase
+
+20220304 v1.18.4
+- Add nmcli command parser tested on linux
+- Enhance parse error messages at the cli
+- Add standard and streaming parser list functions to the public API
+- Enhance python developer documentation formatting
+
+20220214 v1.18.3
+- Add rsync command and log file parser tested on linux and macOS
+- Add rsync command and log file streaming parser tested on linux and macOS
+- Add xrandr command parser tested on linux
+- Enhance timestamp performance with caching and format hints
+- Refactor ignore_exceptions functionality in streaming parsers
+- Fix man page in packages
+
+20220127 v1.18.2
+- Fix for plugin parsers with underscores in the name
+- Add type hints to public API functions
+- Add plugin attribute to plugin parser metadata
+- Add C locale hint to parsing error messages
+- Refactor more cli code into lib
+
+20220121 v1.18.1
+- Minor fix for MacOS binary
+
+20220121 v1.18.0
+- Add high-level parse API for built-in and plugin parsers
+- Add python module developer documentation
+- Enhance magic syntax exception messages
+- Enhance documentation formatting
+
+20220106 v1.17.7
+- Add stat command streaming parser tested on linux and macOS
+
+20220103 v1.17.6
+- Add jar-manifest file parser (for MANIFEST.MF files)
+- Fix CSV parsers for some files that include doublequotes
+
+20211221 v1.17.5
+- Add zipinfo parser tested on linux and macOS
+
+20211207 v1.17.4
+- Add support for the NO_COLOR environment variable to set mono (http://no-color.org/)
+- Add -C option to force color output even when using pipes (overrides -m and NO_COLOR)
+
+20211202 v1.17.3
+- Update parsers to exit with error if non-string input is detected (raise TypeError)
+- Update streaming parsers to exit with error if non-iterable input is detected (raise TypeError)
+- Simplify quiet-checking in parsers
+- Add iostat parser tested on linux
+- Add iostat streaming parser tested on linux
+
+20211117 v1.17.2
+- Fix ping parser to add Alpine linux support
+- Fix netstat parser for older versions of netstat on linux
+- Fix df parser for cases where the filesystem field overflows the column length
+
+20211030 v1.17.1
+- Fix file parser for gzip files
+- Fix uname parser for cases where the 'processor' and/or 'hardware_platform' fields are missing on linux
+- Fix uname parser on FreeBSD
+- Add lsusb parser tested on linux
+- Add CSV file streaming parser
+- Add testing for Python 3.10.0
+
+20210923 v1.17.0
+- Note to Package Maintainers: please see note at 20210720 v1.16.0
+- Add wrapping of warning and error messages
+- Add vmstat parser tested on linux
+- Add support for streaming parsers
+- Add ls command streaming parser tested on linux, macOS, and freeBSD
+- Add ping command streaming parser tested on linux, macOS, and freeBSD
+- Add vmstat command streaming parser tested on linux
+- Add -u option to allow unbuffered output
+
+20210830 v1.16.2
+- Note to Package Maintainers: please see note at 20210720 v1.16.0
+- Update sfdisk parser to support the -F option and newer versions of sfdisk
+
+20210813 v1.16.1
+- Note to Package Maintainers: please see note at 20210720 v1.16.0
+- Fix issue with process substitution with the magic syntax
+- Fix issue with globs not including filenames with spaces with magic syntax
+- Fix stat parser to properly handle filenames with spaces on macOS/BSD
+
+20210720 v1.16.0
+- Note to Package Maintainers:
+    TL;DR: `/man/jc.1.gz` and `/jc/man/jc.1.gz` are deprecated and only `/man/jc.1` should be used.
+
+    The Man page in the PyPi source packages will be moving from `/jc/man/jc.1.gz` to `/man/jc.1`
+    in version 1.17.0. For now the Man pages will be available in both locations, but be aware that
+    the Man page at `/jc/man/jc.1.gz` is now considered deprecated.
+
+    Also, starting in v1.17.0, the Man page will no longer be compressed in the source package,
+    therefore `/man/jc.1.gz` should also be considered deprecated and will no longer be available
+    after v1.17.0. Please use `/man/jc.1` and compress downstream if you would like.
+- Include CHANGELOG in source distribution
+- Fix Man page location in source packages
+- Add sfdisk command parser tested on linux
+- Update unit test files to change the timezone when needed (POSIX only)
+- Binaries and DEB/RPM/MSI packages now include Python 3.9.5 interpreter
+
+20210628 v1.15.6
+- Fix issue to only load local plugin parsers that have filenames that end in .py
+
+20210520 v1.15.5
+- Fix issue where help and about information would not display if a 3rd party parser library was missing. (e.g. xmltodict)
+- Add more error message detail when encountering ParseError and LibraryNotFound exceptions
+
+20210517 v1.15.4
+- Update ping parser to support error responses in OSX and BSD
+- Update ping parser to be more resilient against parsing errors for unknown error types
+- Update dig parser to support `+noall +answer` use case
+- Update dig parser compatibility to all platforms
+- Fix colors in Windows terminals (cmd.exe and PowerShell)
+- Fix epoch calculations when UTC is referenced as "Coordinated Universal Time"
+- Add Windows time format for systeminfo output
+- Add exceptions module to standardize parser exceptions
+- JC no longer swallows exit codes when using the "magic" syntax. See the Exit Codes section of the README and man page for details
+
+20210426 v1.15.3
+- Add ufw status command parser tested on linux
+- Add ufw-appinfo command parser tested on linux
+- Fix deb package name to conform to standard
+- Add Caveats section to readme and manpage
+
+20210418 v1.15.2
+- Add systeminfo parser tested on Windows
+- Update dig parser to fix an issue with IPv6 addresses in the server field
+- Update dig parser to fix an issue when axfr entries contain a semicolon
+- Update dig parser to add support for Additional Section and Opt Pseudosection
+- Update dig parser to add query_size field
+- Use dig parser as the main example in readme, documentation, and man page
+- Standardize int, float, and boolean conversion rules with functions in jc.utils
+
+20210413 v1.15.1
+- New feature to show parser documentation interactively with -h --parser_name
+  for example: $ jc -h --arp
+- Add man page to pypi package for easier packaging in homebrew
+- Update rpm-qi parser to add two calculated timestamp fields: install_date_epoch and install_date_epoch_utc
+- Clean up documentation and autogenerate the Parser Information section from metadata
+
+20210407 v1.15.0
+- Add acpi command parser tested on linux
+- Add upower command parser tested on linux
+- Add /usr/bin/time command parser tested on linux and macOS
+- Add dpkg -l command parser tested on linux
+- Add rpm -qi command parser tested on linux
+- Add finger command parser tested on linux and macOS
+- Add dir command parser tested on Windows 10
+- Update date parser: complete rewrite (v2.0) providing many enhancements:
+    - Make weekday numbering ISO 8601 compliant
+    - Add a calculated naive timestamp field
+    - Add a calculated UTC timestamp field (only if date output is in UTC)
+    - Add several fields, including: hour_24, utc_offset, day_of_year, week_of_year, iso, and timezone_aware
+- Update uptime parser to add uptime_days, uptime_hours, uptime_minutes, uptime_total_seconds, time_hour,
+      time_minute, and time_second fields
+- Update last parser to use new timestamp function
+- Update stat parser to add access_time_epoch, access_time_epoch_utc, modify_time_epoch, modify_time_epoch_utc,
+      change_time_epoch, change_time_epoch_utc, birth_time_epoch, birth_time_epoch_utc fields
+- Update timedatectl parser to add epoch_utc field
+- Update who parser to add epoch field
+- Update dig parser to add when_epoch and when_epoch_utc fields
+- Update ls parser to add epoch and epoch_utc fields
+- Add -h option to display the help text. Piping errors no longer show the help text.
+- Add -v option to display version information.
+- Add contributing information to project root
+- Make all external python library dependencies optional: pygments, ruamel.yaml, xmltodict
+- JSON output now supports unencoded unicode characters
+- JSON output is now more compact unless the -p (pretty) option is used
+- Developer scripts added and enhanced to automate documentation and man page creation
+- Enhanced man page
+
+20210305 v1.14.4
+- Packaging fix only for binaries and RPMs hosted on https://github.com/kellyjonbrazil/jc-packaging.
+  Packages from PyPi and OS repositories are not affected. This fixes an issue that kept the YAML
+  parser from initializing.
+
+20210210 v1.14.3
+- Add hciconfig parser tested on linux
+- Update dig parser to simplify answer data logic
+
+20210205 v1.14.2
+- Update dig parser to fix cases where there are spaces in the answer data (e.g. TXT records)
+
+20210106 v1.14.1
+- Add iw-scan parser tested on linux (beta)
+- Update date parser for Ubuntu 20.04 support
+- Update last parser for last -F support
+- Update last parser to add convenience fields and augment data for easier parsing
+- Update man page
+- Minor documentation updates
+
+20201231 v1.14.0
+- Add hashsum parser tested on linux, macos
+- Add hash parser tested on linux, macos
+- Add cksum parser tested on linux, macos
+- Add wc parser tested on linux, macos
+- Add printenv support under env parser
+- Add vdir support under ls parser
+- Add python 3.9 to github automation tests
+
+20200805 v1.13.4
+- Update crontab and crontab-u parsers to tighten up variable detection
+- Update ping parser to tighten linux/bsd detection
+
+20200804 v1.13.3
+- Update ping parser for Raspberry Pi compatibility
+
+20200803 v1.13.2
+- Add key/value file parser (wrapper for ini parser)
+- Add date command parser
+- Update traceroute parser to more gracefully handle missing header row
+- Update traceroute parser to handle annotations
+- Update traceroute parser to only return successful probes
+
+20200727 v1.13.1
+- Add route -6 tests
+
+20200727 v1.13.0
+- Add ping and ping6 command parser tested on linux, macos, and freebsd
+- Add traceroute and traceroute6 command parser tested on linux, macos, and freebsd
+- Add tracepath command parser tested on linux
+- Update ini parser to support files only containing key/value pairs
+- Update uname parser exception with a hint to use "uname -a"
+- Update route parser to support IPv6 tables
+
+20200711 v1.12.1
+- Fix tests when using older version of pygments library
+
+20200710 v1.12.0
+- Add sysctl command parser tested on linux, macOS, and freebsd
+- Update the cli code to allow older versions of the pygments library (2.3.0) for debian packaging
+- Code cleanup on the cli
+- Add tests for the cli
+- Vendorize cgitb as tracebackplus for verbose debug messages
+
+20200625 v1.11.8
+- Add verbose debug option using -dd argument
+
+20200622 v1.11.7
+- Fix iptables parser issue which would not output the last chain
+
+20200614 v1.11.6
+- Improve and standardize empty data check for all parsers
+
+20200612 v1.11.5
+- Update airport_s parser to fix error on parsing empty data
+- Update arp parser to fix error on parsing empty data
+- Update blkid parser to fix error on parsing empty data
+- Update crontab parser to fix error on parsing empty data
+- Update crontab_u parser to fix error on parsing empty data
+- Update df parser to fix error on parsing empty data
+- Update free parser to fix error on parsing empty data
+- Update lsblk parser to fix error on parsing empty data
+- Update lsmod parser to fix error on parsing empty data
+- Update mount parser to fix error on parsing empty data
+- Update netstat parser to fix error on parsing empty data
+- Update ntpq parser to fix error on parsing empty data
+- Update ps parser to fix error on parsing empty data
+- Update route parser to fix error on parsing empty data
+- Update systemctl parser to fix error on parsing empty data
+- Update systemctl_lj parser to fix error on parsing empty data
+- Update systemctl_ls parser to fix error on parsing empty data
+- Update systemctl_luf parser to fix error on parsing empty data
+- Update uptime parser to fix error on parsing empty data
+- Update w parser to fix error on parsing empty data
+- Update xml parser to fix error on parsing empty data
+- Add tests to all parsers for no data condition
+- Update ss parser to fix integer fields
+
+20200610 v1.11.4
+- Update ls parser to fix error on parsing an empty directory
+
+20200609 v1.11.3
+- Add local parser plugin feature (contributed by Dean Serenevy)
+
+20200530 v1.11.2
+- Update netstat parser to add freebsd support
+- Update netstat parser to add route_flags_pretty field
+- Update netstat parser to change osx_inode field name to unix_inode
+- Update netstat parser to change osx_flags field name to unix_flags
+- Update netstat parser to strip whitespace from state field
+- Update route parser to add flags_pretty field
+- Update arp parser to add permanent field (freebsd and osx)
+- Update arp parser to add expires field (freebsd)
+- Update w parser to strip whitespace from what field
+- Update last parser to fix FreeBSD issues
+- Update stat parser to change osx_flags field name to unix_flags
+- Update stat parser to add unix_device field for freebsd and osx
+- Fix freebsd compatibility message for df, fstab, mount, ntpq, stat, and uname parsers
+- Fix compatibility message for platforms that include the version number at the end (e.g. freebsd12)
+
+20200523 v1.11.1
+- Update stat command parser to change osx_flags field to string
+
+20200522 v1.11.0
+- Add dmidecode command parser
+- Update stat command parser to add OSX support
+- Update netstat command parser to add OSX support
+- Update netstat command parser to add -r (route) functionality for linux and OSX
+- Update netstat command parser to add -i (interface) functionality for linux and OSX
+
+20200511 v1.10.12
+- Remove shebang from jc/cli.py for Fedora packaging
+
+20200511 v1.10.11
+- Change file permissions for Fedora packaging
+
+20200509 v1.10.10
+- Fix ls parser issue where the first file was skipped for ls -R on some platforms
+- Update last parser to handle 'gone - no logout' condition
+- Update netstat parser to handle bluetooth section (ignore gracefully for now)
+
+20200508 v1.10.9
+- Add license info to vendorized ifconfig-parser class
+
+20200508 v1.10.8
+- Add license file to dist for Fedora RPM packaging requirements
+- Remove tests from package to keep from polluting the global site-packages
+
+20200501 v1.10.7
+- Requirements modifications for Fedora RPM packaging requirements
+
+20200420 v1.10.6
+- Remove homebrew shim references from du osx tests
+
+20200414 v1.10.5
+- Minor change of using sys.exit(0) instead of exit()
+
+20200412 v1.10.4
+- Add color customization via JC_COLORS env variable
+
+20200409 v1.10.3
+- Fix break on pipe error
+
+20200409 v1.10.2
+- Change colors to ansi and match jello colors
+
+20200402 v1.10.1
+- Code cleanup
+
+20200402 v1.10.0
+- Add color output by default when not piping data to another program
+- Add -m option for monochrome output
+
+20200326 v1.9.3
+- Add axfr support for dig command parser
+
+20200312 v1.9.2
+- Update arp parser to fix OSX detection for some edge cases
+
+20200312 v1.9.1
+- Update file command parser to make filename splitting more robust
+
+20200311 v1.9.0
+- Add ntpq command parser
+- Add timedatectl status command parser
+- Add airport -I and airport -s command parser
+- Add file command parser
+- Optimized history command parser by https://github.com/philippeitis
+- Magic syntax fix for certain edge cases
+
+20200308 v1.8.1
+- CLI optimizations by https://github.com/philippeitis
+- Refactored magic syntax function and added tests (https://github.com/philippeitis)
+- Github actions for CI testing on multiple platforms by https://github.com/philippeitis
+- Update ls parser to fix parsing error in OSX with -lR when there are empty folders
+
+20200303 v1.8.0
+- Add blkid command parser
+- Add last and lastb command parser
+- Add who command parser
+- Add CSV file parser
+- Add /etc/passwd file parser
+- Add /etc/shadow file parser
+- Add /etc/group file parser
+- Add /etc/gshadow file parser
+
+20200227 v1.7.5
+- Update ls parser to support filenames with newline characters
+
+20200219 v1.7.4
+- Update ls parser to support multiple directories, globbing, and -R (recursive)
+
+20200211 v1.7.3
+- Add alternative 'magic' syntax: e.g. `jc ls -al`
+- Options can now be condensed (e.g. -prq is equivalent to -p -r -q)
+
+20200208 v1.7.2
+- Include test fixtures in wheel and sdist
+
+20200205 v1.7.1
+- Add YAML file parser
+- Add INI file parser
+- Add XML file parser
+- Add id parser (tested on linux and OSX)
+- Add crontab file parser with user support (tested on linux)
+- Add __version__ variable to parser modules
+- Add exit code on error
+- Update history parser to output "line" as an integer
+- Update compatibility list for some parsers
+- Bugfix in crontab file parser: header insertion was clobbering first row
+- Just-in-time loading of parser modules instead of loading all at start
+
+20191217 v1.6.1
+- Add du parser (tested on linux and OSX)
+- Add crontab parser (tested on linux and OSX)
+- Add pip list parser (tested on linux and OSX)
+- Add pip show parser (tested on linux and OSX)
+- Add OSX support for the ifconfig, arp, df, mount, and uname parsers
+- Add tests for ls, dig, ps, w, uptime on OSX
+- Add about option
+- Add universal parsers to refactor repetitive code
+- Update ifconfig parser to output 'state' as an array
+
+20191117 v1.5.1
+- Add ss parser
+- Add stat parser
+- Add /etc/hosts parser
+- Add /etc/fstab parser
+- Add systemctl parser (includes list-jobs, list-sockets, and list-unit-files)
+- Add -r and raw=True options. By default, jc will now convert numbers and boolean, if possible, and add other semantic information, while the raw output will keep all values as text and provide a more literal JSON output
+- Add -q and quiet=True options to suppress warnings to stderr
+- Add -d option to debug parsing issues
+- Add compatibility warnings to stderr
+- Add documentation
+- Update iptables parser to allow --line-numbers option
+- Update lsblk parser to allow parsing of added columns
+- Update mount parser: changed 'access' field name to 'options'
+- Update netstat parser to allow parsing of unix sockets and raw network connections
+- Update w parser to fix unaligned data where blanks are possible
+- Clean up code and reorganize package
+
+20191031 v1.1.1
+- Add arp parser
+- Add dig parser
+- Add unit tests
+- fix netstat parser (remove side effects due to global variable)
+
+20191025 v1.0.1
+- Add w parser
+- Add uptime parser
+- Add history parser
+- Flatten env parser output
+- Remove problematic characters from key names in: df, free, history, lsblk, lsof, and w
+- Where possible, lowercase all keys (except cases like env where the key is the variable name)
+- Remove integer values
+- Handle CTRL-C gracefully
+
+20191023 v0.9.1
+- Add jobs parser
+- Add lsof parser
+- Add lsmod parser
+- No blocking if no piped data
+- Better help text
+- Clean up iptables parser code
+
+20191022 v0.8.1
+- Add env parser
+- Add df parser
+- Add free parser
+- Add lsblk parser
+- Add mount parser
+- Add uname parser
+- Add iptables parser
+
+20191021 v0.6.4
+- Flatten netstat parser output
+- Clean up argument parsing
+- Fix command help
+
+20191018 v0.5.5
+- Fix netstat -p parsing for Ubuntu
+- Add ps parser
+- Add route parser
+- ls parser fixes
+
+20191017 v0.2.0
+- ifconfig, ls, and netstat support

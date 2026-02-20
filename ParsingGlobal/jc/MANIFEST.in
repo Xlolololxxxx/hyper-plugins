@@ -1,0 +1,3 @@
+include jc/py.typed
+include man/jc.1
+include CHANGELOG
